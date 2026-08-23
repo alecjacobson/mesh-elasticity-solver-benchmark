@@ -2,127 +2,207 @@
 
 Directed graph: **nodes = methods/papers**, **edges = "A claims to beat B"** on some
 dimension. Each edge is *hardened* from `self-claimed` toward `validated` / `qualified` /
-`refuted` as evidence accrues. Machine-readable source: [`claims.yaml`](claims.yaml) ·
-Schema: [`schema.md`](schema.md).
+`refuted` as evidence accrues. Machine-readable source of truth: [`claims.yaml`](claims.yaml)
+(80 nodes, 159 edges) · Schema: [`schema.md`](schema.md).
 
-> Status of this file: **seed set**, hand-authored from [`../docs/corpus.md`](../docs/corpus.md).
-> Being expanded by per-paper self-claim extraction (issue #4). Inclusion ≠ endorsement; an
-> edge records the *authors' assertion* until independently assessed.
+> Built by per-paper self-claim extraction (issue #4), 5 agent batches over the corpus.
+> **Inclusion ≠ endorsement** — an edge records the *authors' assertion* until independently
+> assessed. The diagrams below are **curated subsets** for readability; the complete edge set
+> lives in `claims.yaml`.
+
+## Stats
+
+- **159 edges**, **80 nodes**. Status: **143 self-claimed**, **16 qualified**, 0 validated, 0 refuted (hardening is issue #5).
+- Dimensions: speed 55 · convergence 36 · robustness 35 · quality 13 · generality 10 · scalability 9 · simplicity 1.
+- Most-targeted baselines: `full-newton` (13), `ipc` (11), `xpbd` (10), `slim` (9), `clamp-filtering` (7), `l-bfgs` (7).
 
 ## Legend
 
 | status | meaning | render |
 |---|---|---|
-| `self-claimed` | authors assert it; not independently checked | ⚪ grey edge |
-| `qualified` | holds only under stated conditions | 🟡 amber edge |
-| `validated` | reproduced/confirmed independently or by our benchmark | 🟢 green edge |
-| `refuted` | contradicted by evidence | 🔴 red edge |
-| `unvalidated` | insufficient evidence either way | ⚫ dashed edge |
+| `self-claimed` | authors assert it; not independently checked | solid grey |
+| `qualified` | holds only under stated conditions / benchmark-backed pending re-run / independent study | amber, dashed |
+| `validated` | reproduced/confirmed independently or by our benchmark | green |
+| `refuted` | contradicted by evidence | red |
 
-Edge labels = the **dimension** of the claim (speed / convergence / robustness / quality /
-generality / scalability / simplicity).
+Edge labels = the **dimension** of the claim.
 
-## World 2 — eigenvalue-filtering axis
-
-The cleanest cluster: every method plugs into the same projected-Newton skeleton and differs
-only in the SPD-projection operator. This subgraph is the v1 benchmark's primary target.
+## World 2 — eigenvalue-filtering axis (the v1 benchmark target)
 
 ```mermaid
 flowchart LR
-    clamp["clamp-to-ε<br/>(Teran '05 / analytic)"]
+    clamp["clamp-to-ε"]
     full["full Newton"]
-    abs["absolute filtering<br/>(2024)"]
-    tr["trust-region filtering<br/>(2024)"]
-    pit["Pitfalls of Projection<br/>(2023)"]
-    ppn["Progressively Projected<br/>Newton (2025)"]
-    blend["eigenvalue blending<br/>(2025)"]
+    numeig["numeric eigendecomp."]
+    abs["absolute (2024)"]
+    tr["trust-region (2024)"]
+    pit["Pitfalls of Projection (2023)"]
+    ppn["Prog. Projected Newton (2025)"]
+    blend["eigenvalue blending (2025)"]
+    ae["analytic eigensystems (2019)"]
 
-    abs -->|convergence| clamp
-    tr  -->|convergence| clamp
-    tr  -->|convergence| abs
-    tr  -->|robustness|  full
+    abs -.->|convergence| clamp
+    abs -->|robustness| clamp
+    abs -->|speed| numeig
+    tr -->|convergence| clamp
+    tr -->|convergence| abs
+    tr -->|robustness| full
     pit -.->|convergence| clamp
     ppn -.->|convergence| clamp
-    blend -->|convergence| clamp
     blend -->|convergence| abs
+    blend -->|convergence| clamp
+    ae -->|speed| numeig
 
-    classDef selfclaimed stroke:#888,color:#333;
-    classDef qualified fill:#fff3cd,stroke:#d39e00;
-    class pit,ppn qualified;
+    classDef q fill:#fff3cd,stroke:#d39e00;
+    class pit,ppn q;
 ```
 
-*(GitHub renders Mermaid natively. Amber nodes = they raise a `qualified` claim; dashed edges
-= `qualified`. Pitfalls-of-Projection and PPN both qualify the clamp method's convergence:
-clamping degrades asymptotic rate / is beaten when projection is done selectively, but remains
-useful far from the solution and for very large steps.)*
+*Amber/dashed = `qualified`. absolute→clamp is qualified (authors concede small-deformation
+compression can slightly damp convergence). Pitfalls-of-Projection is an **independent** study →
+it qualifies clamp's implicit convergence claim. PPN is fastest **except** very large steps /
+quasistatics.*
 
 ## World 1 — distortion optimization
 
 ```mermaid
 flowchart LR
-    gd["gradient descent"]
     lbfgs["L-BFGS"]
+    fn["full / projected Newton"]
     aqp["AQP (2016)"]
     akvf["AKVF (2017)"]
     slim["SLIM (2017)"]
-    cm["Composite<br/>Majorization (2017)"]
+    cm["Comp. Majorization (2017)"]
     bcqn["BCQN (2018)"]
+    anderson["Anderson (2018)"]
+    pp["Prog. Param. (2018)"]
+    abcd["ABCD (2020)"]
+    split["Splitting (2021)"]
     goss["GOSS (2023)"]
     tlc["TLC (2020)"]
-    pe["Progressive<br/>Embedding (2019)"]
+    ff["Foldover-free (2021)"]
+    scaf["Scaffold (2017)"]
+    ebp["Efficient Bijective (2020)"]
 
-    aqp -->|convergence| lbfgs
-    aqp -->|convergence| gd
-    akvf -->|convergence| aqp
-    cm  -->|convergence| aqp
-    slim -->|scalability| aqp
+    aqp -->|speed| lbfgs
+    aqp -->|speed| fn
+    slim -->|speed| aqp
+    cm -->|speed| aqp
+    cm -->|speed| slim
     bcqn -->|speed| aqp
     bcqn -->|speed| slim
-    bcqn -->|speed| cm
-    goss -->|robustness| slim
-    tlc  -.->|robustness| slim
-    tlc  -.->|robustness| pe
+    bcqn -->|convergence| lbfgs
+    anderson -->|convergence| slim
+    pp -->|speed| slim
+    abcd -->|robustness| slim
+    split -.->|robustness| slim
+    goss -.->|speed| tlc
+    goss -.->|speed| ff
+    tlc -.->|robustness| ff
+    ebp -.->|speed| scaf
 
-    classDef qualified fill:#fff3cd,stroke:#d39e00;
-    class tlc qualified;
+    classDef q fill:#fff3cd,stroke:#d39e00;
+    class split,goss,tlc,ebp q;
 ```
 
-*(BCQN's three outgoing edges are all `self-claimed` and **entangled** — it changes line
-search + proxy + convergence criterion at once; benchmark experiment #3 splits these. TLC's
-edges are `qualified` because they rest on a released 11,647-mesh benchmark measuring
-feasibility/success — a different axis from convergence speed — pending independent re-run.)*
+*BCQN's outgoing edges are **entangled** (it changes line search + proxy + convergence
+criterion at once). Injectivity/feasibility edges (TLC, Foldover-free, GOSS, Efficient
+Bijective) are `qualified` — backed by released benchmarks pending independent re-run.*
 
-## All edges (seed set)
+## World 2 — simulation accelerators / integrators
 
-| from | → to | dimension | status |
-|---|---|---|---|
-| absolute-filtering | clamp-filtering | convergence | self-claimed |
-| trust-region-filtering | clamp-filtering | convergence | self-claimed |
-| trust-region-filtering | absolute-filtering | convergence | self-claimed |
-| trust-region-filtering | full-newton | robustness | self-claimed |
-| pitfalls-projection | clamp-filtering | convergence | **qualified** |
-| progressively-projected-newton | clamp-filtering | convergence | **qualified** |
-| eigenvalue-blending | clamp-filtering | convergence | self-claimed |
-| eigenvalue-blending | absolute-filtering | convergence | self-claimed |
-| slim | aqp | scalability | self-claimed |
-| aqp | l-bfgs | convergence | self-claimed |
-| aqp | gradient-descent | convergence | self-claimed |
-| bcqn | aqp | speed | self-claimed |
-| bcqn | slim | speed | self-claimed |
-| bcqn | composite-majorization | speed | self-claimed |
-| composite-majorization | aqp | convergence | self-claimed |
-| akvf | aqp | convergence | self-claimed |
-| goss | slim | robustness | self-claimed |
-| tlc | slim | robustness | **qualified** |
-| tlc | progressive-embedding | robustness | **qualified** |
-| quasi-newton-liu2017 | projective-dynamics | generality | self-claimed |
-| anderson-geometry | local-global | convergence | self-claimed |
-| vertex-block-descent | projective-dynamics | speed | self-claimed |
-| vertex-block-descent | xpbd | convergence | self-claimed |
+```mermaid
+flowchart LR
+    fms["Fast Mass-Spring (2013)"]
+    pbd["PBD"]
+    pd["Projective Dynamics (2014)"]
+    cheb["Chebyshev (2015)"]
+    qn["Quasi-Newton (2017)"]
+    admmpd["ADMM⊇PD (2016)"]
+    xpbd["XPBD (2016)"]
+    pxpbd["Primal-XPBD (2023)"]
+    pbng["PBNG (2024)"]
+    vbd["VBD (2024)"]
+    jgs2["JGS2 (2025)"]
+    sosd["2nd-Order Stencil (2023)"]
+    fn["full Newton"]
+
+    fms -->|speed| fn
+    pd -->|speed| fn
+    pd -->|generality| fms
+    qn -->|generality| pd
+    qn -->|speed| fn
+    admmpd -->|generality| pd
+    cheb -->|convergence| pd
+    xpbd -->|quality| pbd
+    pxpbd -->|quality| xpbd
+    pbng -->|convergence| xpbd
+    vbd -->|speed| xpbd
+    jgs2 -->|convergence| vbd
+    jgs2 -->|speed| fn
+    sosd -->|convergence| fn
+```
+
+*Nested generality chain `fast-mass-spring ⊂ projective-dynamics ⊂ quasi-newton ⊂ admm-pd`.
+Many "N× faster than Newton" edges here are **fixed-budget / per-iteration**, not converged
+(flagged in each edge's `notes`). XPBD→PBD explicitly disclaims any speed win (consistency
+only). Cleanest converged claims: JGS2→{VBD,PD,XPBD}, PBNG→XPBD, Primal-XPBD→XPBD.*
+
+## World 3 — contact / IPC
+
+```mermaid
+flowchart LR
+    prior["prior engines"]
+    ipc["IPC (2020)"]
+    cipc["C-IPC (2021)"]
+    rigid["Rigid-IPC (2021)"]
+    abd["ABD (2022)"]
+    medial["Medial-IPC (2021)"]
+    gipc["GIPC (2024)"]
+    stiff["StiffGIPC (2025)"]
+    bal["Barrier-Aug-Lagrangian (2024)"]
+    ogc["OGC (2025)"]
+    cubic["Cubic Barrier (2024)"]
+    bfree["Barrier-free (2025)"]
+
+    ipc -->|robustness| prior
+    rigid -->|robustness| prior
+    cipc -->|generality| ipc
+    abd -->|speed| ipc
+    medial -->|speed| ipc
+    gipc -->|speed| ipc
+    stiff -->|scalability| gipc
+    bal -->|speed| gipc
+    ogc -->|quality| ipc
+    cubic -->|robustness| ipc
+    bfree -->|speed| gipc
+```
+
+*Two comparison regimes: **fair** = same barrier / same GPU, vary the inner solve (GIPC's 3×
+eigensystem, StiffGIPC & Barrier-Aug-Lagrangian vs GIPC). **Confounded / capability-only** =
+GPU-vs-CPU (GIPC ~95×, Barrier-Aug-Lagrangian 80× vs CPU IPC), DOF/subspace reductions (ABD,
+Medial-IPC), and contact-model swaps (OGC, Cubic Barrier, Barrier-free — binary non-penetration
+demos, not shared-metric convergence). Barrier-free claims **parity** with IPC robustness, not
+superiority. Every such caveat is in the edge `notes`.*
+
+## Notable qualified / honest-caveat edges
+
+These are the 16 `qualified` edges plus the author-conceded caveats — the seeds for hardening (#5):
+
+| edge | why qualified / honest note |
+|---|---|
+| absolute → clamp (convergence) | authors concede small-deformation compression can slightly damp convergence; ν-edge may be locking-confounded (control C1) |
+| Pitfalls-of-Projection → clamp | **independent** study: clamping degrades *asymptotic* rate; still robust far from solution |
+| PPN → clamp (convergence) | fastest **except** very large steps / quasistatics |
+| Splitting → {SLIM, AKVF, PP} | robust to flips but **not consistently faster**; can fail on far-constraint inits |
+| TLC → {LBD, SA, FF} | backed by released 11,647-mesh benchmark, pending independent re-run; robustness axis only |
+| Foldover-free → TLC | benchmark-backed; FF must switch L-BFGS→Newton for extreme rotations |
+| GOSS → {TLC, FF} | benchmark-backed speed; success rate is *comparable*, not better |
+| Efficient-Bijective → Scaffold | benchmark-backed ~6×; per-iteration cost, 2D disk-topology only |
+| Rigid-IPC → prior engines | robustness guarantee but authors concede **2–3 orders slower** |
+| XPBD → PBD | authors **disclaim** any speed/convergence win (consistency only) |
 
 ## How to extend
 
-Add nodes/edges to [`claims.yaml`](claims.yaml) following [`schema.md`](schema.md), then update
-the diagrams/table here (or regenerate). One edge = one `(from, to, dimension)`; harden
-`status` in place with a cited `assessed_by`, don't duplicate. See issue #4 for the extraction
-protocol and issue #5 for hardening against benchmark results.
+Add nodes/edges to [`claims.yaml`](claims.yaml) per [`schema.md`](schema.md); one edge =
+one `(from, to, dimension)`; harden `status` in place with a cited `assessed_by`. Reflect
+structural changes in the diagrams here. See issue #4 (extraction) and #5 (hardening).

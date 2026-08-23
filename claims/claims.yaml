@@ -1,385 +1,296 @@
 # Superiority-Claims Graph — machine-readable edges. See schema.md.
-# SEED SET (hand-authored from docs/corpus.md). Being expanded by per-paper extraction (issue #4).
-# Status starts `self-claimed`; hardened to validated/qualified/refuted only with cited evidence.
+# Consolidated from per-paper self-claim extraction (issue #4), 5 agent batches over the corpus.
+# Status starts `self-claimed`; `qualified` = the paper itself states a regime limit OR the claim
+# rests on a released benchmark pending independent re-run OR it is an independent (not-self) study.
+# Hardened to `validated`/`refuted` only with cited evidence (issue #5).
+#
+# Reconciled node-ids: projected-newton = generic projected/2nd-order Newton baseline (World-1
+# distortion); clamp-filtering = the eigenvalue-clamp filter (World-2); full-newton = unfiltered
+# Newton. chebyshev-semi-iterative, ipc, advanced-mips, progressive-param are canonical.
 
 nodes:
-  # --- World 2: eigenvalue-filtering cohort + baselines ---
-  - id: clamp-filtering
-    title: "Clamped (project-to-PSD) Projected Newton — per-element eigenvalue clamp-to-ε"
-    authors: "Teran et al. (origin); Smith–de Goes–Kim (analytic)"
-    year: 2005
-    venue: "SCA / TOG"
-    world: 2
-    ref: "Teran et al. 2005; Analytic Eigensystems TOG 2019"
-  - id: full-newton
-    title: "Full Newton (unfiltered Hessian) with line search"
-    authors: "—"
-    year: 0
-    venue: "classical"
-    world: 0
-    ref: "Nocedal & Wright §3.3"
-  - id: absolute-filtering
-    title: "Stabler Neo-Hookean: Absolute Eigenvalue Filtering for Projected Newton"
-    authors: "Chen, Liu, Levin, Zheng, Jacobson"
-    year: 2024
-    venue: "SIGGRAPH"
-    world: 2
-    ref: "arXiv:2406.05928"
-  - id: trust-region-filtering
-    title: "Trust-Region Eigenvalue Filtering for Projected Newton"
-    authors: "Chen, Liu, Jacobson, Levin, Zheng"
-    year: 2024
-    venue: "SIGGRAPH Asia"
-    world: 2
-    ref: "arXiv:2410.10102"
-  - id: pitfalls-projection
-    title: "Pitfalls of Projection: a study of Newton-type solvers for incremental potentials"
-    authors: "Longva, Löschner, Fernández-Fernández et al."
-    year: 2023
-    venue: "arXiv [?]"
-    world: 2
-    ref: "arXiv:2311.14526"
-  - id: progressively-projected-newton
-    title: "Progressively Projected Newton's Method (PPN)"
-    authors: "Fernández-Fernández, Löschner, Bender"
-    year: 2025
-    venue: "CGF (Eurographics)"
-    world: 2
-    ref: "arXiv:2505.21013"
-  - id: eigenvalue-blending
-    title: "Eigenvalue Blending for Projected Newton"
-    authors: "Cheng, Liu, Fu"
-    year: 2025
-    venue: "CGF"
-    world: 2
-    ref: "[?]"
+  # ---- World 2: eigenvalue-filtering cohort + baselines ----
+  - {id: clamp-filtering, title: "Clamped Projected Newton (per-element eigenvalue clamp-to-ε)", authors: "Teran et al.; Smith-de Goes-Kim (analytic)", year: 2005, venue: "SCA/TOG", world: 2, ref: "Teran 2005; TOG 2019"}
+  - {id: full-newton, title: "Full Newton (unfiltered Hessian) + line search", authors: "—", year: 0, venue: classical, world: 0, ref: "N&W §3.3"}
+  - {id: projected-newton, title: "Newton / Projected Newton (2nd-order baseline)", authors: "—", year: 0, venue: classical, world: 2, ref: "clamp variant = clamp-filtering"}
+  - {id: absolute-filtering, title: "Stabler Neo-Hookean: Absolute Eigenvalue Filtering", authors: "Chen, Liu, Levin, Zheng, Jacobson", year: 2024, venue: SIGGRAPH, world: 2, ref: "arXiv:2406.05928"}
+  - {id: trust-region-filtering, title: "Trust-Region Eigenvalue Filtering for Projected Newton", authors: "Chen, Liu, Jacobson, Levin, Zheng", year: 2024, venue: "SIGGRAPH Asia", world: 2, ref: "arXiv:2410.10102"}
+  - {id: pitfalls-projection, title: "Pitfalls of Projection: Newton-type solvers for incremental potentials", authors: "Longva, Löschner, Fernández-Fernández et al.", year: 2023, venue: "arXiv [?]", world: 2, ref: "arXiv:2311.14526"}
+  - {id: progressively-projected-newton, title: "Progressively Projected Newton (PPN)", authors: "Fernández-Fernández, Löschner, Bender", year: 2025, venue: "CGF", world: 2, ref: "arXiv:2505.21013"}
+  - {id: eigenvalue-blending, title: "Eigenvalue Blending for Projected Newton", authors: "Cheng, Liu, Fu", year: 2025, venue: CGF, world: 2, ref: "10.1111/cgf.70027"}
+  - {id: project-on-demand-newton, title: "Project-on-Demand Newton (PDN)", authors: "from Pitfalls of Projection", year: 2023, venue: arXiv, world: 2, ref: "arXiv:2311.14526"}
+  - {id: numeric-eigendecomposition, title: "Numerical eigendecomposition (generic PSD Hessian projection)", authors: classical, year: 0, venue: baseline, world: 2, ref: "[?]"}
+  - {id: analytic-eigensystems, title: "Analytic Eigensystems for Isotropic Distortion Energies", authors: "Smith, de Goes, Kim", year: 2019, venue: TOG, world: 2, ref: "10.1145/3241041"}
+  - {id: stable-neo-hookean, title: "Stable Neo-Hookean Flesh Simulation", authors: "Smith, de Goes, Kim", year: 2018, venue: TOG, world: 2, ref: "10.1145/3180491"}
+  - {id: standard-neo-hookean, title: "Standard/prior Neo-Hookean hyperelastic models", authors: classical, year: 0, venue: baseline, world: 2, ref: "[?]"}
 
-  # --- World 1: distortion optimization + baselines ---
-  - id: aqp
-    title: "Accelerated Quadratic Proxy for Geometric Optimization"
-    authors: "Kovalsky, Galun, Lipman"
-    year: 2016
-    venue: "SIGGRAPH"
-    world: 1
-    ref: "10.1145/2897824.2925920"
-  - id: slim
-    title: "Scalable Locally Injective Mappings (SLIM)"
-    authors: "Rabinovich, Poranne, Panozzo, Sorkine-Hornung"
-    year: 2017
-    venue: "TOG"
-    world: 1
-    ref: "SLIM 2017"
-  - id: akvf
-    title: "Isometry-Aware Preconditioning for Mesh Parameterization (AKVF)"
-    authors: "Claici, Bessmeltsev, Schaefer, Solomon"
-    year: 2017
-    venue: "CGF / SGP"
-    world: 1
-    ref: "AKVF 2017"
-  - id: composite-majorization
-    title: "Geometric Optimization via Composite Majorization"
-    authors: "Shtengel, Poranne, Sorkine-Hornung, Kovalsky, Lipman"
-    year: 2017
-    venue: "TOG"
-    world: 1
-    ref: "CompMajor 2017"
-  - id: bcqn
-    title: "Blended Cured Quasi-Newton for Distortion Optimization"
-    authors: "Zhu, Bridson, Kaufman"
-    year: 2018
-    venue: "SIGGRAPH"
-    world: 1
-    ref: "arXiv:1705.00039"
-  - id: tlc
-    title: "Lifting Simplices to Find Injectivity (TLC)"
-    authors: "Du, Aigerman, Zhou, Kovalsky, Yan, Kaufman, Ju"
-    year: 2020
-    venue: "SIGGRAPH"
-    world: 1
-    ref: "TLC 2020"
-  - id: progressive-embedding
-    title: "Progressive Embedding"
-    authors: "Shen, Jiang, Zorin, Panozzo"
-    year: 2019
-    venue: "SIGGRAPH"
-    world: 1
-    ref: "Progressive Embedding 2019"
-  - id: goss
-    title: "Geometric Optimisation via Spectral Shifting (GOSS)"
-    authors: "Poya et al."
-    year: 2023
-    venue: "TOG"
-    world: 1
-    ref: "GOSS 2023"
+  # ---- World 1: distortion optimization + baselines ----
+  - {id: aqp, title: "Accelerated Quadratic Proxy (AQP)", authors: "Kovalsky, Galun, Lipman", year: 2016, venue: SIGGRAPH, world: 1, ref: "10.1145/2897824.2925920"}
+  - {id: slim, title: "Scalable Locally Injective Mappings (SLIM)", authors: "Rabinovich, Poranne, Panozzo, Sorkine-Hornung", year: 2017, venue: TOG, world: 1, ref: "10.1145/2983621"}
+  - {id: akvf, title: "Isometry-Aware Preconditioning / Killing (AKVF)", authors: "Claici, Bessmeltsev, Schaefer, Solomon", year: 2017, venue: "CGF/SGP", world: 1, ref: "AKVF 2017 [outbound claims unverified]"}
+  - {id: composite-majorization, title: "Geometric Optimization via Composite Majorization", authors: "Shtengel, Poranne, Sorkine-Hornung, Kovalsky, Lipman", year: 2017, venue: TOG, world: 1, ref: "10.1145/3072959.3073618"}
+  - {id: bcqn, title: "Blended Cured Quasi-Newton (BCQN)", authors: "Zhu, Bridson, Kaufman", year: 2018, venue: SIGGRAPH, world: 1, ref: "arXiv:1705.00039"}
+  - {id: anderson-geometry, title: "Anderson Acceleration for Geometry Optimization", authors: "Peng, Deng, Zhang, Geng, Qin, Liu", year: 2018, venue: SIGGRAPH, world: 1, ref: "arXiv:1805.05715"}
+  - {id: progressive-param, title: "Progressive Parameterizations", authors: "Liu, Ye, Ni, Fu", year: 2018, venue: "SIGGRAPH Asia", world: 1, ref: "10.1145/3197517.3201331"}
+  - {id: abcd, title: "Adaptive Block Coordinate Descent (ABCD)", authors: "Naitsat, Zhu, Zeevi", year: 2020, venue: "CGF/SGP", world: 1, ref: "10.1111/cgf.14043"}
+  - {id: splitting-flip-free, title: "A Splitting Scheme for Flip-Free Distortion Energies", authors: "Stein, Li, Solomon", year: 2021, venue: SIIMS, world: 1, ref: "10.1137/21M1433058"}
+  - {id: advanced-mips, title: "Computing Locally Injective Mappings by Advanced MIPS", authors: "Fu, Liu, Guo", year: 2015, venue: TOG, world: 1, ref: "10.1145/2766938"}
+  - {id: tlc, title: "Lifting Simplices to Find Injectivity (TLC)", authors: "Du, Aigerman, Zhou, Kovalsky, Yan, Kaufman, Ju", year: 2020, venue: SIGGRAPH, world: 1, ref: "10.1145/3386569.3392484"}
+  - {id: progressive-embedding, title: "Progressive Embedding", authors: "Shen, Jiang, Zorin, Panozzo", year: 2019, venue: SIGGRAPH, world: 1, ref: "10.1145/3306346.3323012"}
+  - {id: foldover-free, title: "Foldover-free maps in 50 lines of code", authors: "Garanzha et al.", year: 2021, venue: SIGGRAPH, world: 1, ref: "arXiv:2102.03069"}
+  - {id: simplex-assembly, title: "Computing Inversion-Free Mappings by Simplex Assembly", authors: "Fu, Liu", year: 2016, venue: "SIGGRAPH Asia", world: 1, ref: "10.1145/2980179.2980231"}
+  - {id: scaf, title: "Simplicial Complex Augmentation / Scaffold (SCAF)", authors: "Jiang, Schaefer, Panozzo", year: 2017, venue: "SIGGRAPH Asia", world: 1, ref: "10.1145/3130800.3130895"}
+  - {id: smith-schaefer-2015, title: "Bijective Parameterization with Free Boundaries", authors: "Smith, Schaefer", year: 2015, venue: TOG, world: 1, ref: "10.1145/2766947"}
+  - {id: lbd, title: "Large-Scale Bounded Distortion Mappings", authors: "Kovalsky, Aigerman, Basri, Lipman", year: 2015, venue: "SIGGRAPH Asia", world: 1, ref: "10.1145/2816795.2818098"}
+  - {id: efficient-bijective-param, title: "Efficient Bijective Parameterizations", authors: "Su, Ye, Liu, Fu", year: 2020, venue: SIGGRAPH, world: 1, ref: "10.1145/3386569.3392435"}
+  - {id: goss, title: "Geometric Optimisation via Spectral Shifting (GOSS/RAMIPS)", authors: "Poya, Ortigosa, Kim", year: 2023, venue: TOG, world: 1, ref: "10.1145/3585003"}
+  - {id: aigerman-lipman-2013, title: "Injective and Bounded Distortion Mappings in 3D", authors: "Aigerman, Lipman", year: 2013, venue: SIGGRAPH, world: 1, ref: "10.1145/2461912.2461931"}
+  - {id: kovalsky-2014, title: "Controlling Singular Values with SDP", authors: "Kovalsky et al.", year: 2014, venue: SGP, world: 1, ref: "10.1145/2601097.2601142"}
+  - {id: lipman-2012, title: "Bounded Distortion Mapping Spaces", authors: "Lipman", year: 2012, venue: SIGGRAPH, world: 1, ref: "10.1145/2185520.2185604"}
+  - {id: weber-zorin-2014, title: "Locally Injective Parametrization w/ Arbitrary Fixed Boundaries", authors: "Weber, Zorin", year: 2014, venue: SIGGRAPH, world: 1, ref: "10.1145/2601097.2601227"}
+  - {id: lim, title: "Locally Injective Mappings (LIM)", authors: "Schüller, Kavan, Panozzo, Sorkine-Hornung", year: 2013, venue: SGP, world: 1, ref: "10.1111/cgf.12179"}
+  - {id: zhang-2005, title: "Feature-based scaffold surface parameterization", authors: "Zhang et al.", year: 2005, venue: "[?]", world: 1, ref: "[?]"}
+  - {id: air-meshes, title: "Air Meshes", authors: "Müller et al.", year: 2015, venue: SIGGRAPH, world: 1, ref: "[?]"}
+  - {id: tua, title: "Total Unsigned Area foldover removal (Xu et al. 2011)", authors: "Xu et al.", year: 2011, venue: "[?]", world: 1, ref: "[?]"}
+  - {id: matchmaker, title: "MatchMaker", authors: "Kraevoy et al.", year: 2003, venue: "[?]", world: 1, ref: "[?]"}
+  - {id: fp-tutte, title: "Floating-point Tutte embedding (libigl impl.)", authors: "—", year: 0, venue: baseline, world: 1, ref: "[?]"}
+  - {id: gauss-newton-nls, title: "Nonlinear least-squares / Gauss-Newton (Tang-style)", authors: "—", year: 0, venue: baseline, world: 1, ref: "[?]"}
 
-  # --- World 2/simulation accelerators + baselines ---
-  - id: l-bfgs
-    title: "L-BFGS (limited-memory quasi-Newton)"
-    authors: "Liu & Nocedal"
-    year: 1989
-    venue: "classical"
-    world: 0
-    ref: "Liu-Nocedal 1989"
-  - id: gradient-descent
-    title: "Gradient descent"
-    authors: "Cauchy"
-    year: 1847
-    venue: "classical"
-    world: 0
-    ref: "—"
-  - id: projective-dynamics
-    title: "Projective Dynamics"
-    authors: "Bouaziz, Martin, Liu, Kavan, Pauly"
-    year: 2014
-    venue: "SIGGRAPH"
-    world: 2
-    ref: "PD 2014"
-  - id: quasi-newton-liu2017
-    title: "Quasi-Newton Methods for Real-Time Simulation of Hyperelastic Materials"
-    authors: "Liu, Bouaziz, Kavan"
-    year: 2017
-    venue: "TOG"
-    world: 2
-    ref: "Liu 2017"
-  - id: local-global
-    title: "Local–global / ARAP fixed-point iteration"
-    authors: "Sorkine–Alexa; Liu et al."
-    year: 2008
-    venue: "SGP"
-    world: 1
-    ref: "—"
-  - id: anderson-geometry
-    title: "Anderson Acceleration for Geometry Optimization and Physics Simulation"
-    authors: "Peng, Deng, Zhang, Geng, Qin, Liu"
-    year: 2018
-    venue: "SIGGRAPH"
-    world: 1
-    ref: "arXiv:1805.05715"
-  - id: vertex-block-descent
-    title: "Vertex Block Descent"
-    authors: "Chen, Liu, Yang, Yuksel"
-    year: 2024
-    venue: "SIGGRAPH"
-    world: 2
-    ref: "arXiv:2403.06321"
-  - id: xpbd
-    title: "XPBD: Position-Based Simulation of Compliant Constrained Dynamics"
-    authors: "Macklin, Müller, Chentanez"
-    year: 2016
-    venue: "MIG"
-    world: 2
-    ref: "XPBD 2016"
+  # ---- World 2: simulation accelerators / integrators + baselines ----
+  - {id: projective-dynamics, title: "Projective Dynamics", authors: "Bouaziz, Martin, Liu, Kavan, Pauly", year: 2014, venue: SIGGRAPH, world: 2, ref: "PD 2014"}
+  - {id: quasi-newton-liu2017, title: "Quasi-Newton Methods for Real-Time Hyperelastic Simulation", authors: "Liu, Bouaziz, Kavan", year: 2017, venue: TOG, world: 2, ref: "arXiv:1604.07378"}
+  - {id: local-global, title: "Local–global / ARAP fixed-point iteration", authors: "Sorkine-Alexa; Liu et al.", year: 2008, venue: SGP, world: 1, ref: "—"}
+  - {id: fast-mass-spring, title: "Fast Simulation of Mass-Spring Systems", authors: "Liu, Bargteil, O'Brien, Kavan", year: 2013, venue: "SIGGRAPH Asia", world: 2, ref: "liu13fast"}
+  - {id: chebyshev-semi-iterative, title: "Chebyshev Semi-Iterative Approach", authors: "Wang", year: 2015, venue: "SIGGRAPH Asia", world: 2, ref: "Wang 2015"}
+  - {id: descent-gpu, title: "Descent Methods for Elastic Body Simulation on the GPU", authors: "Wang, Yang", year: 2016, venue: "SIGGRAPH Asia", world: 2, ref: "10.1145/2980179.2980236"}
+  - {id: admm-pd, title: "ADMM ⊇ Projective Dynamics", authors: "Narain, Overby, Brown", year: 2016, venue: SCA, world: 2, ref: "admm-pd 2016"}
+  - {id: aa-admm, title: "Accelerating ADMM (Anderson) / AA-ADMM", authors: "Zhang, Peng, Ouyang, Deng", year: 2019, venue: "SIGGRAPH Asia", world: 2, ref: "arXiv:1909.00470"}
+  - {id: vertex-block-descent, title: "Vertex Block Descent (VBD)", authors: "Chen, Liu, Yang, Yuksel", year: 2024, venue: SIGGRAPH, world: 2, ref: "arXiv:2403.06321"}
+  - {id: jgs2, title: "JGS2: Near second-order Jacobi/Gauss-Seidel for GPU Elastodynamics", authors: "Lan et al.", year: 2025, venue: TOG, world: 2, ref: "arXiv:2506.06494"}
+  - {id: second-order-stencil-descent, title: "Second-Order Stencil Descent for Interior-Point Hyperelasticity", authors: "Lan et al.", year: 2023, venue: TOG, world: 2, ref: "10.1145/3592104"}
+  - {id: pbng, title: "Position-Based Nonlinear Gauss-Seidel for Quasistatic Hyperelasticity", authors: "Chen, Han, Teran et al.", year: 2024, venue: TOG, world: 2, ref: "arXiv:2306.09021"}
+  - {id: primal-xpbd, title: "Primal Extended Position Based Dynamics", authors: "Chen, Han, Fedkiw, Teran", year: 2023, venue: MIG, world: 2, ref: "10.1145/3623264.3624437"}
+  - {id: xpbd, title: "XPBD: Position-Based Simulation of Compliant Constrained Dynamics", authors: "Macklin, Müller, Chentanez", year: 2016, venue: MIG, world: 2, ref: "XPBD 2016"}
+  - {id: pbd, title: "Position Based Dynamics (PBD)", authors: "Müller et al.", year: 2007, venue: "J. VCIR", world: 2, ref: "PBD 2007"}
+  - {id: nonlinear-conjugate-gradient, title: "Nonlinear Conjugate Gradient", authors: "Fletcher-Reeves; Polak-Ribière", year: 1964, venue: classical, world: 0, ref: "—"}
+  - {id: admm, title: "ADMM (plain / over-relaxed)", authors: "—", year: 0, venue: classical, world: 0, ref: "Boyd 2011"}
+  - {id: gauss-seidel, title: "Gauss-Seidel (e.g. Vivace)", authors: "—", year: 0, venue: classical, world: 0, ref: "—"}
+  - {id: jacobi, title: "Jacobi iteration", authors: "—", year: 0, venue: classical, world: 0, ref: "—"}
+  - {id: l-bfgs, title: "L-BFGS (limited-memory quasi-Newton)", authors: "Liu, Nocedal", year: 1989, venue: classical, world: 0, ref: "Liu-Nocedal 1989"}
+  - {id: gradient-descent, title: "Gradient descent", authors: "Cauchy", year: 1847, venue: classical, world: 0, ref: "—"}
+  - {id: accelerated-gradient-descent, title: "Accelerated Gradient Descent (baseline)", authors: "Nesterov-style", year: 0, venue: classical, world: 0, ref: "—"}
+  - {id: martin-multiscale, title: "Multi-scale gradient filtering (Martin et al. 2013)", authors: "Martin et al.", year: 2013, venue: "[?]", world: 1, ref: "[?]"}
+
+  # ---- World 3: contact / IPC family + baselines ----
+  - {id: ipc, title: "Incremental Potential Contact (IPC)", authors: "Li et al.", year: 2020, venue: TOG, world: 3, ref: "10.1145/3386569.3392425"}
+  - {id: c-ipc, title: "Codimensional IPC (C-IPC)", authors: "Li, Kaufman, Jiang", year: 2021, venue: TOG, world: 3, ref: "arXiv:2012.04457"}
+  - {id: rigid-ipc, title: "Intersection-free Rigid Body Dynamics (Rigid-IPC)", authors: "Ferguson et al.", year: 2021, venue: TOG, world: 3, ref: "10.1145/3450626.3459802"}
+  - {id: abd, title: "Affine Body Dynamics (ABD)", authors: "Lan et al.", year: 2022, venue: TOG, world: 3, ref: "arXiv:2201.10022"}
+  - {id: medial-ipc, title: "Medial IPC", authors: "Lan et al.", year: 2021, venue: TOG, world: 3, ref: "10.1145/3450626.3459753"}
+  - {id: gipc, title: "GIPC: Gauss-Newton IPC Barrier", authors: "Huang et al.", year: 2024, venue: TOG, world: 3, ref: "arXiv:2308.09400"}
+  - {id: stiffgipc, title: "StiffGIPC", authors: "Huang et al.", year: 2025, venue: TOG, world: 3, ref: "arXiv:2411.06224"}
+  - {id: barrier-aug-lagrangian, title: "Barrier-Augmented Lagrangian for GPU Elastodynamic Contact", authors: "Guo et al.", year: 2024, venue: "SIGGRAPH Asia", world: 3, ref: "arXiv:2407.00046"}
+  - {id: ogc, title: "Offset Geometric Contact (OGC)", authors: "Chen et al.", year: 2025, venue: SIGGRAPH, world: 3, ref: "10.1145/3731205"}
+  - {id: cubic-barrier-ando, title: "A Cubic Barrier with Elasticity-Inclusive Dynamic Stiffness", authors: "Ando", year: 2024, venue: "SIGGRAPH Asia", world: 3, ref: "10.1145/3687908"}
+  - {id: barrier-free-elastodynamics, title: "Robust Penetration-Free Elastodynamics without Barriers", authors: "Zheng, Luo, Li", year: 2025, venue: TOG, world: 3, ref: "arXiv:2512.12151"}
+  - {id: gpu-ipc, title: "GPU-IPC (generic GPU IPC baseline)", authors: "various", year: 2023, venue: "—", world: 3, ref: "[?]"}
+  - {id: arcsim, title: "ARCSim Adaptive Cloth", authors: "Narain et al.", year: 2012, venue: TOG, world: 3, ref: "ARCSim"}
+  - {id: prior-rigid-engines, title: "Prior rigid-body engines (Bullet/MuJoCo/Chrono/Houdini)", authors: various, year: 2020, venue: "—", world: 3, ref: "[?]"}
 
 edges:
-  # ===== World 2: eigenvalue-filtering axis =====
-  - from: absolute-filtering
-    to: clamp-filtering
-    dimension: convergence
-    status: self-claimed
-    claim: "Absolute-value eigenvalue filtering needs fewer Newton iterations than clamp-to-zero, especially in near-incompressible / large-volume-change regimes."
-    evidence: "iteration counts on a quasistatic dataset; one-line change holding the projected-Newton skeleton fixed"
-    source: "arXiv:2406.05928"
-    assessed_by: "self"
-    notes: "Prime candidate for benchmark 1b. Guard with locking-free element (control C1) — the near-incompressible edge may be confounded by volumetric locking on displacement-only tets."
-  - from: trust-region-filtering
-    to: clamp-filtering
-    dimension: convergence
-    status: self-claimed
-    claim: "Trust-region-adaptive filtering reduces Newton iterations vs clamp-to-zero across deformations/materials/resolutions."
-    evidence: "iteration counts across a quasistatic dataset"
-    source: "arXiv:2410.10102"
-    assessed_by: "self"
-    notes: "Unifies full-Newton/clamp/absolute as one adaptive rule — the 'switchboard'."
-  - from: trust-region-filtering
-    to: absolute-filtering
-    dimension: convergence
-    status: self-claimed
-    claim: "Adaptive trust-region selection outperforms stand-alone absolute-value filtering."
-    evidence: "iteration counts; picks strategy by quadratic-model fit"
-    source: "arXiv:2410.10102"
-    assessed_by: "self"
-    notes: ""
-  - from: trust-region-filtering
-    to: full-newton
-    dimension: robustness
-    status: self-claimed
-    claim: "Recovers full-Newton convergence when the model fits, without its indefiniteness failures."
-    evidence: "unification argument + experiments"
-    source: "arXiv:2410.10102"
-    assessed_by: "self"
-    notes: ""
-  - from: pitfalls-projection
-    to: clamp-filtering
-    dimension: convergence
-    status: qualified
-    claim: "Unconditional PSD projection (clamping) reduces asymptotic convergence rate vs classical Newton and breaks affine invariance; project-on-demand / kinetic Newton recover it."
-    evidence: "controlled ablation on hyperelastic + contact incremental potentials; dissects mesh resolution, element order, projection method, material, boundary handling"
-    source: "arXiv:2311.14526"
-    assessed_by: "corpus"
-    notes: "Independent study, not the clamp authors → qualifies the clamp method's implicit convergence claim. Status 'qualified': degradation is regime/asymptotic; clamping still aids robustness far from the solution."
-  - from: progressively-projected-newton
-    to: clamp-filtering
-    dimension: convergence
-    status: qualified
-    claim: "Projecting only a residual-selected subset (<10% of element projections) keeps the global Hessian closer to true Newton → fewer iterations."
-    evidence: "projection counts, Newton iterations, wall-clock vs PN and project-on-demand"
-    source: "arXiv:2505.21013"
-    assessed_by: "self"
-    notes: "Qualified: authors note full PN still wins for very large steps / quasistatics → regime-dependent."
-  - from: eigenvalue-blending
-    to: clamp-filtering
-    dimension: convergence
-    status: self-claimed
-    claim: "Blending clamped and absolute eigenvalues (coefficients from a descent constraint) needs fewer iterations than either alone."
-    evidence: "iteration counts vs clamp and absolute"
-    source: "[?]"
-    assessed_by: "self"
-    notes: ""
-  - from: eigenvalue-blending
-    to: absolute-filtering
-    dimension: convergence
-    status: self-claimed
-    claim: "Blended filtering beats stand-alone absolute-value filtering on iteration count."
-    evidence: "iteration counts"
-    source: "[?]"
-    assessed_by: "self"
-    notes: "Overlaps trust-region-filtering's territory — a direct three-way comparison is a benchmark target."
+  # ===================== World 2: eigenvalue-filtering axis =====================
+  - {from: absolute-filtering, to: clamp-filtering, dimension: convergence, status: qualified,
+     claim: "Absolute eigenvalue filtering needs fewer Newton iterations than clamping for Neo-Hookean / volume-preserving energies.",
+     evidence: "~2.5× avg iteration speedup on 593 TetWild/Thingi10k meshes; clamping fails (>200 iters) on 11× stretch at ν=0.4999 while abs stays stable.",
+     source: "arXiv:2406.05928", assessed_by: self,
+     notes: "Author-stated regime limit: for small deformation (esp. compression) abs can slightly damp convergence vs clamping. Benchmark control C1 (locking-free element) needed — ν-edge may be confounded by locking."}
+  - {from: absolute-filtering, to: clamp-filtering, dimension: robustness, status: self-claimed,
+     claim: "Stabilizes optimization at high Poisson ratio (→0.5) and large volume change where clamping gives poor descent.",
+     evidence: "Stability at ν∈[0.45,0.5); large negative eigenvalues when λ~100μ coincide with large J−1.", source: "arXiv:2406.05928", assessed_by: self, notes: ""}
+  - {from: absolute-filtering, to: numeric-eigendecomposition, dimension: speed, status: self-claimed,
+     claim: "Local per-element absolute filtering is dramatically cheaper than global absolute-value projection.",
+     evidence: "0.25 s/iter (local) vs >3 hr/iter for global abs on a 38k×38k Hessian.", source: "arXiv:2406.05928", assessed_by: self,
+     notes: "Target is 'global abs' full eigendecomposition, not per-element clamping."}
+  - {from: trust-region-filtering, to: clamp-filtering, dimension: convergence, status: self-claimed,
+     claim: "Trust-region-adaptive filtering beats stand-alone clamping across quasistatic deformable-solid experiments.",
+     evidence: "Iteration/acceleration over a large quasistatic dataset.", source: "arXiv:2410.10102", assessed_by: self, notes: "Unifies Newton/clamp/absolute as one adaptive rule (the 'switchboard')."}
+  - {from: trust-region-filtering, to: absolute-filtering, dimension: convergence, status: self-claimed,
+     claim: "Adaptive trust-region selection outperforms stand-alone absolute filtering.", evidence: "Beats all stand-alone variants over a large quasistatic dataset.", source: "arXiv:2410.10102", assessed_by: self, notes: ""}
+  - {from: trust-region-filtering, to: full-newton, dimension: robustness, status: self-claimed,
+     claim: "Recovers full-Newton convergence when the model fits, without its indefiniteness failures.", evidence: "Unification argument + experiments.", source: "arXiv:2410.10102", assessed_by: self, notes: ""}
+  - {from: pitfalls-projection, to: clamp-filtering, dimension: convergence, status: qualified,
+     claim: "Unconditional PSD projection (clamping) reduces asymptotic convergence rate vs classical Newton and breaks affine invariance; PDN recovers it.",
+     evidence: "Controlled ablation on hyperelastic + contact incremental potentials, dissecting resolution/element-order/projection/material/BCs.",
+     source: "arXiv:2311.14526", assessed_by: corpus, notes: "Independent study (not the clamp authors) → qualifies clamp's implicit convergence claim. Degradation is asymptotic/regime; clamping still aids robustness far from the solution."}
+  - {from: pitfalls-projection, to: full-newton, dimension: robustness, status: self-claimed,
+     claim: "Project-on-Demand Newton keeps Projected-Newton robustness where classical Newton fails.", evidence: "PDN robust where unprojected Newton diverges; Kinetic Newton avoids projection via regularization.", source: "arXiv:2311.14526", assessed_by: self, notes: "Entangled: hybrid combines robustness + convergence axes."}
+  - {from: progressively-projected-newton, to: clamp-filtering, dimension: convergence, status: qualified,
+     claim: "Projecting only a residual-selected subset keeps the global Hessian near true Newton → fewer Newton iterations; fastest in the benchmark.",
+     evidence: "Up to 53% fewer Newton iters and up to 2.5× wall-clock over PN; <10% of PN's element projections.",
+     source: "arXiv:2505.21013", assessed_by: self, notes: "Author-stated limit: PN still wins for very large time steps (dt=100ms) and quasistatics."}
+  - {from: progressively-projected-newton, to: clamp-filtering, dimension: scalability, status: self-claimed,
+     claim: "Far fewer eigendecompositions than PN (projects <10% of elements).", evidence: "e.g. 8% projected in Press.", source: "arXiv:2505.21013", assessed_by: self, notes: ""}
+  - {from: progressively-projected-newton, to: project-on-demand-newton, dimension: speed, status: self-claimed,
+     claim: "Fewer projections and iterations than Project-on-Demand Newton → wall-clock speedup.", evidence: "20% fewer iters, 1.34× (Armadillo Slingshot); 1.42× (Large-Ratios U-Turn).", source: "arXiv:2505.21013", assessed_by: self, notes: ""}
+  - {from: eigenvalue-blending, to: absolute-filtering, dimension: convergence, status: self-claimed,
+     claim: "Blending clamped+absolute eigenvalues gives more objective reduction and fewer iterations than absolute alone.", evidence: "Under 2nd-order Taylor, blended filter gives larger decrease; fewer iters than SOTA filters.", source: "10.1111/cgf.70027", assessed_by: self, notes: "Overlaps trust-region-filtering's territory → direct 3-way comparison is a benchmark target."}
+  - {from: eigenvalue-blending, to: clamp-filtering, dimension: convergence, status: self-claimed,
+     claim: "Blended filter needs fewer iterations than clamping.", evidence: "Fewer iters than SOTA eigenvalue filtering.", source: "10.1111/cgf.70027", assessed_by: self, notes: ""}
+  - {from: analytic-eigensystems, to: numeric-eigendecomposition, dimension: speed, status: self-claimed,
+     claim: "Analytic per-quadrature-point eigensystems project Hessians to PSD up to 7× faster than numerical eigendecomposition.", evidence: "Up to 7× across 2D/3D energies.", source: "10.1145/3241041", assessed_by: self, notes: ""}
+  - {from: analytic-eigensystems, to: numeric-eigendecomposition, dimension: quality, status: self-claimed,
+     claim: "Achieves Newton-type convergence + PSD guarantee without spurious degeneracies.", evidence: "Compact 2D/3D-valid expressions from stretch-tensor invariants.", source: "10.1145/3241041", assessed_by: self, notes: ""}
+  - {from: stable-neo-hookean, to: standard-neo-hookean, dimension: quality, status: self-claimed,
+     claim: "Superior volume preservation near ν=1/2 while keeping fleshy appearance.", evidence: "Extensive comparisons vs existing material models.", source: "10.1145/3180491", assessed_by: self, notes: ""}
+  - {from: stable-neo-hookean, to: standard-neo-hookean, dimension: robustness, status: self-claimed,
+     claim: "Robust to extreme rotation and inversion where standard Neo-Hookean fails.", evidence: "Demonstrated under extreme rotations/inversions.", source: "10.1145/3180491", assessed_by: self, notes: ""}
 
-  # ===== World 1: distortion optimization =====
-  - from: slim
-    to: aqp
-    dimension: scalability
-    status: self-claimed
-    claim: "Reweighted proxy scales to 25M triangles with ~40 iterations, no flips — beyond AQP's regime."
-    evidence: "iterations / scale on large meshes"
-    source: "SLIM 2017"
-    assessed_by: "self"
-    notes: ""
-  - from: aqp
-    to: l-bfgs
-    dimension: convergence
-    status: self-claimed
-    claim: "Laplacian-proxy + Nesterov acceleration converges in near-constant iteration count independent of mesh size, beating L-BFGS/gradient descent on ill-conditioned distortion energies."
-    evidence: "iterations vs mesh size"
-    source: "10.1145/2897824.2925920"
-    assessed_by: "self"
-    notes: ""
-  - from: aqp
-    to: gradient-descent
-    dimension: convergence
-    status: self-claimed
-    claim: "Accelerated proxy dramatically outperforms plain gradient descent."
-    evidence: "convergence curves"
-    source: "10.1145/2897824.2925920"
-    assessed_by: "self"
-    notes: ""
-  - from: bcqn
-    to: aqp
-    dimension: speed
-    status: self-claimed
-    claim: "Blended cured quasi-Newton is generally fastest for distortion optimization."
-    evidence: "wall-clock across scales"
-    source: "arXiv:1705.00039"
-    assessed_by: "self"
-    notes: "ENTANGLED: BCQN changes line-search + proxy + convergence criterion at once → attribution unclear. Benchmark experiment #3 (triple-split) targets exactly this."
-  - from: bcqn
-    to: slim
-    dimension: speed
-    status: self-claimed
-    claim: "Faster and more robust than SLIM."
-    evidence: "wall-clock, success rate"
-    source: "arXiv:1705.00039"
-    assessed_by: "self"
-    notes: "See entanglement note above."
-  - from: bcqn
-    to: composite-majorization
-    dimension: speed
-    status: self-claimed
-    claim: "Faster than composite majorization."
-    evidence: "wall-clock"
-    source: "arXiv:1705.00039"
-    assessed_by: "self"
-    notes: ""
-  - from: composite-majorization
-    to: aqp
-    dimension: convergence
-    status: self-claimed
-    claim: "Tight convex majorizer gives second-order-like steps, fewer iterations than AQP."
-    evidence: "iteration counts (2D)"
-    source: "CompMajor 2017"
-    assessed_by: "self"
-    notes: "Iterations not wall-clock-comparable across first/second order — flagged for benchmark experiment #4."
-  - from: akvf
-    to: aqp
-    dimension: convergence
-    status: self-claimed
-    claim: "Killing-operator preconditioner improves search-direction quality → competitive/faster convergence than AQP."
-    evidence: "iterations"
-    source: "AKVF 2017"
-    assessed_by: "self"
-    notes: "Per-iteration cost higher (solves a linear system each step) — wall-clock parity unclear."
-  - from: goss
-    to: slim
-    dimension: robustness
-    status: self-claimed
-    claim: "Spectral shifting recovers fold-free maps from non-injective initial states while preserving second-order convergence, beating proxy methods like SLIM."
-    evidence: "success from folded init; convergence order"
-    source: "GOSS 2023"
-    assessed_by: "self"
-    notes: "ENTANGLED: new energy regularization + analytic Hessian eigensystem changed together."
-  - from: tlc
-    to: slim
-    dimension: robustness
-    status: qualified
-    claim: "100% success on an 11,647-mesh injectivity benchmark where SLIM and others partially fail."
-    evidence: "success rate on a released benchmark"
-    source: "TLC 2020"
-    assessed_by: "corpus"
-    notes: "Backed by a released benchmark (stronger than a self-claim) → 'qualified' pending independent re-run; measures feasibility/success, a different axis than convergence speed."
-  - from: tlc
-    to: progressive-embedding
-    dimension: robustness
-    status: qualified
-    claim: "Higher success rate than Progressive Embedding on the injectivity benchmark."
-    evidence: "success rate on released benchmark"
-    source: "TLC 2020"
-    assessed_by: "corpus"
-    notes: "Same benchmark caveat."
+  # ===================== World 1: distortion accelerators =====================
+  - {from: aqp, to: l-bfgs, dimension: speed, status: self-claimed, claim: "AQP outperforms L-BFGS on 2D/3D distortion energies.", evidence: "×200 vs MATLAB L-BFGS on isometric example; ×9 on Horse.", source: "10.1145/2897824.2925920", assessed_by: self, notes: ""}
+  - {from: aqp, to: accelerated-gradient-descent, dimension: scalability, status: self-claimed, claim: "AQP scales where AGD scales poorly as energies become ill-conditioned.", evidence: "Fig.4 sweep; AGD = AQP with Laplacian proxy disabled (ablation).", source: "10.1145/2897824.2925920", assessed_by: self, notes: ""}
+  - {from: aqp, to: full-newton, dimension: speed, status: self-claimed, claim: "AQP faster than Newton in wall-clock despite Newton's lower iteration count.", evidence: "Newton fewest iters but each iter inefficient (full Hessian solve).", source: "10.1145/2897824.2925920", assessed_by: self, notes: ""}
+  - {from: aqp, to: local-global, dimension: speed, status: self-claimed, claim: "AQP terminates faster than ARAP local/global alternation.", evidence: "0.38s vs 1.55s (2D); ~3× on tet deformation.", source: "10.1145/2897824.2925920", assessed_by: self, notes: ""}
+  - {from: slim, to: aqp, dimension: speed, status: self-claimed, claim: "SLIM reaches the same symmetric-Dirichlet energy in fewer iterations and less time than AQP.", evidence: "2–14× faster (Table I); superior descent directions.", source: "10.1145/2983621", assessed_by: self, notes: "Per-iter SLIM more expensive (refactorization); overall faster."}
+  - {from: slim, to: l-bfgs, dimension: convergence, status: self-claimed, claim: "SLIM progresses much faster than L-BFGS overall.", evidence: "Fig.12 (386K faces): far faster on time axis.", source: "10.1145/2983621", assessed_by: self, notes: ""}
+  - {from: slim, to: projected-newton, dimension: robustness, status: self-claimed, claim: "SLIM outperforms Newton and regularized Newton on non-uniform triangulations.", evidence: "Fig.11: Newton stalls; 1 SLIM iter ≈ 2000 Newton iters far from min.", source: "10.1145/2983621", assessed_by: self, notes: ""}
+  - {from: slim, to: martin-multiscale, dimension: scalability, status: self-claimed, claim: "SLIM is orders of magnitude faster than Martin et al. 2013 and scales where it doesn't.", evidence: ">200× (11K Bimba), >2100× (99K Lion Vase).", source: "10.1145/2983621", assessed_by: self, notes: ""}
+  - {from: composite-majorization, to: projected-newton, dimension: speed, status: self-claimed, claim: "Converges faster than Projected Newton on symmetric-ARAP.", evidence: "'>4× faster than projected Newton'; analytic Hessian ~order faster than autodiff.", source: "10.1145/3072959.3073618", assessed_by: self, notes: ""}
+  - {from: composite-majorization, to: slim, dimension: speed, status: self-claimed, claim: "Converges faster than SLIM.", evidence: "Fig.1 bar-release energy-vs-time race.", source: "10.1145/3072959.3073618", assessed_by: self, notes: ""}
+  - {from: composite-majorization, to: aqp, dimension: speed, status: self-claimed, claim: "Converges faster than AQP.", evidence: "Fig.1 race; wins on 4-example benchmark (Table 1).", source: "10.1145/3072959.3073618", assessed_by: self, notes: ""}
+  - {from: bcqn, to: aqp, dimension: speed, status: self-claimed, claim: "BCQN gives faster convergence than AQP on nonconvex energies.", evidence: ">7× speedup when AQP converges; rate gains >10×.", source: "arXiv:1705.00039", assessed_by: self, notes: "ENTANGLED: barrier-aware line-search + blended Sobolev/L-BFGS proxy + characteristic-gradient-norm criterion changed together (decomposition experiment #3)."}
+  - {from: bcqn, to: aqp, dimension: robustness, status: self-claimed, claim: "BCQN converges where AQP fails.", evidence: "AQP fails >40% of nonconvex tests; BCQN converges.", source: "arXiv:1705.00039", assessed_by: self, notes: "ENTANGLED (see above)."}
+  - {from: bcqn, to: slim, dimension: speed, status: self-claimed, claim: "Faster than SLIM.", evidence: "'SLIM falls well short of both CM and PN'; BCQN fastest overall.", source: "arXiv:1705.00039", assessed_by: self, notes: "ENTANGLED."}
+  - {from: bcqn, to: composite-majorization, dimension: speed, status: self-claimed, claim: "Lower per-iteration cost makes BCQN faster than CM across sizes.", evidence: "Scalar Laplacian ×d vs CM denser nd×nd systems.", source: "arXiv:1705.00039", assessed_by: self, notes: "ENTANGLED."}
+  - {from: bcqn, to: composite-majorization, dimension: scalability, status: self-claimed, claim: "Scales past CM (which runs out of memory, 2D-only).", evidence: "Fig.11 ~6M+ tris: CM OOM; BCQN continues.", source: "arXiv:1705.00039", assessed_by: self, notes: "Also a generality claim (CM 2D-only)."}
+  - {from: bcqn, to: projected-newton, dimension: speed, status: self-claimed, claim: "Lower cost per iteration makes BCQN faster than Projected Newton at scale.", evidence: "Armadillo 1.5M: PN 9 iter/13447s vs BCQN 393 iter/4148s.", source: "arXiv:1705.00039", assessed_by: self, notes: "ENTANGLED."}
+  - {from: bcqn, to: l-bfgs, dimension: convergence, status: self-claimed, claim: "Blended proxy avoids L-BFGS's slow convergence and swelling artifacts.", evidence: "Fig.4 MIPS 2D shearing: L-BFGS slow + swelling.", source: "arXiv:1705.00039", assessed_by: self, notes: "ENTANGLED."}
+  - {from: bcqn, to: gradient-descent, dimension: convergence, status: self-claimed, claim: "Adding BCQN's barrier-aware line-search filter to plain descent improves convergence >1 order.", evidence: "Fig.6: >10× over SGD, ~10× over AQP from the line-search filter ALONE.", source: "arXiv:1705.00039", assessed_by: self, notes: "Isolates ONE of BCQN's three components — directly useful for decomposition experiment #3."}
+  - {from: anderson-geometry, to: local-global, dimension: convergence, status: self-claimed, claim: "Anderson acceleration of local-global sharply reduces iterations/time.", evidence: "Fig.1 far fewer iters vs plain local-global.", source: "arXiv:1805.05715", assessed_by: self, notes: ""}
+  - {from: anderson-geometry, to: l-bfgs, dimension: speed, status: self-claimed, claim: "Better than L-BFGS in computation time on cloth/elastic sim.", evidence: "Similar energy/iter but cheaper accelerated iterate (m vs 2m+1 inner products).", source: "arXiv:1805.05715", assessed_by: self, notes: ""}
+  - {from: anderson-geometry, to: aqp, dimension: convergence, status: self-claimed, claim: "Reaches lower final energy at smaller cost than AQP on 2D ARAP with hard constraints.", evidence: "Fig.5 across resolutions.", source: "arXiv:1805.05715", assessed_by: self, notes: ""}
+  - {from: anderson-geometry, to: chebyshev-semi-iterative, dimension: convergence, status: self-claimed, claim: "Faster energy decrease than Chebyshev semi-iterative in PD.", evidence: "Fig.8.", source: "arXiv:1805.05715", assessed_by: self, notes: ""}
+  - {from: anderson-geometry, to: slim, dimension: convergence, status: self-claimed, claim: "Anderson acceleration speeds up SLIM's optimization.", evidence: "Fig.10: faster than unaccelerated SLIM.", source: "arXiv:1805.05715", assessed_by: self, notes: "Accelerates SLIM as a fixed-point map, doesn't replace it."}
+  - {from: progressive-param, to: slim, dimension: speed, status: self-claimed, claim: "Much more efficient than SLIM to a target symmetric-Dirichlet result.", evidence: "1.79M-tri disk: to match PP's 9th iter, SLIM needs +144 iters / +314.6s.", source: "10.1145/3197517.3201331", assessed_by: self, notes: ""}
+  - {from: progressive-param, to: akvf, dimension: speed, status: self-claimed, claim: "More efficient than AKVF.", evidence: "AKVF needs +81 iters / +184.45s to match PP.", source: "10.1145/3197517.3201331", assessed_by: self, notes: ""}
+  - {from: progressive-param, to: composite-majorization, dimension: speed, status: self-claimed, claim: "More efficient than CM.", evidence: "CM needs +17 iters / +38.65s; P-CM wins on a 20712-mesh benchmark.", source: "10.1145/3197517.3201331", assessed_by: self, notes: ""}
+  - {from: abcd, to: slim, dimension: robustness, status: self-claimed, claim: "More robust than SLIM on inverted/degenerate/noisy initializations.", evidence: "Handles thousands of degenerate/inverted elements.", source: "10.1111/cgf.14043", assessed_by: self, notes: "ABCD is a blended framework (CM/PN/BCQN/AKVF/SLIM + map-fixers); comparisons collective, entangled."}
+  - {from: abcd, to: akvf, dimension: robustness, status: self-claimed, claim: "More robust than AKVF on distorted/noisy inits.", evidence: "Fig.2 noisy Tutte-init parametrization.", source: "10.1111/cgf.14043", assessed_by: self, notes: "Entangled."}
+  - {from: abcd, to: bcqn, dimension: robustness, status: self-claimed, claim: "More robust than BCQN; ABCD(BCQN) reduces failures on hard cases.", evidence: "Octopus: fewer failures over 100 trials.", source: "10.1111/cgf.14043", assessed_by: self, notes: "Uses BCQN as inner core-solver; entangled."}
+  - {from: abcd, to: composite-majorization, dimension: speed, status: self-claimed, claim: "Superior speed+robustness over core-solvers incl. CM.", evidence: "Adaptive block partition beats global solvers when descent field non-smooth.", source: "10.1111/cgf.14043", assessed_by: self, notes: "Collective/entangled."}
+  - {from: abcd, to: projected-newton, dimension: speed, status: self-claimed, claim: "Outperforms Projected Newton in speed+robustness.", evidence: "ABCD(PN) reduces flips/failures over runtime.", source: "10.1111/cgf.14043", assessed_by: self, notes: "PN used as inner core-solver; entangled."}
+  - {from: splitting-flip-free, to: slim, dimension: robustness, status: qualified, claim: "Robust to flipped elements where line-search methods like SLIM fail.", evidence: "Energy only on flip-free P; can unflip SLIM outputs; solves cases prior methods can't.", source: "10.1137/21M1433058", assessed_by: self, notes: "Author-stated limit: can fail on far-constraint inits (Sec.9); NOT consistently faster (Table 2)."}
+  - {from: splitting-flip-free, to: akvf, dimension: robustness, status: qualified, claim: "Handles flipped initial iterates where AKVF requires feasible flip-free iterates.", evidence: "P always SPD; matches AKVF energy; solves flip-heavy inputs.", source: "10.1137/21M1433058", assessed_by: self, notes: "Regime limit stated; runtime not superior."}
+  - {from: splitting-flip-free, to: progressive-param, dimension: robustness, status: qualified, claim: "Handles flip-heavy meshes where PP cannot produce a flip-free minimizer.", evidence: "Table 2: PP fails on hardest meshes; splitting succeeds.", source: "10.1137/21M1433058", assessed_by: self, notes: "Often slower on easy meshes."}
+  - {from: advanced-mips, to: projected-newton, dimension: speed, status: self-claimed, claim: "Computes locally-injective maps 1–2 orders faster than SOTA locally-injective methods.", evidence: "Inexact block coordinate descent; baseline unnamed.", source: "10.1145/2766938", assessed_by: self, notes: "Baselines unnamed ('state-of-the-art'); ref [?]."}
+  - {from: advanced-mips, to: projected-newton, dimension: quality, status: self-claimed, claim: "As-low-as-possible distortion vs SOTA locally-injective techniques.", evidence: "Enhanced MIPS energy distributes distortion evenly.", source: "10.1145/2766938", assessed_by: self, notes: "Baselines unnamed; ref [?]."}
 
-  # ===== World 2: simulation accelerators =====
-  - from: quasi-newton-liu2017
-    to: projective-dynamics
-    dimension: generality
-    status: self-claimed
-    claim: "Reinterpreting PD as quasi-Newton + L-BFGS extends it to general hyperelastics, unlike restricted-energy PD."
-    evidence: "Neo-Hookean/spline materials; ~10× vs Newton"
-    source: "Liu 2017"
-    assessed_by: "self"
-    notes: "PD-as-quasi-Newton bridge; PD alone is energy-restricted."
-  - from: anderson-geometry
-    to: local-global
-    dimension: convergence
-    status: self-claimed
-    claim: "Anderson acceleration of the local-global fixed point dramatically improves convergence."
-    evidence: "iterations / wall-clock vs unaccelerated local-global"
-    source: "arXiv:1805.05715"
-    assessed_by: "self"
-    notes: "Direct descendant of Anderson 1965 (multisecant quasi-Newton)."
-  - from: vertex-block-descent
-    to: projective-dynamics
-    dimension: speed
-    status: self-claimed
-    claim: "Vertex-level block coordinate descent is faster and unconditionally stable vs PD/XPBD/Newton within any iteration budget."
-    evidence: "convergence, stability, FPS"
-    source: "arXiv:2403.06321"
-    assessed_by: "self"
-    notes: "Fixed-budget FPS claims — not directly comparable to converged-solution metrics (benchmark experiment #4 caveat)."
-  - from: vertex-block-descent
-    to: xpbd
-    dimension: convergence
-    status: self-claimed
-    claim: "Converges better than XPBD (which stagnates on the backward-Euler residual)."
-    evidence: "residual reduction"
-    source: "arXiv:2403.06321"
-    assessed_by: "self"
-    notes: ""
+  # ===================== World 1: injectivity / feasibility =====================
+  - {from: tlc, to: lbd, dimension: robustness, status: qualified, claim: "Removes inversions where LBD fails (convex→concave, inner-boundary rotation).", evidence: "0 failures vs LBD 6/7, 26/30, 267/10706 (2D) on 11,647-mesh benchmark.", source: "10.1145/3386569.3392484", assessed_by: corpus, notes: "Backed by released benchmark; pending independent re-run. LBD given a favorable K."}
+  - {from: tlc, to: simplex-assembly, dimension: robustness, status: qualified, claim: "Succeeds where Simplex Assembly fails, esp. heavy 3D twisting.", evidence: "0 failures vs SA 1/7 (2D), 29/5/0/54/177 (3D).", source: "10.1145/3386569.3392484", assessed_by: corpus, notes: "Released benchmark; pending re-run."}
+  - {from: tlc, to: simplex-assembly, dimension: speed, status: self-claimed, claim: "Faster than SA in 3D.", evidence: "Fig.12(d) on all-success subset.", source: "10.1145/3386569.3392484", assessed_by: self, notes: "Restricted to subset where all succeed."}
+  - {from: tlc, to: foldover-free, dimension: robustness, status: qualified, claim: "Higher success rate than FF (Su et al. 2019); FF often worsens the interior.", evidence: "0 failures vs FF 1292/10706, etc.; speed on-par.", source: "10.1145/3386569.3392484", assessed_by: corpus, notes: "FF here = Su et al. 2019 volumetric, NOT Garanzha 2021. Robustness win only; speed on-par."}
+  - {from: tlc, to: tua, dimension: robustness, status: self-claimed, claim: "TUA (its α=0 special case) gets stuck in non-injective minima; lifting fixes vanishing gradients.", evidence: "Fig.5; Prop 4.1–4.3 (C∞, injective-only minima for small α).", source: "10.1145/3386569.3392484", assessed_by: self, notes: "Injectivity guaranteed only at global minima at possibly tiny α."}
+  - {from: tlc, to: weber-zorin-2014, dimension: robustness, status: self-claimed, claim: "Finds injective maps for all feasible examples without adding vertices; W&Z needed refinement.", evidence: "All feasible W&Z examples solved without remeshing.", source: "10.1145/3386569.3392484", assessed_by: self, notes: ""}
+  - {from: tlc, to: progressive-embedding, dimension: generality, status: self-claimed, claim: "Not limited to convex targets / 2D as PE is; works in 3D.", evidence: "Fig.13: restores injectivity to a PE example (46 inverted tris) in 65 iters.", source: "10.1145/3386569.3392484", assessed_by: self, notes: "Single shared example; does NOT claim to beat PE's FP-robustness."}
+  - {from: tlc, to: aigerman-lipman-2013, dimension: robustness, status: self-claimed, claim: "Better injectivity success than A&L 2013; any target polygon vs their convex set.", evidence: "Solves all 116 polycube examples from A&L/Fu 2016.", source: "10.1145/3386569.3392484", assessed_by: self, notes: "Scope difference (fixed vs sliding boundary)."}
+  - {from: progressive-embedding, to: fp-tutte, dimension: robustness, status: qualified, claim: "Tutte-like guarantees but resilient to floating-point rounding; fixes all FP-Tutte flips.", evidence: "FP Tutte flips 80/2718 Thingi10k genus-0; PE fixes all 80.", source: "10.1145/3306346.3323012", assessed_by: corpus, notes: "Released benchmark; can still fail if no representable local solution."}
+  - {from: progressive-embedding, to: slim, dimension: robustness, status: self-claimed, claim: "Multiprecision quality-optimization (SLIM/coord-descent) fails to robustly solve the FP problem; SLIM prohibitively slow.", evidence: "On 80 failing models: coord-descent 57/80, SLIM impractically slow; PE fixes all.", source: "10.1145/3306346.3323012", assessed_by: self, notes: "SLIM adapted to multiprecision as an ablation, not its published use."}
+  - {from: progressive-embedding, to: lbd, dimension: robustness, status: qualified, claim: "PE/MatchMaker++ succeeds on all 102 constrained global-param models; LBD fails 28/102.", evidence: "Myles 2014 benchmark, 3 random fixed points.", source: "10.1145/3306346.3323012", assessed_by: corpus, notes: "PE may remesh (extra DoF); LBD preserves connectivity."}
+  - {from: progressive-embedding, to: matchmaker, dimension: robustness, status: self-claimed, claim: "MatchMaker++ (Tutte→PE) robust where original MatchMaker fails.", evidence: "102 models, 3 constraints: MatchMaker fails 5; ++ succeeds all.", source: "10.1145/3306346.3323012", assessed_by: self, notes: "Mixes robustness fix with new self-overlap capability."}
+  - {from: foldover-free, to: tlc, dimension: quality, status: qualified, claim: "Locally injective maps with less distortion than TLC (2D+3D).", evidence: "Lucy→P: min scaling differs 12 orders, max stretch 2 orders; Fig.7 over 10743+904 benchmark.", source: "arXiv:2102.03069", assessed_by: corpus, notes: "Released benchmark; constrained-boundary problems."}
+  - {from: foldover-free, to: tlc, dimension: robustness, status: self-claimed, claim: "Init-insensitive, handles larger deformations; TLC depends on init and fails at large rotations.", evidence: "Cube-cavity: FF reaches 180° (Newton), TLC fails at 135°.", source: "arXiv:2102.03069", assessed_by: self, notes: "FF must switch L-BFGS→Newton to reach 180°; single-model demos."}
+  - {from: foldover-free, to: tlc, dimension: generality, status: self-claimed, claim: "Only method producing inversion-free maps with a free boundary; TLC's objective degenerates without boundary constraints.", evidence: "Free-boundary compression/bend tests (Fig.9).", source: "arXiv:2102.03069", assessed_by: self, notes: "'To the best of our knowledge' hedge."}
+  - {from: simplex-assembly, to: advanced-mips, dimension: robustness, status: self-claimed, claim: "No inversion-free init needed and insensitive to parameter s, unlike AMIPS.", evidence: "Hand: AMIPS fails at s=4, SA converges s=1,4,8; gorilla substepping fails for AMIPS.", source: "10.1145/2980179.2980231", assessed_by: self, notes: ""}
+  - {from: simplex-assembly, to: advanced-mips, dimension: speed, status: self-claimed, claim: "Faster than AMIPS at comparable distortion.", evidence: "1.25M-vtx Bunny: SA 10.2s vs AMIPS 2h (Tutte)/2min (ABF).", source: "10.1145/2980179.2980231", assessed_by: self, notes: ""}
+  - {from: simplex-assembly, to: lbd, dimension: robustness, status: self-claimed, claim: "LBD may fail at tight/low distortion bound; SA needs no bound.", evidence: "3D polycube: LBD fails Bimba; Rocker LBD 154.52s vs SA 8.50s.", source: "10.1145/2980179.2980231", assessed_by: self, notes: "On some cases (Sphinx, bar) LBD is faster."}
+  - {from: simplex-assembly, to: lipman-2012, dimension: speed, status: self-claimed, claim: "Similar conformal bounds ≥1 order faster.", evidence: "Isis SA 1.59s vs Lipman 45.6s; Fandisk 0.09s vs 20.9s.", source: "10.1145/2980179.2980231", assessed_by: self, notes: ""}
+  - {from: simplex-assembly, to: kovalsky-2014, dimension: speed, status: self-claimed, claim: "Comparable/better deformation far faster than Kovalsky 2014 SDP.", evidence: "Gorilla con-bound=5: Kovalsky 264.96s vs SA a fraction.", source: "10.1145/2980179.2980231", assessed_by: self, notes: ""}
+  - {from: scaf, to: smith-schaefer-2015, dimension: speed, status: self-claimed, claim: "Two orders faster than Smith&Schaefer at parity distortion.", evidence: "Space-filling: 96s vs 8472s (88×); denser Hilbert >200×.", source: "10.1145/3130800.3130895", assessed_by: self, notes: "Fastest runs use SLIM proxy+Newton. 2D."}
+  - {from: scaf, to: smith-schaefer-2015, dimension: generality, status: self-claimed, claim: "Globally bijective in 2D AND 3D; S&S is 2D-only.", evidence: "3D bijective results (bunny grown 30× in a box).", source: "10.1145/3130800.3130895", assessed_by: self, notes: "3D scaffold less robust, slower."}
+  - {from: scaf, to: air-meshes, dimension: robustness, status: self-claimed, claim: "Air Meshes allows boundary interpenetration (soft) so isn't bijective; SCAF forbids any overlap.", evidence: "Interior-point guarantee of no flip/self-intersection.", source: "10.1145/3130800.3130895", assessed_by: self, notes: "No head-to-head timing; SCAF solves a harder problem."}
+  - {from: scaf, to: slim, dimension: robustness, status: self-claimed, claim: "SLIM guarantees only local injectivity; SCAF is globally bijective.", evidence: "Fig.7: SLIM has global overlaps; SCAF bijective on 119-mesh set.", source: "10.1145/3130800.3130895", assessed_by: self, notes: "SCAF uses SLIM as its own solver; no speed win over SLIM claimed."}
+  - {from: smith-schaefer-2015, to: slim, dimension: robustness, status: self-claimed, claim: "Free-boundary methods (LSCM/ABF++/ARAP) not guaranteed bijective; all our results are bijections.", evidence: "Fig.11 competitors fail bijectivity (binary metric).", source: "10.1145/2766947", assessed_by: self, notes: "slim id = representative locally-injective free-boundary method. Win on bijectivity guarantee, not distortion."}
+  - {from: smith-schaefer-2015, to: weber-zorin-2014, dimension: quality, status: self-claimed, claim: "Fixed-boundary methods (incl. W&Z) over-distort; free boundary lowers distortion, no boundary spec.", evidence: "Table 1 isometric error near-minimal.", source: "10.1145/2766947", assessed_by: self, notes: "Needs a valid bijective (Tutte/Floater) start."}
+  - {from: lbd, to: aigerman-lipman-2013, dimension: speed, status: self-claimed, claim: "~100× faster on average than A&L 2013 interior-point QP.", evidence: "≤60k elems; rocker 22.09s vs 1008.03s; ~90% energy ratio.", source: "10.1145/2816795.2818098", assessed_by: self, notes: "100× is an average; A&L occasionally slightly better energy."}
+  - {from: lbd, to: kovalsky-2014, dimension: speed, status: self-claimed, claim: ">150× faster than Kovalsky 2014 SOCP, even with Kovalsky LBD-initialized.", evidence: "arma 1.62s vs 497.28s; rocker 22.09s vs 784.41s.", source: "10.1145/2816795.2818098", assessed_by: self, notes: "Kovalsky2014 reaches lowest energies (quality ref)."}
+  - {from: lbd, to: gauss-newton-nls, dimension: speed, status: self-claimed, claim: "Reuses a fixed prefactorization; NLS re-solves a new system each iter (10–100× longer iters).", evidence: "13k-tet: NLS 188ms/iter vs LBD 24ms/iter.", source: "10.1145/2816795.2818098", assessed_by: self, notes: "NLS converges in fewer iters; LBD wins per-iter + no tuning."}
+  - {from: lbd, to: lim, dimension: scalability, status: self-claimed, claim: "Two-step (free-optimize then K-bounded, large K) scales where LIM needs excessive time/fails.", evidence: "Scalability plot up to ~3e4 elems.", source: "10.1145/2816795.2818098", assessed_by: self, notes: "Two-step doesn't immediately imply local injectivity as LIM guarantees."}
+  - {from: goss, to: tlc, dimension: speed, status: qualified, claim: "RAMIPS >10× faster than ABCD/Du-et-al over a large 3D dataset.", evidence: "3D mean 2.84s vs 112.96s (39.8×); 2D 2.34s vs 11.49s (4.9×).", source: "10.1145/3585003", assessed_by: corpus, notes: "Benchmark-backed; success rate comparable, win is speed. tlc id = ABCD/Du-et-al line."}
+  - {from: goss, to: foldover-free, dimension: speed, status: qualified, claim: "RAMIPS faster than FFM (Garanzha) and Modified-FFM.", evidence: "2D 2.34s vs FFM 30.19s (12.9×); 3D 2.84s vs 5.94s (2.1×).", source: "10.1145/3585003", assessed_by: corpus, notes: "FFM ties GOSS at 100% benchmark success; win is speed + 2nd-order convergence."}
+  - {from: goss, to: aqp, dimension: convergence, status: self-claimed, claim: "Maintains second-order convergence on folded/degenerate inits, unlike first-order proxy methods.", evidence: "SPD-projected regularised-invariant Hessian → nearly quadratic even for folded configs.", source: "10.1145/3585003", assessed_by: self, notes: "aqp id = proxy/local-global family. No global-injectivity guarantee."}
+  - {from: efficient-bijective-param, to: scaf, dimension: speed, status: qualified, claim: "~6× faster than Scaffold to the same result (fixed shell avoids per-iter refactorization).", evidence: "Avg T_Sca/T_Ours=6.168; 1.45M tris 39.97s vs 159.18s; quality tied.", source: "10.1145/3386569.3392435", assessed_by: corpus, notes: "Released 14,861-model benchmark. 2D disk-topology only."}
+  - {from: efficient-bijective-param, to: scaf, dimension: scalability, status: qualified, claim: "Scales ~6× better than Scaffold across resolutions.", evidence: "Lucy 100K→6400K tris, ~6× throughout.", source: "10.1145/3386569.3392435", assessed_by: corpus, notes: "Per-iteration cost, not fewer iters."}
+  - {from: efficient-bijective-param, to: smith-schaefer-2015, dimension: speed, status: self-claimed, claim: "Much faster than S&S quasi-Newton solver.", evidence: "1.45M tris 39.97s vs '≥5 hours'.", source: "10.1145/3386569.3392435", assessed_by: self, notes: "Barrier contributes less than the 2nd-order solver + coarse shell."}
+  - {from: efficient-bijective-param, to: progressive-param, dimension: generality, status: self-claimed, claim: "Matches PP speed while achieving globally bijective (not just flip-free) maps.", evidence: "Ours/PP per-iter 1.05–1.12; ~5–12% slower but globally bijective.", source: "10.1145/3386569.3392435", assessed_by: self, notes: "Honest self-limit: PP is faster."}
+
+  # ===================== World 2: simulation accelerators =====================
+  - {from: fast-mass-spring, to: full-newton, dimension: speed, status: self-claimed, claim: "Much faster initial work-to-error reduction than Newton.", evidence: "Curtain 6561 verts: 10 iters=50.6ms (rel err 0.196) vs 1 Newton iter 181ms (0.2496). FIXED-BUDGET, non-converged.", source: liu13fast, assessed_by: self, notes: "Energy-restricted (Hookean); linear convergence; authors advise Newton for exact solution."}
+  - {from: fast-mass-spring, to: pbd, dimension: quality, status: self-claimed, claim: "Converges to exact implicit-Euler; no PBD iteration-dependent stiffness.", evidence: "Analytic: PBD effective stiffness grows with iterations.", source: liu13fast, assessed_by: self, notes: "Energy-restricted."}
+  - {from: projective-dynamics, to: full-newton, dimension: speed, status: self-claimed, claim: "Faster than Newton for interactive use (~30 local/global iters per Newton iter).", evidence: "Twisting bar 4290 DoF, wall-clock to 1e-10 (converged). Constant prefactored matrix.", source: "PD 2014", assessed_by: self, notes: "Energy-restricted to quadratic constraint-projection energies; Newton has quadratic vs their linear rate."}
+  - {from: projective-dynamics, to: full-newton, dimension: simplicity, status: self-claimed, claim: "No line search, no indefinite-Hessian safeguards, no SVD differentiation; guaranteed energy decrease.", evidence: "Design argument.", source: "PD 2014", assessed_by: self, notes: ""}
+  - {from: projective-dynamics, to: pbd, dimension: quality, status: self-claimed, claim: "Converges to true implicit-Euler, iteration/order-independent; PBD is order-dependent inelastic.", evidence: "Order-independent Jacobi consensus.", source: "PD 2014", assessed_by: self, notes: ""}
+  - {from: projective-dynamics, to: fast-mass-spring, dimension: generality, status: self-claimed, claim: "General nodal systems, not just linear mass-springs [Liu 2013].", evidence: "Constraint-projection generalizes beyond Hookean springs.", source: "PD 2014", assessed_by: self, notes: "Generality superset."}
+  - {from: chebyshev-semi-iterative, to: projective-dynamics, dimension: convergence, status: self-claimed, claim: "Accelerates PD convergence ≥1 order across direct/Jacobi/Gauss-Seidel.", evidence: "Rel-err-vs-time (Fig.4).", source: "Wang 2015", assessed_by: self, notes: "Needs spectral-radius estimate; weaker on tets/PBD; inherits PD restricted energies."}
+  - {from: chebyshev-semi-iterative, to: nonlinear-conjugate-gradient, dimension: convergence, status: self-claimed, claim: "CG rate can't exceed Chebyshev's and each CG iter is costlier (inner products).", evidence: "Analytic + short-recurrence GPU-friendliness.", source: "Wang 2015", assessed_by: self, notes: ""}
+  - {from: quasi-newton-liu2017, to: full-newton, dimension: speed, status: self-claimed, claim: ">10× faster than one Newton iteration without quality loss.", evidence: "Constant prefactored n×n vs 3n×3n; 1 iter ~100× faster than a Newton iter. FIXED-BUDGET.", source: "arXiv:1604.07378", assessed_by: self, notes: "Materials must satisfy Valanis-Landel; still needs line search."}
+  - {from: quasi-newton-liu2017, to: projective-dynamics, dimension: generality, status: self-claimed, claim: "Supports Neo-Hookean/StVK/Mooney-Rivlin/spline/corotated that PD cannot.", evidence: "PD is the m=0 special case of the L-BFGS scheme.", source: "arXiv:1604.07378", assessed_by: self, notes: "Central pitch: quasi-Newton ⊃ PD."}
+  - {from: quasi-newton-liu2017, to: projective-dynamics, dimension: convergence, status: self-claimed, claim: "L-BFGS history (m=5) strictly improves per-iteration convergence over PD (m=0).", evidence: "Convergence-vs-iteration (Fig.6).", source: "arXiv:1604.07378", assessed_by: self, notes: ""}
+  - {from: quasi-newton-liu2017, to: l-bfgs, dimension: convergence, status: self-claimed, claim: "Init A0=M/h²+L gives much faster convergence than scaled-identity L-BFGS.", evidence: "Fig.7 vs scaled-identity/rest-pose/stiffness-warping inits.", source: "arXiv:1604.07378", assessed_by: self, notes: ""}
+  - {from: quasi-newton-liu2017, to: chebyshev-semi-iterative, dimension: convergence, status: self-claimed, claim: "Even m=2 slightly faster than Chebyshev, without disabling early acceleration or spectral-radius estimation.", evidence: "Convergence-vs-iteration + no-tuning.", source: "arXiv:1604.07378", assessed_by: self, notes: ""}
+  - {from: descent-gpu, to: nonlinear-conjugate-gradient, dimension: speed, status: self-claimed, claim: "3–4× faster than nonlinear CG on GPU by eliminating dot-product reductions.", evidence: "Armadillo 15K: their method needs zero dot products vs CG's ≥2. GPU throughput, fixed-budget.", source: "10.1145/2980179.2980236", assessed_by: self, notes: "CPU performance conceded similar."}
+  - {from: descent-gpu, to: projective-dynamics, dimension: convergence, status: self-claimed, claim: "With same step length, converges significantly faster than PD.", evidence: "Fig.4 mass-spring; uses diagonal of exact Hessian. Energy-restricted, fixed-budget.", source: "10.1145/2980179.2980236", assessed_by: self, notes: ""}
+  - {from: admm-pd, to: projective-dynamics, dimension: generality, status: self-claimed, claim: "Generalizes PD to arbitrary conservative forces + hard constraints, keeping PD's speed; PD is the linear-force special case.", evidence: "Same prefactored matrix; Appendix A proves PD=ADMM for linear constraints.", source: "admm-pd 2016", assessed_by: self, notes: "Speed = parity, not superiority."}
+  - {from: admm-pd, to: projective-dynamics, dimension: convergence, status: self-claimed, claim: "With lower weight w=½√k, ADMM converges faster than PD.", evidence: "Fig.2/6 corotated box to 500 iters.", source: "admm-pd 2016", assessed_by: self, notes: "Energy-restricted; too-small w fails; at w=√k they take identical steps. Single nonlinear example."}
+  - {from: admm-pd, to: l-bfgs, dimension: speed, status: self-claimed, claim: "L-BFGS on the raw problem is slower (in time) than PD and ADMM (costlier per iter).", evidence: "Fig.2 time-to-convergence, untwisting box, window 10.", source: "admm-pd 2016", assessed_by: self, notes: "L-BFGS here = raw-problem, not Liu-2017 quasi-Newton PD. Single example."}
+  - {from: aa-admm, to: admm, dimension: convergence, status: self-claimed, claim: "Anderson-accelerated ADMM decreases residuals much faster than plain ADMM.", evidence: "3 elastic bars (corot/StVK/NH), residual + time-to-accuracy (Fig.2), m=6.", source: "arXiv:1909.00470", assessed_by: self, notes: "Wall-clock benefit needs high enough per-iter cost (self-admitted)."}
+  - {from: aa-admm, to: admm, dimension: robustness, status: self-claimed, claim: "Effective on non-convex sim where Nesterov-accelerated ADMM variants fail.", evidence: "Fig.3 soft-rubber; competitors rely on convexity.", source: "arXiv:1909.00470", assessed_by: self, notes: "Self-admits it loses to specialized GMRES acceleration by a small margin."}
+  - {from: xpbd, to: pbd, dimension: quality, status: self-claimed, claim: "Stiffness is time-step and iteration-count independent; PBD stiffens with iteration count.", evidence: "Fig.2 harmonic oscillator (XPBD matches analytic).", source: "XPBD 2016", assessed_by: self, notes: "EXPLICIT author disclaimer: XPBD does NOT converge faster than PBD (overhead <2%). Win is consistency, not speed."}
+  - {from: xpbd, to: full-newton, dimension: quality, status: self-claimed, claim: "Visually indistinguishable from a more expensive reference Newton solver at PBD simplicity.", evidence: "Cantilever StVK 20 iters ≈ Newton; chain force err 6/2/0.5% at 50/100/1000 iters.", source: "XPBD 2016", assessed_by: self, notes: "Parity-at-lower-cost; Newton is ground truth, XPBD doesn't solve implicit EOM exactly."}
+  - {from: vertex-block-descent, to: xpbd, dimension: speed, status: self-claimed, claim: "~10× faster than XPBD at the same settings.", evidence: "Squishy ball ~0.03 vs ~0.32 s/frame. FIXED-BUDGET, not equal-accuracy.", source: "arXiv:2403.06321", assessed_by: self, notes: "Same-settings, not equal-residual."}
+  - {from: vertex-block-descent, to: xpbd, dimension: quality, status: self-claimed, claim: "Matches true implicit Euler where XPBD diverges.", evidence: "XPBD needed 25× smaller timestep + 25× more collision detection to look comparable.", source: "arXiv:2403.06321", assessed_by: self, notes: ""}
+  - {from: vertex-block-descent, to: xpbd, dimension: robustness, status: self-claimed, claim: "Handles 1:2000 mass ratio contact where XPBD fails.", evidence: "Qualitative (XPBD crushes light object).", source: "arXiv:2403.06321", assessed_by: self, notes: "Contact/mass-ratio-specific."}
+  - {from: vertex-block-descent, to: xpbd, dimension: scalability, status: self-claimed, claim: "Vertex coloring needs far fewer colors than element/constraint coloring.", evidence: "3 vs 7 (tri); 8 vs 76 (tet).", source: "arXiv:2403.06321", assessed_by: self, notes: "Structural, not runtime."}
+  - {from: vertex-block-descent, to: full-newton, dimension: speed, status: self-claimed, claim: "Converges faster in wall-clock initially, even single-threaded CPU.", evidence: "Loss-vs-time, single 33ms step.", source: "arXiv:2403.06321", assessed_by: self, notes: "'Initially' only; Newton better per-iteration and catches up asymptotically."}
+  - {from: vertex-block-descent, to: jacobi, dimension: convergence, status: self-claimed, claim: "Gauss-Seidel-style block updates converge better than block Jacobi.", evidence: "Jacobi ~20% cheaper/iter but worse convergence; net VBD win.", source: "arXiv:2403.06321", assessed_by: self, notes: "Trade-off claim."}
+  - {from: vertex-block-descent, to: l-bfgs, dimension: convergence, status: self-claimed, claim: "Accelerated VBD outpaces Laplacian-initialized L-BFGS.", evidence: "Single-step armadillo plot.", source: "arXiv:2403.06321", assessed_by: self, notes: "LOW CONFIDENCE — single source."}
+  - {from: jgs2, to: vertex-block-descent, dimension: convergence, status: self-claimed, claim: "Reaches 1e-3 in 3 iters vs 500+ for VBD on the overshoot beam.", evidence: "ARAP overshoot beam to 1e-4 vs Newton ref. Converged.", source: "arXiv:2506.06494", assessed_by: self, notes: "Clean converged comparison."}
+  - {from: jgs2, to: vertex-block-descent, dimension: speed, status: self-claimed, claim: "40× faster than VBD (up to 137–173× in stiffer scenes).", evidence: "Armadillo 1M verts iters to ‖Δx‖<1e-4; 137× at 20× stiffness.", source: "arXiv:2506.06494", assessed_by: self, notes: "Biggest multipliers where VBD degrades; some VBD iter counts under-reported."}
+  - {from: jgs2, to: vertex-block-descent, dimension: robustness, status: self-claimed, claim: "VBD fails on stiff letters / house-of-cards where JGS2 converges.", evidence: "155 cards; 1000× stiffness variation.", source: "arXiv:2506.06494", assessed_by: self, notes: ""}
+  - {from: jgs2, to: second-order-stencil-descent, dimension: speed, status: self-claimed, claim: "15× faster than 2nd-order Stencil Descent (34× at 20× stiffness).", evidence: "Armadillo 1M iters to 1e-4.", source: "arXiv:2506.06494", assessed_by: self, notes: ""}
+  - {from: jgs2, to: full-newton, dimension: speed, status: self-claimed, claim: "~8,000× faster than projected Newton per step.", evidence: "883ms vs ~106min/step, 6 armadillos (44 vs 58 iters).", source: "arXiv:2506.06494", assessed_by: self, notes: "Per-iteration cost win (no global Cholesky), not fewer iterations."}
+  - {from: jgs2, to: projective-dynamics, dimension: convergence, status: self-claimed, claim: "3 iters to 1e-3 vs 500+ for PD; 70× faster than GPU-PD in a large scene.", evidence: "ARAP beam vs Newton ref; animal-crossing 4.8M elem.", source: "arXiv:2506.06494", assessed_by: self, notes: "PD energy-restricted."}
+  - {from: jgs2, to: xpbd, dimension: convergence, status: self-claimed, claim: "3 iters to 1e-3 vs 500+ for XPBD.", evidence: "ARAP overshoot beam.", source: "arXiv:2506.06494", assessed_by: self, notes: ""}
+  - {from: jgs2, to: gpu-ipc, dimension: speed, status: self-claimed, claim: "82–136× faster than GPU-IPC.", evidence: "Bone dragons 11M DOF (82×); animal-crossing (136×).", source: "arXiv:2506.06494", assessed_by: self, notes: "Per-step; collision-specific."}
+  - {from: second-order-stencil-descent, to: full-newton, dimension: convergence, status: self-claimed, claim: "Iteration count comparable to Newton with ~two-orders speedup.", evidence: "~100 iters vs >10,000 for gradient descent; Fig.1.", source: "10.1145/3592104", assessed_by: self, notes: "Iteration-parity is algorithmic; the 'two orders' speedup is GPU-vs-CPU Newton."}
+  - {from: second-order-stencil-descent, to: gradient-descent, dimension: convergence, status: self-claimed, claim: "Locally 2nd-order, far fewer iters than GPU gradient descent.", evidence: "~100 vs >10,000 iters (same-GPU, to 1e-4).", source: "10.1145/3592104", assessed_by: self, notes: "HONEST concession: GD wins in soft/small-step regime (0.88s vs 3.8s); 2nd-SD wins only stiff/large-step."}
+  - {from: second-order-stencil-descent, to: gauss-seidel, dimension: convergence, status: self-claimed, claim: "97 iters vs 168 for Gauss-Seidel (Vivace).", evidence: "Dragon 1M, 45.7s vs 64.6s (same GPU).", source: "10.1145/3592104", assessed_by: self, notes: "Same-hardware ablation."}
+  - {from: second-order-stencil-descent, to: ipc, dimension: speed, status: self-claimed, claim: "58–129× faster than CPU IPC to a <1e-3 converged solution.", evidence: "Ships 974K 17.6s; dragon 1M 6.7s vs 390s.", source: "10.1145/3592104", assessed_by: self, notes: "GPU-vs-CPU; local barrier ≠ identical solution. Same-HW factor only 13× (vs own Jacobi)."}
+  - {from: pbng, to: full-newton, dimension: speed, status: self-claimed, claim: "6–7× faster than Newton, visually comparable.", evidence: "Muscles 284K verts: 67s vs 430s/frame.", source: "arXiv:2306.09021", assessed_by: self, notes: "Time-to-visual-plausibility, NOT matched residual; loses to converged Newton at large budget."}
+  - {from: pbng, to: xpbd, dimension: convergence, status: self-claimed, claim: "Reaches tolerance where XPBD stagnates.", evidence: "Clamped block: residual 1e-8 vs XPBD stagnating at 1e-5 (matched-iteration).", source: "arXiv:2306.09021", assessed_by: self, notes: "Strongest converged claim in the paper."}
+  - {from: pbng, to: xpbd, dimension: scalability, status: self-claimed, claim: "Far fewer colors than XPBD (5 vs 39; 13 vs 82).", evidence: "Table 1.", source: "arXiv:2306.09021", assessed_by: self, notes: "Comparable/sometimes slower speed (more work per iter)."}
+  - {from: primal-xpbd, to: xpbd, dimension: convergence, status: self-claimed, claim: "Reduces backward-Euler residual where XPBD stagnates (XPBD omits the momentum residual).", evidence: "Residual-vs-iteration, corotated ~50 iters.", source: "10.1145/3623264.3624437", assessed_by: self, notes: ""}
+  - {from: primal-xpbd, to: xpbd, dimension: quality, status: self-claimed, claim: "Neo-Hookean: hits ground truth in 10 iters (345ms) while XPBD wrong at 100 iters (795ms).", evidence: "~2.3× faster AND correct.", source: "10.1145/3623264.3624437", assessed_by: self, notes: "Genuine converged-quality; XPBD also energy-restricted."}
+  - {from: primal-xpbd, to: xpbd, dimension: generality, status: self-claimed, claim: "Handles arbitrary hyperelastic models XPBD structurally cannot; coloring works for all tet meshes.", evidence: "Bar E=1e4 (XPBD unstable, PXPBD stable).", source: "10.1145/3623264.3624437", assessed_by: self, notes: "Per-step cost parity."}
+  - {from: primal-xpbd, to: full-newton, dimension: robustness, status: self-claimed, claim: "Stable at a fixed frame budget where Newton is unstable; lower residual at equal budget (~3.3×).", evidence: "32³ grid fixed 200ms/frame; 17.6 vs 58.9 s/frame.", source: "10.1145/3623264.3624437", assessed_by: self, notes: "Fixed-budget with Newton truncated; asymptotic rate slower than Newton (conceded)."}
+
+  # ===================== World 3: contact / IPC =====================
+  - {from: ipc, to: prior-rigid-engines, dimension: robustness, status: self-claimed, claim: "First implicit stepper to consistently enforce intersection- and inversion-free trajectories regardless of material/step/velocity/deformation.", evidence: "Binary intersection+inversion-free GUARANTEE (barrier + CCD-filtered line search) to user tolerance; speed comparable-or-faster than methods lacking guarantees.", source: "10.1145/3386569.3392425", assessed_by: self, notes: "Target = generic prior penalty/LCP/active-set contact. Guarantee vs tunable-but-failure-prone."}
+  - {from: c-ipc, to: ipc, dimension: generality, status: self-claimed, claim: "Extends IPC (codim-0 only) to codim-0/1/2/3 in arbitrary combination with frictional contact.", evidence: "Intersection-free + strain/thickness guarantee to 0.1%.", source: "arXiv:2012.04457", assessed_by: self, notes: "Capability extension, not like-for-like beat."}
+  - {from: c-ipc, to: arcsim, dimension: quality, status: self-claimed, claim: "Satisfies strain limits across all elements/steps; ARCSim increasingly violates as membrane stiffness drops.", evidence: "Strain-limit-violation comparison.", source: "arXiv:2012.04457", assessed_by: self, notes: "Different limiting model; not a speed comparison."}
+  - {from: rigid-ipc, to: prior-rigid-engines, dimension: robustness, status: self-claimed, claim: "First implicit rigid-body stepper guaranteeing intersection-free configs every step; handles scenes Bullet/MuJoCo/Chrono/Houdini cannot, no per-scene tuning.", evidence: "Erleben 2018 + large scenes; documented competitor failures.", source: "10.1145/3450626.3459802", assessed_by: self, notes: "Authors CONCEDE 2–3 orders SLOWER than competitors. Contact-model swap — not throughput-comparable."}
+  - {from: rigid-ipc, to: ipc, dimension: generality, status: self-claimed, claim: "Extends IPC to reduced/rigid coordinates.", evidence: "Capability extension.", source: "10.1145/3450626.3459802", assessed_by: self, notes: ""}
+  - {from: abd, to: ipc, dimension: speed, status: self-claimed, claim: "Orders-of-magnitude faster stiff simulation than prior IPC, keeping non-intersection.", evidence: "2–3 orders CPU, up to ~10,000× with GPU.", source: "arXiv:2201.10022", assessed_by: self, notes: "MODEL CHANGE: 12 affine DOFs/body vs full FEM — speedup from far fewer DOFs. 10,000× folds GPU on CPU gains. Near-rigid/stiff only."}
+  - {from: medial-ipc, to: ipc, dimension: speed, status: self-claimed, claim: "≥1 order faster than fullspace IPC via reduced medial subspace.", evidence: "≥10× on collision-rich scenes; closed-form reduced CCD.", source: "10.1145/3450626.3459753", assessed_by: self, notes: "REDUCED-SPACE model change (MAT subspace); trades accuracy/DOF; mixes reduction with GPU."}
+  - {from: gipc, to: ipc, dimension: speed, status: self-claimed, claim: "Analytic Gauss-Newton eigensystems give 3× over the standard IPC barrier; full GPU adds much more.", evidence: "3× on barrier Hessian (same CPU, same barrier — FAIR); up to ~95× overall vs CPU IPC.", source: "arXiv:2308.09400", assessed_by: self, notes: "3× eigensystem is same-CPU fixed-barrier (fair). 95× overall is GPU-vs-CPU (confounded)."}
+  - {from: stiffgipc, to: gipc, dimension: scalability, status: self-claimed, claim: "Up to 10× over SOTA GPU IPC (GIPC, ZeMa) via connectivity-enhanced MAS preconditioner.", evidence: "MAS ~2.2× avg; 2.60× vs ZeMa on 123K-node scene. GPU-vs-GPU (fair).", source: "arXiv:2411.06224", assessed_by: self, notes: "10× headline is vs GPU baselines, NOT CPU IPC."}
+  - {from: stiffgipc, to: gipc, dimension: convergence, status: self-claimed, claim: "Up to 2.4× PCG convergence over GIPC on stiff materials where GIPC's MAS degrades.", evidence: "2.4× faster PCG on stiff regimes.", source: "arXiv:2411.06224", assessed_by: self, notes: "Genuine algorithmic improvement (preconditioner). Adds a cubic strain-limiting energy."}
+  - {from: stiffgipc, to: c-ipc, dimension: speed, status: self-claimed, claim: "Cubic inexact strain-limiting ~1.24× faster than C-IPC barrier strain-limiting.", evidence: "~1.24× vs Li 2021.", source: "arXiv:2411.06224", assessed_by: self, notes: "Modest; strain-limiting model change. Same 1.24× appears in Ando 2024."}
+  - {from: barrier-aug-lagrangian, to: ipc, dimension: speed, status: self-claimed, claim: "80.1× speedup vs IPC (~9.5 hr/frame same task).", evidence: "1.76M-tet scene: 427 s/frame vs ~9.5 hr.", source: "arXiv:2407.00046", assessed_by: self, notes: "GPU (RTX 4090) vs CPU (i9) — hardware-confounded. Also solver change (ALM + inexact Newton-PCG)."}
+  - {from: barrier-aug-lagrangian, to: gipc, dimension: speed, status: self-claimed, claim: "Up to 3.8× speed over GIPC; handles stiff problems surpassing existing GPU interior-point methods.", evidence: "Fig.29; 9M-tet T-rex in 8GB GPU vs 128GB CPU.", source: "arXiv:2407.00046", assessed_by: self, notes: "GIPC comparison GPU-vs-GPU (fair). Memory claim GPU-vs-CPU storage."}
+  - {from: barrier-aug-lagrangian, to: gipc, dimension: convergence, status: self-claimed, claim: "Up to 6.1× Newton convergence over GIPC on stiff problems.", evidence: "Fig.29.", source: "arXiv:2407.00046", assessed_by: self, notes: "GPU-vs-GPU (fair). Gain from ALM + inexact PCG."}
+  - {from: ogc, to: ipc, dimension: quality, status: self-claimed, claim: "Supports a large contact radius without the artifacts IPC's contact model produces.", evidence: "Qualitative artifact comparison; per-vertex displacement bounds; real-time ~500K verts, no CCD.", source: "10.1145/3731205", assessed_by: self, notes: "Contact-MODEL swap (offset geometry). Only the IPC claim is qualitative artifact, not a metric benchmark."}
+  - {from: ogc, to: ipc, dimension: speed, status: self-claimed, claim: ">2 orders faster than prior methods.", evidence: "Real-time ~500K verts, GPU, avoids CCD; prior methods unnamed.", source: "10.1145/3731205", assessed_by: self, notes: "Speedup vs UNNAMED prior methods; capability demo, not shared-metric. Loose edge to ipc."}
+  - {from: cubic-barrier-ando, to: ipc, dimension: robustness, status: self-claimed, claim: "Cubic barrier enlarges tight strain-limiting gaps where log barriers (IPC) struggle.", evidence: "Qualitative thin-shell/strain-limiting cases.", source: "10.1145/3687908", assessed_by: self, notes: "Barrier-function MODEL change (cubic vs log) — claim is inherently about the new model."}
+  - {from: cubic-barrier-ando, to: c-ipc, dimension: speed, status: self-claimed, claim: "~1.24× faster than C-IPC barrier strain-limiting at similar quality.", evidence: "~1.24× vs Li 2021, same CPU.", source: "10.1145/3687908", assessed_by: self, notes: "Modest; cubic-vs-log barrier model change."}
+  - {from: barrier-free-elastodynamics, to: gipc, dimension: speed, status: self-claimed, claim: "Matches IPC robustness while removing its efficiency bottlenecks; up to 103× over GIPC.", evidence: "103× on contact-rich benchmarks; avoids TOI locking → fewer Newton iters.", source: "arXiv:2512.12151", assessed_by: self, notes: "BARRIER-FREE model change; GPU-vs-GPU framing."}
+  - {from: barrier-free-elastodynamics, to: ipc, dimension: convergence, status: self-claimed, claim: "Overcomes IPC's ill-conditioned log-barrier systems and TOI locking (fewer Newton iters).", evidence: "All CCD pairs included immediately (no TOI locking).", source: "arXiv:2512.12151", assessed_by: self, notes: "Robustness vs IPC is claimed as PARITY, not superiority — honest headline is speed/convergence."}
