@@ -73,7 +73,8 @@ taxonomy → capability cells → tiered problem classes
 
 | Path | What |
 |---|---|
-| [`docs/design.md`](docs/design.md) | Full design: taxonomy, scope arguments, recommended two-track benchmark, v1 plan, decomposition experiments, lineage map, scope ledger |
+| [`docs/design.md`](docs/design.md) | Full design: scope arguments, recommended two-track benchmark, v1 plan, decomposition experiments, lineage map, scope ledger |
+| [`docs/taxonomy.md`](docs/taxonomy.md) | The taxonomy: method axes × capability cells, classification of the corpus, orthogonality evaluation, fairness gate |
 | [`docs/corpus.md`](docs/corpus.md) | Annotated corpus (~180 entries) across Worlds 0–3, with axis tags, comparability notes, code availability |
 | [`claims/`](claims/) | **Superiority-claims graph** — machine-readable edges (`claims.yaml`) + rendered Mermaid graph & tables ([`claims/README.md`](claims/README.md)) + [`schema`](claims/schema.md) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Conventions for **humans and agents** adding papers, claims, and findings |
