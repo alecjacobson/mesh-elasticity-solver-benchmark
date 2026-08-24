@@ -55,6 +55,18 @@ def tag(r):
     return f"{r['iters']} it" if r["status"] == "converged" else r["status"]
 
 
+# HW-independent per-iteration cost (docs/metrics.md Lever 1): global factorizations to converge.
+# Newton (dense-direct) factorizes the Hessian EACH iteration; Sobolev-L-BFGS and AQP prefactor a
+# fixed operator ONCE; L-BFGS/GD/Adam never factorize. So a low iteration count that costs a
+# factorization each is not cheaper than a higher count of back-solve-only iterations.
+def facs(m, r):
+    if m == "newton":
+        return r["iters"] if r["status"] == "converged" else "—"
+    if m in ("sobolev-lbfgs", "aqp"):
+        return 1
+    return 0
+
+
 def main():
     print("== E2: World-1 accelerators across regimes ==\n")
     scens = [("well-conditioned (perturbation)", build_scenario(nx=8, ny=8)),
@@ -74,10 +86,12 @@ def main():
              "Two regimes, because World-1 superiority claims are regime-specific. "
              "Run: `python -m bench.run_e2`.", ""]
     for name, _ in scens:
-        lines += [f"## {name}", "", "| method | iters / status | wall (ms) |", "|---|---|---|"]
+        lines += [f"## {name}", "",
+                  "| method | iters / status | global factorizations | wall (ms) |",
+                  "|---|---|---|---|"]
         for m in order:
             r = data[name][m]
-            lines.append(f"| {m} | {tag(r)} | {r['wall_s']*1e3:.1f} |")
+            lines.append(f"| {m} | {tag(r)} | {facs(m, r)} | {r['wall_s']*1e3:.1f} |")
         lines.append("")
     well = data[scens[0][0]]; ill = data[scens[1][0]]
 
@@ -98,13 +112,18 @@ def main():
               f"generic optimizer?' -- here, no) -- flag `aqp->l-bfgs` as **confound-borne / "
               f"unreproduced** in this harness. (AQP's genuine claim is mesh-independent iteration "
               f"count + cheap per-iter, not raw iterations vs L-BFGS.)",
-              f"- **Second order still wins iterations:** Newton {it(well,'newton')}/{it(ill,'newton')} "
-              f"it; but that is the iteration axis -- wall-clock differs (E4). Adam (honesty "
-              f"control) needs hundreds of iters / plateau-prone in both.",
+              f"- **Second order still wins iterations -- but iterations are not free:** Newton takes "
+              f"only {it(well,'newton')}/{it(ill,'newton')} iters, yet **each is a full Hessian "
+              f"factorization** ({it(well,'newton')}/{it(ill,'newton')} of them), whereas AQP and "
+              f"Sobolev-L-BFGS prefactor a fixed operator **once** and L-BFGS never factorizes. So "
+              f"the low Newton iteration count is the expensive kind; the factorizations column is "
+              f"the honest HW-independent cost that iteration-count alone hides, and it is why "
+              f"wall-clock does not track iterations (E4).",
               "",
-              "_Caveat: dense Newton; single mesh/seed per regime; iteration counts are the "
-              "HW-independent axis, wall-clock the paired HW-dependent one. AQP's mesh-independence "
-              "claim (vs its L-BFGS-speed claim) is a separate, still-open test._"]
+              "_Caveat: dense Newton; single mesh/seed per regime. We report THREE axes per method -- "
+              "iterations, global factorizations (HW-independent cost), and wall-clock (HW-dependent) "
+              "-- because no single one settles a cross-method verdict (docs/metrics.md). AQP's "
+              "mesh-independence claim (vs its L-BFGS-speed claim) is a separate, still-open test (#29)._"]
     os.makedirs("results", exist_ok=True)
     with open("results/e2.md", "w") as f:
         f.write("\n".join(lines) + "\n")
