@@ -45,6 +45,22 @@ def energy_only(x, tris, Bs, areas, eterms=_sd_element_terms):
     return E
 
 
+def _cg_solve(Hff, gf, counts, rtol=1e-9, maxiter=5000):
+    """Conjugate-gradient inner solve (SPD Hff), counting matrix-vector products (metric #15)."""
+    import scipy.sparse.linalg as spla
+    n = Hff.shape[0]
+    mv = [0]
+
+    def matvec(v):
+        mv[0] += 1
+        return Hff @ v
+
+    A = spla.LinearOperator((n, n), matvec=matvec)
+    d, _info = spla.cg(A, -gf, rtol=rtol, maxiter=maxiter)
+    counts["mat_vecs"] += mv[0]
+    return d
+
+
 def _spd_shift_solve(Hff, gf):
     """Levenberg identity-shift; returns (d, tau, n_factorizations)."""
     n = Hff.shape[0]
@@ -61,10 +77,11 @@ def _spd_shift_solve(Hff, gf):
 
 
 def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
-          max_iter=400, tol=1e-6, c=1e-4):
+          linsolver="direct", max_iter=400, tol=1e-6, c=1e-4):
     x = x0.copy()
     log = []
-    counts = {"assemblies": 0, "energy_evals": 0, "lin_solves": 0, "factorizations": 0}
+    counts = {"assemblies": 0, "energy_evals": 0, "lin_solves": 0,
+              "factorizations": 0, "mat_vecs": 0}
     t0 = time.perf_counter()
     status = "maxiter"
     for it in range(max_iter):
@@ -91,11 +108,15 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
             except np.linalg.LinAlgError:
                 d, _, nf = _spd_shift_solve(Hff, gf); counts["factorizations"] += nf
         else:
-            counts["factorizations"] += 1; counts["lin_solves"] += 1
-            try:
-                d = np.linalg.solve(Hff, -gf)
-            except np.linalg.LinAlgError:
-                d = np.linalg.lstsq(Hff, -gf, rcond=None)[0]
+            counts["lin_solves"] += 1
+            if linsolver == "cg":            # iterative inner solve (SPD-filtered Hff)
+                d = _cg_solve(Hff, gf, counts)
+            else:
+                counts["factorizations"] += 1
+                try:
+                    d = np.linalg.solve(Hff, -gf)
+                except np.linalg.LinAlgError:
+                    d = np.linalg.lstsq(Hff, -gf, rcond=None)[0]
         gd = float(gf @ d)
         if gd >= 0.0:
             status = "nondescent"; break
