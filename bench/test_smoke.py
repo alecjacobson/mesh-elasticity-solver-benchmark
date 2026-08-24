@@ -55,6 +55,26 @@ def main():
     assert rc["counts"]["lin_solves"] >= 1
     print("[smoke] telemetry counters present")
 
+    # 5. sparse backend matches dense; P2 element conformance + solve
+    from .solver import solve_sparse
+    rsp = solve_sparse(*args, "clamp", eterms=sd_terms, linsolver="direct", tol=1e-6)
+    assert rsp["iters"] == rc["iters"] and abs(rsp["final_energy"] - rc["final_energy"]) < 1e-8, \
+        "sparse != dense"
+    print("[smoke] sparse backend matches dense")
+
+    from . import p2 as _p2
+    from .energy import psi as _psi, grad_psi as _gp, hess_psi as _hp
+    assert _p2._conformance() < 1e-5, "P2 conformance failed"
+    _nodes, _elems = _p2.grid_mesh_p2(4, 4)
+    _quad = _p2.rest_quantities_p2(_nodes, _elems)
+    _et = _p2.make_element_terms(_psi, _gp, _hp)
+    _xc = _nodes[:, 0]
+    _pin = (np.abs(_xc) < 1e-9) | (np.abs(_xc - 1) < 1e-9)
+    _x0 = _nodes.copy(); _x0[:, 0] = 1.5 * _nodes[:, 0]; _x0 = _x0.reshape(-1)
+    _r = _p2.solve_p2(_x0, _elems, _quad, ~np.repeat(_pin, 2), _et, "clamp", tol=1e-6)
+    assert _r["status"] == "converged", f"P2 solve failed: {_r['status']}"
+    print(f"[smoke] P2 element conformance + solve OK ({_r['iters']} it)")
+
     print("[smoke] ALL PASS")
     return ok
 

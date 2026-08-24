@@ -15,5 +15,7 @@ jobs:
       - run: pip install numpy scipy
       - name: conformance gate
         run: python -m bench.conformance
+      - name: p2 element conformance
+        run: python -m bench.p2
       - name: smoke test
         run: python -m bench.test_smoke
