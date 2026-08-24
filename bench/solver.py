@@ -72,14 +72,18 @@ def _spd_project_solve(Hff, gf, eps=1e-9):
     return d, 1
 
 
-def _blend_step(Hff, gf, w, eps=0.01):
+def _blend_step(Hff, gf, w, eps=1e-9):
     """Faithful trust-region eigenvalue blend (Chen et al. 2024): a SINGLE operator
     lambda_eff = (1-w) lambda + w |lambda| with w in {0, 0.5, 1} unifying the three named states:
       w=0   -> lambda            (full Newton -- the branch the old two-state switchboard lacked)
       w=0.5 -> 0 for lambda<0    (clamp-to-zero; floored to eps to stay invertible)
       w=1   -> |lambda|          (absolute).
-    Floors at eps=0.01 (the paper's value) when w>0; leaves raw eigenvalues for full Newton.
-    Returns (d, n_factorizations=1)."""
+    Floors at eps=1e-9 when w>0 -- the SAME floor the standalone clamp/absolute filters
+    (filters.project_element) use, so the w=0.5/w=1 states are literally those operators (review-r2:
+    the paper's 0.01 regularization is a separate choice; matching the filter floor is what makes the
+    head-to-head an apples-to-apples switchboard test). Leaves raw eigenvalues for full Newton.
+    Returns (d, n_factorizations=1) -- one dense eigendecomposition of the assembled free Hessian,
+    which is MORE expensive per step than the per-element 6x6 projections clamp/absolute do."""
     wv, V = np.linalg.eigh(Hff)
     lam = (1.0 - w) * wv + w * np.abs(wv)
     if w > 0.0:

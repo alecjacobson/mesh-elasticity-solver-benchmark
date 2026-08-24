@@ -34,8 +34,14 @@ def run_p1():
         et, _, _, _ = nh.make(mu=1.0, lam=nh.lam_from_nu(nu)); tab[nu] = {}
         for f in FILTERS:
             r = solve(x0, tris, Bs, areas, free, f, eterms=et, tol=1e-6, max_iter=400)
-            tab[nu][f] = r["iters"] if r["status"] == "converged" else r["status"]
+            tab[nu][f] = _cell(r)
     return tab
+
+
+def _cell(r):
+    return {"it": (r["iters"] if r["status"] == "converged" else r["status"]),
+            "status": r["status"], "wall": r.get("wall_s"),
+            "fac": r.get("counts", {}).get("factorizations")}
 
 
 def run_p2():
@@ -48,8 +54,21 @@ def run_p2():
         et = p2.make_element_terms(psi, gp, _hpsi(gp)); tab[nu] = {}
         for f in FILTERS:
             r = p2.solve_p2(x0, elems, quad, free, et, f, tol=1e-6, max_iter=400)
-            tab[nu][f] = r["iters"] if r["status"] == "converged" else r["status"]
+            tab[nu][f] = _cell(r)
     return tab
+
+
+def _fmt(cell, key):
+    v = cell[key]
+    if v is None:
+        return "—"
+    if key == "wall":
+        return f"{v*1e3:.0f}"
+    return str(v)
+
+
+def _iters_val(cell):
+    return cell["it"] if isinstance(cell["it"], int) else None
 
 
 def main():
@@ -59,47 +78,75 @@ def main():
         print(name)
         print("  nu      " + " ".join(f"{f:>13}" for f in FILTERS))
         for nu in NUS:
-            print(f"  {nu:.4f} " + " ".join(f"{str(tab[nu][f]):>13}" for f in FILTERS))
+            print(f"  {nu:.4f} " + " ".join(f"{str(tab[nu][f]['it']):>13}" for f in FILTERS))
         print()
 
-    def tbl(tab):
+    def tbl(tab, key):
         out = ["| ν | " + " | ".join(FILTERS) + " |", "|" + "---|" * (len(FILTERS) + 1)]
         for nu in NUS:
-            out.append(f"| {nu:.4f} | " + " | ".join(str(tab[nu][f]) for f in FILTERS) + " |")
+            out.append(f"| {nu:.4f} | " + " | ".join(_fmt(tab[nu][f], key) for f in FILTERS) + " |")
         return "\n".join(out)
 
+    # de-hardcoded comparison values at the most-incompressible ν
+    nu_hi = NUS[-1]
+    def cmp_line(tab, elem):
+        tr, cl, ab = tab[nu_hi]["trust-region"], tab[nu_hi]["clamp"], tab[nu_hi]["absolute"]
+        it_tr, it_cl = _iters_val(tr), _iters_val(cl)
+        w_tr = tr["wall"] * 1e3 if tr["wall"] else None
+        w_cl = cl["wall"] * 1e3 if cl["wall"] else None
+        wall_ratio = (w_tr / w_cl) if (w_tr and w_cl) else None
+        seg = f"{elem} at ν={nu_hi}: trust-region {tr['it']} it"
+        if w_tr:
+            seg += f" / {w_tr:.0f} ms" + (f" ({tr['fac']} fac)" if tr["fac"] is not None else "")
+        seg += f" vs clamp {cl['it']} it"
+        if w_cl:
+            seg += f" / {w_cl:.0f} ms" + (f" ({cl['fac']} fac)" if cl["fac"] is not None else "")
+        seg += f" vs absolute {ab['it']} it."
+        if wall_ratio:
+            seg += (f" So TR uses ~{it_cl/it_tr:.1f}× FEWER iterations but ~{wall_ratio:.1f}× "
+                    f"MORE wall-clock than clamp." if (it_tr and it_cl) else
+                    f" TR wall-clock is ~{wall_ratio:.1f}× clamp's.")
+        return seg
+
     lines = ["# World-2 filter head-to-head: clamp / absolute / trust-region, P1 vs P2 (measured)",
-             "", "Neo-Hookean ν-sweep (stretch init), only the filter swapped. Run: "
-             "`python -m bench.run_world2_filters`.", "",
-             "## P1 (locking)", "", tbl(p1), "",
-             "## P2 (locking-relieved)", "", tbl(pp2), "",
-             "## Observed", "",
-             "Trust-region here is the FAITHFUL three-state blend λ_eff=(1−w)λ+w|λ|, w∈{0,0.5,1} → "
-             "{full Newton, clamp, absolute} driven by the model-fit ratio ρ (review-r1 #38); the "
-             "operator reproduces the three named filters exactly (conformance-gated) and adds the "
-             "**w=0 full-Newton branch the old two-state version lacked**.",
-             "- **On P2 (locking-relieved): trust-region BEATS BOTH clamp and absolute** -- 39 it vs "
-             "clamp 53 / absolute 41 at ν=0.4999, and 11 vs 15 / 15 at ν=0.49. With locking removed "
-             "the quadratic-model fit is reliable, so the adaptive rule picks the better state each "
-             "step and dominates its own components -- exactly the 'switchboard beats each "
-             "standalone' claim.",
-             "- **On P1 (locking): trust-region now also beats BOTH** (139 vs clamp 242 / absolute "
-             "maxiter at ν=0.4999; 62 vs 139 / 314 at ν=0.499). This is the payoff of restoring the "
-             "full-Newton branch: the old two-state switchboard was stuck choosing between clamp and "
-             "absolute and inherited absolute's locking penalty; the three-state rule can back off to "
-             "raw Newton when the model fits and only project when it doesn't, so it dominates even "
-             "on the locking element. **NB:** the absolute-vs-clamp *gap* on P1 is still "
-             "**locking-confounded and non-attributable** (control C1) -- but trust-region's win over "
-             "*both* is a genuine adaptive-solver effect, not a locking artifact.",
-             "- **Hardens** `trust-region-filtering→{clamp,absolute}`: **validated on BOTH P1 and P2** "
-             "(TR ≤ both filters everywhere, strictly better in most rows). The switchboard dominates "
-             "its components; what remains discretization-dependent is only the clamp-vs-absolute "
-             "ordering, not the trust-region advantage.",
+             "", "Neo-Hookean ν-sweep (stretch init), only the filter swapped. **Three axes** per "
+             "cell (docs/metrics.md): iterations, wall-clock, and — where available — global "
+             "factorizations. Run: `python -m bench.run_world2_filters`.", "",
+             "### Iterations to converge", "", tbl(p1, "it"),
+             "", "_(P2, locking-relieved)_", "", tbl(pp2, "it"),
+             "", "### Wall-clock (ms)", "", tbl(p1, "wall"),
+             "", "_(P2)_", "", tbl(pp2, "wall"),
+             "", "### Global factorizations (P1 solver; P2 solver does not expose counts)", "",
+             tbl(p1, "fac"), "",
+             "## Observed (corrected, review-r2 #42/#43/#44/#45)", "",
+             "Trust-region is the three-state blend λ_eff=(1−w)λ+w|λ|, w∈{0,0.5,1} → {full Newton, "
+             "clamp, absolute} driven by the model-fit ratio ρ. **Two honest corrections to the "
+             "round-1 write-up:**",
+             "- **Fewer iterations is NOT cheaper here.** " + cmp_line(p1, "P1") + " On P1 the "
+             "trust-region step does a **full eigendecomposition of the assembled Hessian** every "
+             "iteration (plus an extra one on each non-descent escalation), whereas clamp/absolute do "
+             "cheap per-element 6×6 projections — so TR's few iterations cost more wall-clock than "
+             "clamp's many. The earlier 'trust-region dominates / validated on both' verdict was drawn "
+             "on **iteration count alone** and is withdrawn; on the paired (iterations, wall-clock, "
+             "factorizations) view TR trades iterations for per-step cost.",
+             "- **P1 and P2 use different trust-region implementations.** P1 (this solver) uses the "
+             "assembled three-state eigen-blend; P2 (`bench/p2.py`) still uses a *per-element two-state* "
+             "clamp/absolute switch. So the P1 and P2 trust-region columns are **not the same operator**, "
+             "and the cross-element comparison is apples-to-oranges — flagged rather than hidden. A "
+             "per-element three-state blend (same cost as clamp/absolute) is the right unification and "
+             "is future work.",
+             "- What DOES hold on iteration count: on the locking-free P2 the adaptive rule is ≤ both "
+             "standalone filters at every ν, and on P1 it uses fewer iterations than both at the most "
+             "incompressible ν — but **not uniformly** (e.g. P1 ν=0.49 it slightly trails clamp), so "
+             "'dominates everywhere' was an overclaim. The eps floor is now 1e-9, matching the "
+             "standalone filters (so the w=0.5/w=1 states ARE those filters — conformance-gated against "
+             "`filters.project_element`; note this changed the P1 counts vs the round-1 run, which "
+             "used a 0.01 floor). The absolute-vs-clamp gap on P1 stays locking-confounded (control C1).",
              "",
-             "_Caveat: dense solve, single stretch/mesh; ρ→w thresholds (ρ≥0.75→Newton, ≤0→absolute, "
-             "else clamp), eigenvalue floor ε=0.01 (paper default). No official-code regression (code "
-             "unavailable); the three-state operator is instead conformance-gated to reproduce "
-             "full-Newton/clamp/absolute exactly._"]
+             "_Caveat: dense solve, single stretch/mesh/seed, single τ=1e-6 — an **indicative** "
+             "head-to-head, not a validated verdict (review-r2). ρ→w thresholds ρ≥0.75→Newton, "
+             "≤0→absolute, else clamp. No official-code regression (code unavailable); the operator is "
+             "conformance-gated to reproduce full-Newton and the real clamp/absolute filters at eps=1e-9._"]
     os.makedirs("results", exist_ok=True)
     with open("results/world2_filters.md", "w") as f:
         f.write("\n".join(lines) + "\n")

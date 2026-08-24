@@ -4,8 +4,8 @@ Hardens `analytic-eigensystems -> numeric`. Closed-form SPD projection (Smith-de
 
 | dim | eigenvalues vs FD (rel) | projection vs numeric (rel) | analytic (svd+closed-form) | numeric (eigh only) | analytic/numeric |
 |---|---|---|---|---|---|
-| 2D | 1.4e-10 | 1.5e-15 | 350 ms | 94 ms | **3.71× slower** |
-| 3D | 2.3e-10 | 2.4e-15 | 730 ms | 146 ms | **5.00× slower** |
+| 2D | 1.4e-10 | 1.5e-15 | 338 ms | 92 ms | **3.65× slower** |
+| 3D | 2.3e-10 | 2.4e-15 | 709 ms | 144 ms | **4.92× slower** |
 
 ## Observed (an honest surprise)
 
