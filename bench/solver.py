@@ -77,7 +77,7 @@ def _spd_shift_solve(Hff, gf):
 
 
 def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
-          linsolver="direct", max_iter=400, tol=1e-6, c=1e-4):
+          linsolver="direct", linesearch="backtracking", max_iter=400, tol=1e-6, c=1e-4):
     x = x0.copy()
     log = []
     counts = {"assemblies": 0, "energy_evals": 0, "lin_solves": 0,
@@ -126,8 +126,12 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
         while True:
             x[free] = xf0 + alpha * d
             En = energy_only(x, tris, Bs, areas, eterms); counts["energy_evals"] += 1
-            if np.isfinite(En) and En <= E + c * alpha * gd:
-                break
+            if linesearch == "full-step":         # accept once feasible; NO Armijo (no descent guarantee)
+                if np.isfinite(En):
+                    break
+            else:                                  # backtracking Armijo (default)
+                if np.isfinite(En) and En <= E + c * alpha * gd:
+                    break
             alpha *= 0.5
             if alpha < 1e-14:
                 x[free] = xf0; status = "linesearch"; break

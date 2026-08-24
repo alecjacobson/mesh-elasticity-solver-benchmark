@@ -20,6 +20,7 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | scale | mesh-independence + CG conditioning (sparse) | [`scaling.md`](scaling.md) | Newton iters **mesh-independent [7,11] over DOFs 98→3042**, while unpreconditioned **CG mat-vecs/iter grow 53→348 (~√DOFs)** (Jacobi-PCG cuts it to 251) — the quantitative case for preconditioning; sparse-direct wall ~DOFs¹·⁰¹ |
 | LS | linear-solver axis (direct vs CG) | [`ls.md`](ls.md) | same Newton iterations, but **wall-clock ranks the two solvers oppositely across scenarios** while the mat-vec count stays consistent — rank on the HW-independent count, not wall-clock |
 | TR | trust-region vs filtering | [`tr.md`](tr.md) | classical **trust-region (Steihaug-CG, no filter) converges across the whole ν-sweep** — incl. ν=0.4999 where absolute fails — supporting the lineage claim that filtering ≈ modified-Newton/trust-region |
+| LSrch | line-search axis (null result) | [`linesearch.md`](linesearch.md) | backtracking ≡ full-step for clamp-projected Newton — a strong filter makes the **line-search axis inert** (axes interact); it becomes decisive only for first-order/aggressive steps |
 
 ## What these already demonstrate for the benchmark's thesis
 
@@ -48,6 +49,7 @@ python -m bench.run_locking      # locking   -> locking.md
 python -m bench.run_scaling      # scaling   -> scaling.md
 python -m bench.run_ls           # LS axis   -> ls.md
 python -m bench.run_tr           # trust-region -> tr.md
+python -m bench.run_linesearch   # line-search -> linesearch.md
 ```
 
 ## Honest limitations (→ next P1 steps)
