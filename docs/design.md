@@ -327,6 +327,16 @@ is undefined here** (no probabilistic output model), and that PINN **Energy-NGD 
 Gauss-Newton** once unknowns are positions not network weights. Refs: Amari 1998; Martens 2020;
 Neuberger *Sobolev Gradients* (LNM 1670); Müller–Zeinhofer 2023.
 
+**Scope caveat — what the single-step template does NOT cover (review-r2).** The form
+`x' = x − αM⁻¹∇E` assumes one *global* step. **Block-coordinate / Gauss–Seidel relaxation methods —
+Vertex Block Descent (VBD), JGS2, PBNG** — do not fit it: they sweep exact per-vertex 3×3 solves in
+a colouring-dependent order, so a full sweep is not `x − αM⁻¹∇E(x)` for any fixed `M` (the effective
+operator is triangular and sweep/ordering-dependent, and each block solve is exact, not a
+preconditioner). These belong to a separate **relaxation / coordinate-descent** family (with roots in
+Gauss–Seidel, nonlinear block SOR, and Southwell relaxation). The unifying-view claim is therefore
+scoped to single-global-step methods; the coordinate-descent cohort is surveyed alongside but under
+its own heading, not shoehorned into the metric-descent spine.
+
 ### 12.2 Lineage map — graphics "innovations" ← named classical ancestors
 The single most valuable survey contribution: many recent SIGGRAPH results are adaptations of
 established technique. Cite as adaptations, not inventions.

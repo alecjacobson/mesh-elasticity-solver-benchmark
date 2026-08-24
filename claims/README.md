@@ -121,6 +121,15 @@ Bijective) are `qualified` — backed by released benchmarks pending independent
 
 ## World 2 — simulation accelerators / integrators
 
+> ⚠️ **Surveyed, NOT benchmarked in v1.** Every edge in this integrator diagram
+> (PD/XPBD/VBD/JGS2/PBNG/ADMM/quasi-Newton…) is `self-claimed`: v1 implements and measures only
+> the **eigenvalue-filtering axis** (this page's first World-2 diagram) and the **World-1 distortion**
+> accelerators. No integrator kernel exists in `bench/` yet, so these are the papers' own assertions
+> — read them as a survey map, not a measured leaderboard. (Distinct from World-3's `unmeasured`
+> status, which is *out of scope by construction*; these *could* be measured in v1 but aren't
+> implemented.) Many "N× faster than Newton" edges here are also **fixed-budget / per-iteration**
+> and/or **GPU-parallel**, not converged same-hardware — flagged per edge.
+
 ```mermaid
 flowchart LR
     fms["Fast Mass-Spring (2013)"]

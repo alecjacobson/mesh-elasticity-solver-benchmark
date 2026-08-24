@@ -55,6 +55,13 @@ differing only in the metric `M` (and its globalization):
 This lets us say precisely: "Sobolev preconditioning in graphics" and "natural gradient in ML"
 are the *same idea under different metrics*.
 
+**Honest boundary of the template (review-r2):** this single-global-step form does *not* cover
+**block-coordinate / Gauss-Seidel** methods — **Vertex Block Descent (VBD)**, **JGS2**, PBNG — whose
+update sweeps per-vertex local solves in a colouring-dependent order and is therefore *not*
+`x − αM⁻¹∇E(x)` for any fixed `M` (the effective operator is triangular/sweep-dependent). Those live
+in a separate "relaxation / coordinate-descent" family; the unifying claim is scoped to methods that
+take one global step.
+
 ## The three "worlds" (comparability is governed by problem class, not method)
 
 - **World 1 — static distortion / parametrization** (no inertia, no contact). AQP, SLIM,
