@@ -1,0 +1,19 @@
+name: bench-ci
+on:
+  push:
+    paths: ['bench/**', '.github/workflows/ci.yml']
+  pull_request:
+    paths: ['bench/**']
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install numpy scipy
+      - name: conformance gate
+        run: python -m bench.conformance
+      - name: smoke test
+        run: python -m bench.test_smoke
