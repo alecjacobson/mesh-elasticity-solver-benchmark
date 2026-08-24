@@ -64,3 +64,12 @@ def element_terms(x_elem, B, area):
     g = area * (B.T @ grad_psi(F).reshape(4))
     H = area * (B.T @ hess_psi(F) @ B)
     return E, g, H, J
+
+
+def element_eg(x_elem, B, area):
+    """Energy + gradient only (no Hessian) -- for first-order / quasi-Newton methods."""
+    F = (B @ x_elem).reshape(2, 2)
+    J = float(np.linalg.det(F))
+    if J <= 0.0:
+        return np.inf, None, J
+    return area * psi(F), area * (B.T @ grad_psi(F).reshape(4)), J

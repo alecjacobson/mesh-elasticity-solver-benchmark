@@ -59,7 +59,7 @@ def main():
     table = []
     for nu in nus:
         lam = nh.lam_from_nu(nu)
-        eterms, psi, grad_psi = nh.make(mu=1.0, lam=lam)
+        eterms, psi, grad_psi, _ = nh.make(mu=1.0, lam=lam)
         gerr = check_grad((eterms, psi, grad_psi), seed=int(nu * 1e4) % 1000)
         assert gerr < 1e-4, f"NH gradient conformance failed at nu={nu}: {gerr:.1e}"
         row = {"nu": nu, "lam": lam, "gerr": gerr}

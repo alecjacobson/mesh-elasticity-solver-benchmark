@@ -49,4 +49,11 @@ def make(mu=1.0, lam=1.0):
         H = area * (B.T @ hess_psi(F) @ B)
         return E, g, H, J
 
-    return element_terms, psi, grad_psi
+    def element_eg(x_elem, B, area):
+        F = (B @ x_elem).reshape(2, 2)
+        J = float(np.linalg.det(F))
+        if J <= 0.0:
+            return np.inf, None, J
+        return area * psi(F), area * (B.T @ grad_psi(F).reshape(4)), J
+
+    return element_terms, psi, grad_psi, element_eg
