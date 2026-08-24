@@ -45,6 +45,7 @@ non-penetration) · `generality` (range of energies/meshes/materials) · `scalab
 - `qualified` — holds only under stated conditions (regime, energy, mesh, metric); `notes` states them.
 - `unvalidated` — insufficient evidence either way.
 - `refuted` — contradicted by evidence (`assessed_by`/`notes` cite it).
+- `unmeasured` — **out of scope of the v1 benchmark by construction, so no measurement was even attempted here** (distinct from `self-claimed`, which *could* be measured in v1 but hasn't been). All World-3 (contact-coupled) edges are `unmeasured`: decision D4 defers contact to v2, so v1 makes *no* measured contact claim. Machine-readable rule: an edge is `unmeasured` iff either endpoint node has `world: 3`. Do not read an `unmeasured` edge as a leaderboard result — it is the paper's own assertion, awaiting a v2 contact track.
 
 ### Conventions
 - A "method" node may be a **baseline family** (e.g. `clamp-filtering`, `projected-newton`,
