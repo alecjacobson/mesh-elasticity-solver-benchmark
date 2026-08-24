@@ -77,8 +77,11 @@ taxonomy → capability cells → tiered problem classes
 | [`docs/taxonomy.md`](docs/taxonomy.md) | The taxonomy: method axes × capability cells, classification of the corpus, orthogonality evaluation, fairness gate |
 | [`docs/metrics.md`](docs/metrics.md) | Performance-metric deliberation: over-complete 80-metric catalog → per-cell orthogonal core; HW-dependent/independent pairing; data-profile aggregation |
 | [`docs/harness.md`](docs/harness.md) | Harness architecture: component-slot contracts, config-as-point-in-component-space, conformance-suite admissibility gate, official-code-first mapping, scenario layer |
+| [`docs/protocol.md`](docs/protocol.md) | Frozen v1 protocol: problem-set strata (1a/1b), controls C1/C2, reference-solution protocol, equal-budget/no-tuning rules, tiers |
+| [`docs/experiments.md`](docs/experiments.md) | The five decomposition experiments (E1–E5) as config-diffs, each linked to the claims edges it hardens |
+| [`docs/paper-outline.md`](docs/paper-outline.md) | STAR-style survey+benchmark paper structure and figure plan |
 | [`docs/corpus.md`](docs/corpus.md) | Annotated corpus (~180 entries) across Worlds 0–3, with axis tags, comparability notes, code availability |
-| [`claims/`](claims/) | **Superiority-claims graph** — machine-readable edges (`claims.yaml`) + rendered Mermaid graph & tables ([`claims/README.md`](claims/README.md)) + [`schema`](claims/schema.md) |
+| [`claims/`](claims/) | **Superiority-claims graph** — machine-readable edges (`claims.yaml`) + rendered Mermaid graph ([`claims/README.md`](claims/README.md)) + [`schema`](claims/schema.md) + [hardening ledger](claims/hardening.md) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Conventions for **humans and agents** adding papers, claims, and findings |
 
 ## The superiority-claims graph
