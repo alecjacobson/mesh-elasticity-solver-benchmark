@@ -98,3 +98,18 @@ the locking-free + more-filters runs.
 - On promotion: set `status`, `assessed_by` (citation / `benchmark`), and `notes` = the regime
   under which it holds. A `qualified` edge must state its condition.
 - A `refuted` edge stays in the graph (with evidence) — refutations are results, not deletions.
+
+## Benchmark verdicts (current) — from the `bench/` prototype
+
+| edge | dim | verdict | evidence |
+|---|---|---|---|
+| anderson-geometry → local-global | convergence | **validated** | Anderson 11 it vs local-global 17 it, mesh-independent (world1) |
+| absolute-filtering → clamp-filtering | convergence | **qualified (settled)** | P1 "refutation" is locking; on P2 absolute matches/beats clamp (p2_nu) |
+| trust-region-filtering → clamp-filtering | convergence | **qualified** | P2: TR beats clamp; P1: degrades to absolute (world2_filters) |
+| trust-region-filtering → absolute-filtering | convergence | **qualified** | P2: TR beats absolute; P1: identical (world2_filters) |
+| aqp → l-bfgs | speed | **qualified (unreproduced)** | AQP loses to a well-implemented L-BFGS; ×200 was a MATLAB-baseline confound (e2) |
+| bcqn → l-bfgs | convergence | **qualified** | Sobolev component helps only ill-conditioned (34 vs 55) not well-cond (42 vs 40) (e2) |
+| pitfalls-projection → clamp-filtering | convergence | **qualified** | consistent with 1b-dynamic (projecting-when-unneeded hurts) |
+
+Plus the general premise **validated**: unfiltered Newton fails 25–58% of static instances (profiles),
+and the ν-claim is a discretization artifact on P1, real on P2 (p2_nu, 3d_nu, world2_filters).
