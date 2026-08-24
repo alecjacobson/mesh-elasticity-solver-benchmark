@@ -20,6 +20,7 @@ import os
 import numpy as np
 from .mesh import grid_mesh, boundary_mask
 from . import world1
+from .world1 import anderson_accelerate, _arap_setup
 
 TOL = 1e-8
 MAX_IT = 4000
@@ -42,6 +43,35 @@ def run_case(n, shear):
     lg = world1.solve_local_global(x0, tris, rest, free, max_iter=MAX_IT, tol=TOL)
     aa = world1.solve_anderson(x0, tris, rest, free, m=5, max_iter=MAX_IT, tol=TOL)
     return {"n": n, "ndof": int(free.sum()), "lg": lg, "aa": aa}
+
+
+def jacobi_generality():
+    """Generality (#36): apply the SAME anderson_accelerate core to a COMPLETELY different
+    fixed-point map -- a (damped) Jacobi stationary iteration for a linear SPD system A x = b
+    (A = cotan-stiffness free block). m=0 = plain Jacobi (fair same-map baseline); m in {5,10} =
+    Anderson-accelerated. Anderson was invented for exactly such iterations, so this is the
+    canonical demonstration that the core is map-agnostic, not ARAP-specific."""
+    sc = build_scenario_for_jacobi()
+    Bs, areas, M, free, pin, Mff, Mfp, solveM = _arap_setup(sc["rest"], sc["tris"], sc["free"])
+    A = np.asarray(Mff.todense()) + 1e-3 * np.eye(Mff.shape[0])
+    n = A.shape[0]
+    b = np.random.default_rng(0).standard_normal(n)
+    D = np.diag(A).copy(); omega = 0.6
+    allfree = np.ones(n, dtype=bool)
+    G = lambda x: x + omega * (b - A @ x) / D
+    En = lambda x: float(0.5 * x @ (A @ x) - b @ x)
+    resid = lambda x: float(np.max(np.abs(b - A @ x)))
+    out = {}
+    for m in (0, 5, 10):
+        out[m] = anderson_accelerate(G, En, resid, np.zeros(n), allfree, m=m, max_iter=20000, tol=1e-8)
+    return n, out
+
+
+def build_scenario_for_jacobi():
+    from .mesh import rest_quantities
+    rest, tris = grid_mesh(8, 8)
+    bmask = boundary_mask(rest)
+    return dict(rest=rest, tris=tris, free=~np.repeat(bmask, 2))
 
 
 def main():
@@ -97,11 +127,41 @@ def main():
         "overhead, so the wall-clock speedup is smaller than the iteration speedup.",
         "- The iteration counts are **mesh-independent** for both methods across the sweep "
         "(the acceleration factor does not wash out as the mesh refines).",
+    ]
+
+    # Part B: generality -- the SAME core on a different fixed-point map (Jacobi linear solve).
+    njac, jac = jacobi_generality()
+    print("\nGenerality -- same AA core on a Jacobi linear-solve iteration:")
+    for m in (0, 5, 10):
+        print(f"  m={m:2d}: {jac[m]['status']} {jac[m]['iters']} it")
+    p0, p5, p10 = jac[0]["iters"], jac[5]["iters"], jac[10]["iters"]
+    lines += [
         "",
-        "_Scope: 2D, ARAP energy, single shear/seed, dense-ish prototype; Anderson's generality "
-        "claim (it wraps *any* fixed-point map — SLIM/PD/physics) is only exercised here on the "
-        "local-global map. Applying the same AA core to a second map to harden a second edge is "
-        "tracked in #36._",
+        "## Generality — the same core wraps a different fixed-point map (#36)",
+        "",
+        "Anderson's defining property is that it accelerates an *arbitrary* fixed-point iteration, "
+        "not just local-global. We factored the AA core into a map-agnostic "
+        "`anderson_accelerate(G, energy, resid, x0, free, m)` (`bench/world1.py`) and applied the "
+        "**identical** core to a completely different map: a damped **Jacobi** stationary iteration "
+        f"for a linear SPD system `A x = b` (A = the {njac}×{njac} cotan-stiffness free block) — the "
+        "kind of iteration Anderson acceleration was originally invented for. `m=0` is plain Jacobi "
+        "(a fair same-map baseline); `m∈{5,10}` is Anderson-accelerated.",
+        "",
+        "| Anderson history m | status | iterations to `|b−Ax|∞ < 1e-8` |",
+        "|---|---|---|",
+        f"| 0 (plain Jacobi) | {jac[0]['status']} | {p0} |",
+        f"| 5 | {jac[5]['status']} | {p5} |",
+        f"| 10 | {jac[10]['status']} | {p10} |",
+        "",
+        f"- The same core cuts plain Jacobi's **{p0}** iterations to **{p5}** (m=5, {p0/max(p5,1):.1f}×) "
+        f"and **{p10}** (m=10, {p0/max(p10,1):.1f}×) on a map that has *nothing* to do with ARAP — "
+        "confirming the acceleration is a property of the **generic Anderson core**, not of the "
+        "local-global map. This is the faithful, general Anderson (Peng et al.): m history, "
+        "min-norm `lstsq`, energy-decrease safeguard, applied to whatever `G` you hand it.",
+        "",
+        "_Scope: 2D, single seed; the two maps (ARAP local-global + Jacobi linear solve) exercise "
+        "the generality. Wrapping the official SLIM reweighting as a third map is a natural "
+        "extension._",
     ]
     with open("results/anderson.md", "w") as f:
         f.write("\n".join(lines) + "\n")

@@ -239,34 +239,28 @@ def solve_local_global(x0, tris, rest, free_dof, max_iter=2000, tol=1e-6):
             "wall_s": time.perf_counter() - t0, "x": x}
 
 
-def solve_anderson(x0, tris, rest, free_dof, m=5, max_iter=2000, tol=1e-6):
-    """Anderson acceleration (Peng et al. 2018) of the ARAP local-global fixed point, with the
-    energy-decrease safeguard (fall back to plain local-global on failure)."""
-    Bs, areas, M, free, pin, Mff, Mfp, solveM = _arap_setup(rest, tris, free_dof)
-    xpin = x0[pin].copy()
-
-    def G(x):
-        return _lg_step(x, tris, Bs, areas, free, pin, Mfp, solveM, xpin)
-
-    def En(x):
-        return arap_energy(x, tris, Bs, areas)
-
-    def gnorm(x):
-        return float(np.max(np.abs((2.0 * (M @ x - _arap_rhs(x, tris, Bs, areas)))[free])))
-
+def anderson_accelerate(G, energy, resid, x0, free, m=5, max_iter=2000, tol=1e-6):
+    """GENERIC Anderson acceleration (Peng et al. 2018) of ANY fixed-point map x <- G(x), with the
+    energy-decrease safeguard. Anderson's whole point is that it wraps an arbitrary contraction, so
+    this core is deliberately map-agnostic: `G` is the fixed-point step (full vector), `energy` the
+    scalar to safeguard on, `resid(x)` the convergence measure, `free` the subspace the differences
+    live in. m=0 recovers the plain fixed-point iteration (no acceleration) -- a fair same-map
+    baseline. Shared by solve_anderson (ARAP local-global) and the gradient-descent generality
+    demonstration (review-r1 #36). Faithful bits: m history (default 5), np.linalg.lstsq min-norm
+    solve, and the energy-decrease safeguard."""
     x = x0.copy()
     dF, dG = [], []                                    # rolling buffers of last m differences
     F_prev, G_prev = None, None                        # no previous residual yet (no zero seed)
-    log = []; t0 = time.perf_counter(); status = "maxiter"; E_acc = En(x)
+    log = []; status = "maxiter"; E_acc = energy(x)
     for it in range(max_iter):
-        gn = gnorm(x)
-        log.append({"iter": it, "energy": En(x), "grad_inf": gn})
-        if gn < tol:
+        r = resid(x)
+        log.append({"iter": it, "energy": energy(x), "grad_inf": r})
+        if r < tol:
             status = "converged"; break
         Gx = G(x); Fk = (Gx - x)[free]
         # append a difference only once a genuine previous residual exists (Peng et al.);
         # seeding from G(x0) before the loop would push a spurious zero column and waste a slot.
-        if F_prev is not None:
+        if m > 0 and F_prev is not None:
             dF.append(Fk - F_prev); dG.append((Gx - G_prev)[free])
             if len(dF) > m:
                 dF.pop(0); dG.pop(0)
@@ -277,14 +271,27 @@ def solve_anderson(x0, tris, rest, free_dof, m=5, max_iter=2000, tol=1e-6):
             x_aa[free] = Gx[free] - np.array(dG).T @ theta
         else:
             x_aa = Gx
-        # safeguard: accept AA only if it decreases energy, else plain local-global step
-        if np.isfinite(En(x_aa)) and En(x_aa) <= E_acc:
+        # safeguard: accept AA only if it decreases energy, else plain fixed-point step
+        if np.isfinite(energy(x_aa)) and energy(x_aa) <= E_acc:
             x_new = x_aa
         else:
             x_new = Gx
-        F_prev, G_prev, E_acc = Fk.copy(), Gx.copy(), En(x_new)
+        F_prev, G_prev, E_acc = Fk.copy(), Gx.copy(), energy(x_new)
         x = x_new
-    return {"filter": "anderson", "status": status,
-            "iters": len(log) - (1 if status == "converged" else 0),
-            "final_energy": log[-1]["energy"], "final_grad_inf": log[-1]["grad_inf"],
-            "wall_s": time.perf_counter() - t0, "x": x}
+    return {"status": status, "iters": len(log) - (1 if status == "converged" else 0),
+            "log": log, "x": x,
+            "final_energy": log[-1]["energy"], "final_grad_inf": log[-1]["grad_inf"]}
+
+
+def solve_anderson(x0, tris, rest, free_dof, m=5, max_iter=2000, tol=1e-6):
+    """Anderson acceleration of the ARAP local-global fixed point (thin wrapper over the generic
+    anderson_accelerate core)."""
+    Bs, areas, M, free, pin, Mff, Mfp, solveM = _arap_setup(rest, tris, free_dof)
+    xpin = x0[pin].copy()
+    G = lambda x: _lg_step(x, tris, Bs, areas, free, pin, Mfp, solveM, xpin)
+    En = lambda x: arap_energy(x, tris, Bs, areas)
+    gnorm = lambda x: float(np.max(np.abs((2.0 * (M @ x - _arap_rhs(x, tris, Bs, areas)))[free])))
+    t0 = time.perf_counter()
+    r = anderson_accelerate(G, En, gnorm, x0, free, m=m, max_iter=max_iter, tol=tol)
+    r["filter"] = "anderson"; r["wall_s"] = time.perf_counter() - t0
+    return r
