@@ -73,14 +73,19 @@ Captured verbatim from the papers; E4 will convert or `qualify` them:
 
 First edges annotated with *our own* measured evidence (`assessed_by` now includes `benchmark`):
 
-- **`absolute-filtering → clamp-filtering` (convergence)** — **SETTLED** (`results/p2_nu.md`).
+- **`absolute-filtering → clamp-filtering` (convergence)** — **INDICATIVE (2D)** (`results/p2_nu.md`).
   On P1 elements absolute under-performs clamp and *fails* at ν=0.4999; but on a locking-relieved
   **P2 (quadratic) element**, from the same init, absolute **matches and beats** clamp near
-  incompressibility (41 vs 53 it at ν=0.4999). So the P1 "refutation" is a **volumetric-locking
-  artifact** and the paper's claim is **validated once a proper discretization is used**. Status
-  stays `qualified` only because it is conditional on a non-locking element. This is the benchmark
-  doing its core job: separating a real solver effect from a discretization confound (via the
-  crossed-mesh probe `results/locking.md` and the definitive P1-vs-P2 experiment).
+  incompressibility (41 vs 53 it at ν=0.4999). So the P1 "refutation" is *consistent with* a
+  **volumetric-locking artifact** rather than a filter defect, and the paper's claim looks sound
+  once a proper discretization is used. Status stays `qualified` — conditional on a non-locking
+  element. **Scope/caveats (do not over-read this):** 2D only; a *single* stretch scenario/seed;
+  small dense meshes; and the crossed-mesh probe is **non-monotone** — the absolute−clamp gap
+  collapses to 0 at ν=0.499 but absolute is **worse again at ν=0.4999 (98 vs 64 it)** because the
+  crossed mesh is not *fully* locking-free (residual locking still bites at the most extreme ν).
+  The clean separation is on the genuinely locking-relieved P2 element; the crossed mesh only
+  *points* that way. This is the benchmark doing its core job — separating a plausible solver
+  effect from a discretization confound — but "indicative in 2D," not "settled."
 - **`pitfalls-projection → clamp-filtering` (convergence)** — our 1b dynamic probe
   (`results/1b_dynamic.md`) is consistent: with inertial regularization, unfiltered Newton
   converged in *fewer* iterations than clamp, i.e. projecting-when-unneeded hurts — this paper's
@@ -103,13 +108,14 @@ the locking-free + more-filters runs.
 
 | edge | dim | verdict | evidence |
 |---|---|---|---|
-| anderson-geometry → local-global | convergence | **validated** | Anderson 11 it vs local-global 17 it, mesh-independent (world1) |
-| absolute-filtering → clamp-filtering | convergence | **qualified (settled)** | P1 "refutation" is locking; on P2 absolute matches/beats clamp (p2_nu) |
-| trust-region-filtering → clamp-filtering | convergence | **qualified** | P2: TR beats clamp; P1: degrades to absolute (world2_filters) |
+| anderson-geometry → local-global | convergence | **validated (2D)** | Anderson 12 it vs local-global 23 it on a non-trivial sheared-target ARAP, mesh-independent, same min; wall-clock speedup < iter speedup (anderson) |
+| absolute-filtering → clamp-filtering | convergence | **qualified (indicative, 2D)** | P1 "refutation" consistent with locking; on locking-relieved P2 absolute matches/beats clamp (p2_nu). Crossed-mesh probe non-monotone; single 2D scenario |
+| trust-region-filtering → clamp-filtering | convergence | **qualified** | P2: TR beats clamp; P1: degrades to absolute — but P1 is locking-confounded, so non-attributable (world2_filters) |
 | trust-region-filtering → absolute-filtering | convergence | **qualified** | P2: TR beats absolute; P1: identical (world2_filters) |
-| aqp → l-bfgs | speed | **qualified (unreproduced)** | AQP loses to a well-implemented L-BFGS; ×200 was a MATLAB-baseline confound (e2) |
-| bcqn → l-bfgs | convergence | **qualified** | Sobolev component helps only ill-conditioned (34 vs 55) not well-cond (42 vs 40) (e2) |
-| pitfalls-projection → clamp-filtering | convergence | **qualified** | consistent with 1b-dynamic (projecting-when-unneeded hurts) |
+| aqp → l-bfgs | speed | **qualified (unreproduced)** | AQP loses to a well-implemented L-BFGS; ×200 was a MATLAB-baseline confound (e2). Not tested from a Tutte-far init (AQP's regime) — see #29 |
+| sobolev-lbfgs → l-bfgs | convergence | **qualified** | isolated Sobolev-preconditioning component (D0=L⁻¹) helps only ill-conditioned (34 vs 55) not well-cond (42 vs 40) (e2) |
+| bcqn → l-bfgs | convergence | **self-claimed** | REVERTED: only 1 of BCQN's 3 components (Sobolev) was isolated (see sobolev-lbfgs→l-bfgs); full method + E3 unimplemented |
+| pitfalls-projection → clamp-filtering | convergence | **qualified** | consistent with 1b-dynamic (projecting-when-unneeded hurts). NB: measures iteration count, not the paper's asymptotic *rate*/affine-invariance claim — see #39 |
 
 Plus the general premise **validated**: unfiltered Newton fails 25–58% of static instances (profiles),
 and the ν-claim is a discretization artifact on P1, real on P2 (p2_nu, 3d_nu, world2_filters).

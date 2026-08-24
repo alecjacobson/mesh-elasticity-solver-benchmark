@@ -11,14 +11,16 @@ architecture*, and a *superiority-claims graph* (80 nodes, 159 edges) — plus a
 conformance-gated [`bench/`](bench/) harness covering **all six taxonomy axes** and **12
 measured experiments** ([`results/`](results/)). See [Status & roadmap](#status--roadmap).
 
-> **🔑 Worked example — the benchmark settling a live claim.** A recent SIGGRAPH paper claims
-> *absolute* eigenvalue filtering beats *clamping* near incompressibility. On standard P1
-> constant-strain elements our harness finds the **opposite** (absolute is slower and *fails* at
-> ν=0.4999). But that's a **volumetric-locking artifact of the element**: on a locking-relieved
-> **P2** element, absolute **matches and beats** clamp — *validating the paper's claim*. The
-> benchmark separated a real solver effect from a discretization confound — [see
+> **🔑 Worked example — the benchmark disentangling a live claim (2D, indicative).** A recent
+> SIGGRAPH paper claims *absolute* eigenvalue filtering beats *clamping* near incompressibility.
+> On standard P1 constant-strain elements our harness finds the **opposite** (absolute is slower
+> and *fails* at ν=0.4999). But that is consistent with a **volumetric-locking artifact of the
+> element**: on a locking-relieved **P2** element, from the same init, absolute **matches and
+> beats** clamp — *consistent with the paper's claim once locking is removed*. The benchmark
+> separated a plausible solver effect from a discretization confound — [see
 > `results/p2_nu.md`](results/p2_nu.md). This is exactly the entanglement the project exists to
-> untangle, demonstrated end-to-end.
+> untangle, demonstrated end-to-end. *(Scope: 2D, a single stretch scenario/seed, small dense
+> meshes — indicative, not a general proof; the crossed-mesh probe is even non-monotone in ν.)*
 
 ---
 
@@ -131,7 +133,7 @@ Tracked in [GitHub issues](../../issues). Phases follow `docs/design.md` §11.
 | phase | what | state |
 |---|---|---|
 | **P0 — design & curation** | taxonomy, corpus, metrics, harness architecture, protocol freeze, experiment specs, claims graph | ✅ **complete** (this repo) |
-| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the decomposition experiments | 🟢 **substantially done** — [`bench/`](bench/) covers **all six axes** (energies: sym-Dirichlet, Neo-Hookean 2D/**3D-tet**; directions: Newton, trust-region, L-BFGS, **AQP**, **Sobolev-L-BFGS**, **local-global**, **Anderson**, GD, Adam; **7 filters** incl. trust-region; line-search; 4 linear solvers incl. sparse + Jacobi-PCG; **P2** + **3D-tet** elements) with **17 measured experiments** and **official-code regression vs libigl SLIM**. Claims graph hardened: **1 validated, 20 qualified**. |
+| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the decomposition experiments | 🟢 **substantially done** — [`bench/`](bench/) covers **all six axes** (energies: sym-Dirichlet, Neo-Hookean 2D/**3D-tet**; directions: Newton, trust-region, L-BFGS, **AQP**, **Sobolev-L-BFGS**, **local-global**, **Anderson**, GD, Adam; **7 filters** incl. trust-region; line-search; 4 linear solvers incl. sparse + Jacobi-PCG; **P2** + **3D-tet** elements) with **18 measured experiments** and **official-code regression vs libigl SLIM**. Claims graph hardened: **2 validated, 21 qualified** (+22 World-3 edges marked `unmeasured` — v1 measures no contact). |
 | **P2 — 1a + feasibility** | distortion accelerators + injectivity suites; BCQN triple-split (E3); full performance profiles | ⬜ |
 | **P3 — paper + release** | write the STAR; release harness as living-benchmark seed (closed/open divisions, hidden tier) | ⬜ |
 | **v2 — contact + learned** | Track-2 contact via the scenario layer; learned-accelerator companion track | ⬜ |

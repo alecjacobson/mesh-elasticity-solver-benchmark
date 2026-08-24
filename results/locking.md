@@ -24,7 +24,8 @@ Re-runs the Neo-Hookean ν-sweep (stretch BC, right edge → x=2) swapping only 
 
 ## Observed
 
-- At ν=0.499 the absolute−clamp iteration gap is **141** on the standard mesh and **0** on the crossed mesh — it shrinks. 
+- At ν=0.499 the absolute−clamp iteration gap is **141** on the standard mesh and **0** on the crossed mesh — it shrinks.
+- **But the crossed-mesh effect is non-monotone in ν, and we flag it rather than cherry-pick the tie:** at ν=0.4999 absolute is **worse again on the crossed mesh (98 vs 64 it)**. The crossed mesh is only *partially* locking-relieved, so residual locking still bites at the most extreme incompressibility. The gap collapse at ν=0.499 is therefore suggestive, not a clean refutation-of-the-refutation — the clean separation comes from the genuinely locking-relieved **P2** element (`results/p2_nu.md`), which this probe only points toward.
 - Reducing locking with the crossed mesh shifts the filter comparison, which supports the interpretation that the standard-mesh result (absolute worse than clamp) is **partly a volumetric-locking artifact**, not a pure statement about the filters. Neither mesh is fully locking-free, so this is a *sensitivity probe*, not the definitive test.
 - **Takeaway for the benchmark:** the eigenvalue-filter comparison in the near-incompressible regime is confounded by the element/discretization unless a locking-free formulation (mixed u–p / F-bar / P2) is used — exactly protocol control C1. A displacement-P1 benchmark would mis-attribute a locking effect to the solver.
 

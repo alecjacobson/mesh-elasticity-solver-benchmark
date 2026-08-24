@@ -56,10 +56,11 @@ which published superiority claims survive confound control.
 8. **Results — the decomposition experiments.** **This section is the paper's reason to exist.**
    Prototype-harness (`bench/`, `results/`) measurements already in hand (each with the
    claims-graph edge it touches):
-   - **Filter isolation + the ν-claim settled** — on P1 constant-strain elements absolute
+   - **Filter isolation + the ν-claim (2D, indicative)** — on P1 constant-strain elements absolute
      filtering under-performs clamp and fails at ν=0.4999; on a locking-relieved **P2** element
-     absolute matches/beats clamp — the P1 result was a **volumetric-locking artifact**; the
-     Stabler-Neo-Hookean claim is *validated* once locking is removed (`results/p2_nu.md`,
+     absolute matches/beats clamp — the P1 result is consistent with a **volumetric-locking
+     artifact**; the Stabler-Neo-Hookean claim looks *sound* once locking is removed (2D, single
+     scenario; the crossed-mesh probe is non-monotone in ν) (`results/p2_nu.md`,
      `results/locking.md`). *The benchmark separating a real solver effect from a discretization
      confound is the paper's headline.*
    - **First- vs second-order** — Newton wins iterations but **L-BFGS wins wall-clock** (skips
@@ -103,6 +104,6 @@ surrogates/PINNs are excluded from the core) stated once, tied to the scope ledg
 ## Status / mapping to issues
 
 Each section maps to a doc already in the repo; drafting = lifting + tightening those into prose.
-§2–7 writable now; **§8–9 now have prototype data** (`bench/` + `results/`, 12 experiments incl.
-the ν-claim settled via the P2 element). Remaining for a full paper: official-code-regression
+§2–7 writable now; **§8–9 now have prototype data** (`bench/` + `results/`, 18 experiments incl.
+the ν-claim disentangled (indicative, 2D) via the P2 element). Remaining for a full paper: official-code-regression
 ports, 3D, E2/E3 seed-method splits, and larger-scale reruns.
