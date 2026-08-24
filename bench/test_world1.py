@@ -15,7 +15,9 @@ def main():
     E_ref = ref["final_energy"]
 
     methods = [("aqp", lambda: world1.solve_aqp(sc["x0"], sc["tris"], sc["rest"], sc["free"],
-                                                max_iter=4000, tol=1e-6))]
+                                                max_iter=4000, tol=1e-6)),
+               ("sobolev-lbfgs", lambda: world1.solve_sobolev_lbfgs(sc["x0"], sc["tris"],
+                                          sc["rest"], sc["free"], max_iter=3000, tol=1e-6))]
     if hasattr(world1, "solve_slim"):
         methods.append(("slim", lambda: world1.solve_slim(sc["x0"], sc["tris"], sc["rest"],
                                                           sc["free"], max_iter=2000, tol=1e-6)))

@@ -94,3 +94,71 @@ def solve_aqp(x0, tris, rest, free_dof, eta=100.0, max_iter=3000, tol=1e-6, c=1e
     return {"filter": "aqp", "status": status, "iters": len(log) - (1 if status == "converged" else 0),
             "final_energy": Efin, "final_grad_inf": gfin, "wall_s": time.perf_counter() - t0,
             "counts": counts, "x": x.reshape(-1)}
+
+
+def solve_sobolev_lbfgs(x0, tris, rest, free_dof, m=5, max_iter=3000, tol=1e-6, c=1e-4):
+    """BCQN proxy core (Zhu-Bridson-Kaufman 2018): L-BFGS with the Sobolev initial inverse-Hessian
+    D0 = L^-1 (cotan Laplacian) instead of a scaled identity. beta=0 (no secant blend) -- isolates
+    the Sobolev-preconditioning component. Reaches the Newton minimizer."""
+    from .mesh import rest_quantities
+    nv = rest.shape[0]
+    vf = _vfree(free_dof)
+    nvf = int(vf.sum())
+    L = cotan_laplacian(rest, tris)
+    Lff = (L[vf][:, vf] + 1e-9 * sp.eye(nvf)).tocsc()
+    solveL = spla.factorized(Lff)
+    Bs, areas = rest_quantities(rest, tris)
+    # map: free dofs (interleaved per free vertex) <-> (nvf, 2)
+    fidx = np.where(free_dof)[0]
+
+    def apply_D0(q):                                   # D0 = L^-1 tensor I2, per coordinate
+        qm = q.reshape(nvf, 2)
+        r = np.empty_like(qm)
+        r[:, 0] = solveL(qm[:, 0]); r[:, 1] = solveL(qm[:, 1])
+        return r.reshape(-1)
+
+    x = x0.copy()
+    S, Y, rho = [], [], []
+    log = []; t0 = time.perf_counter(); status = "maxiter"
+    counts = {"grad_evals": 0, "energy_evals": 0}
+    g_prev = xf_prev = None
+    for it in range(max_iter):
+        E, g = assemble_eg(x, tris, Bs, areas, element_eg); counts["grad_evals"] += 1
+        gf = g[fidx]; gnorm = float(np.max(np.abs(gf)))
+        log.append({"iter": it, "energy": E, "grad_inf": gnorm, "wall_s": time.perf_counter() - t0})
+        if gnorm < tol:
+            status = "converged"; break
+        if g_prev is not None:
+            s = x[fidx] - xf_prev; y = gf - g_prev; sy = float(s @ y)
+            if sy > 1e-12:
+                if len(S) == m:
+                    S.pop(0); Y.pop(0); rho.pop(0)
+                S.append(s); Y.append(y); rho.append(1.0 / sy)
+        q = gf.copy(); al = []
+        for i in range(len(S) - 1, -1, -1):
+            a = rho[i] * float(S[i] @ q); al.append(a); q -= a * Y[i]
+        r = apply_D0(q)                                # Sobolev initial inverse Hessian
+        for i in range(len(S)):
+            b = rho[i] * float(Y[i] @ r); r += S[i] * (al[len(S) - 1 - i] - b)
+        d = -r
+        gd = float(gf @ d)
+        if gd >= 0:
+            d = -apply_D0(gf); gd = float(gf @ d)      # safeguard: Sobolev steepest descent
+        xf_prev = x[fidx].copy(); g_prev = gf.copy()
+        alpha = 1.0; xf0 = x[fidx].copy()
+        while True:
+            x[fidx] = xf0 + alpha * d
+            En, _ = assemble_eg(x, tris, Bs, areas, element_eg); counts["energy_evals"] += 1
+            if np.isfinite(En) and En <= E + c * alpha * gd:
+                break
+            alpha *= 0.5
+            if alpha < 1e-14:
+                x[fidx] = xf0; status = "linesearch"; break
+        if status == "linesearch":
+            break
+    Efin = log[-1]["energy"] if log else np.inf
+    gfin = log[-1]["grad_inf"] if log else np.inf
+    return {"filter": "sobolev-lbfgs", "status": status,
+            "iters": len(log) - (1 if status == "converged" else 0),
+            "final_energy": Efin, "final_grad_inf": gfin, "wall_s": time.perf_counter() - t0,
+            "counts": counts, "x": x}
