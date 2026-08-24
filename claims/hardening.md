@@ -116,6 +116,7 @@ the locking-free + more-filters runs.
 | sobolev-lbfgs → l-bfgs | convergence | **qualified** | isolated Sobolev-preconditioning component (D0=L⁻¹) helps only ill-conditioned (34 vs 55) not well-cond (42 vs 40) (e2) |
 | bcqn → l-bfgs | convergence | **self-claimed** | REVERTED: only 1 of BCQN's 3 components (Sobolev) was isolated (see sobolev-lbfgs→l-bfgs); full method + E3 unimplemented |
 | pitfalls-projection → clamp-filtering | convergence | **qualified** | consistent with 1b-dynamic (projecting-when-unneeded hurts). NB: measures iteration count, not the paper's asymptotic *rate*/affine-invariance claim — see #39 |
+| analytic-eigensystems → numeric-eigendecomposition | speed | **qualified (equivalence validated; speed not reproduced)** | projection provably identical (~1e-15); with a FAIR baseline the closed form is ~3.7×/5× *slower* than LAPACK eigh (2D/3D) — old 3.3× was FD-assembly cost. Real advantage = autodiff-free SPD projection, not a faster eigensolve (analytic_eig) |
 
 Plus the general premise **validated**: unfiltered Newton fails 25–58% of static instances (profiles),
 and the ν-claim is a discretization artifact on P1, real on P2 (p2_nu, 3d_nu, world2_filters).

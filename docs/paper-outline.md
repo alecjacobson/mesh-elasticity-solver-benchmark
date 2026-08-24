@@ -104,6 +104,6 @@ surrogates/PINNs are excluded from the core) stated once, tied to the scope ledg
 ## Status / mapping to issues
 
 Each section maps to a doc already in the repo; drafting = lifting + tightening those into prose.
-§2–7 writable now; **§8–9 now have prototype data** (`bench/` + `results/`, 18 experiments incl.
+§2–7 writable now; **§8–9 now have prototype data** (`bench/` + `results/`, 19 experiments incl.
 the ν-claim disentangled (indicative, 2D) via the P2 element). Remaining for a full paper: official-code-regression
 ports, 3D, E2/E3 seed-method splits, and larger-scale reruns.
