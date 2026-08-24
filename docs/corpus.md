@@ -66,10 +66,10 @@ LS=linear-solver/preconditioner, C=convergence-criterion, A=acceleration.
 - **An Eigenanalysis of Angle-Based Deformation Energies** | Wu, Kim 2023 PACMCGIT | E,H | analytic clamp for bending/strands.
 - **Spatial Eigenanalysis of 2D Deformation Energies** | Wu, Wu, Kim 2025 CGF/SGP | H | spatial-domain per-element eigensystems.
 - **Stabler Neo-Hookean: Absolute Eigenvalue Filtering** | Chen, Liu, Levin, Zheng, Jacobson 2024 SIGGRAPH | H | λ⁺=|λ|; one-line change on fixed skeleton. code: yes (abs-psd) ★ SEED
-- **Trust-Region Eigenvalue Filtering** | Chen, Liu, Jacobson, Levin, Zheng 2024 SA | H,S | UNIFIES Newton/clamp/absolute as one adaptive rule — the "switchboard". code: yes (trust-region-newton)[?] ★ SEED
-- **Pitfalls of Projection** | Longva, Löschner, Fernández-Fernández et al. 2023/24 arXiv[?] | H,C,L | shows unconditional PSD projection slows convergence; proposes project-on-demand + kinetic Newton; controlled ablation on both hyperelastic & contact. code:[?] ★ SEED
-- **Progressively Projected Newton (PPN)** | Fernández-Fernández, Löschner, Bender 2025 CGF | H,S | selective subset projection (<10% of PN); controlled head-to-head vs PN/PDN incl. contact. code:[?] ★
-- **Eigenvalue Blending for Projected Newton** | Cheng, Liu, Fu 2025 CGF | H | blend clamped+absolute via descent constraint. code:[?]
+- **Trust-Region Eigenvalue Filtering** | Chen, Liu, Jacobson, Levin, Zheng 2024 SIGGRAPH Asia (10.1145/3680528.3687650) | H,S | UNIFIES Newton/clamp/absolute as one adaptive rule — the "switchboard". code: yes (github.com/honglin-c/trust-region-newton) ★ SEED
+- **Pitfalls of Projection** | Longva, Löschner, Fernández-Fernández, Larionov, Ascher, Bender 2023 arXiv:2311.14526 (preprint, unpublished) | H,C,L | shows unconditional PSD projection slows convergence; proposes project-on-demand + kinetic Newton; controlled ablation on both hyperelastic & contact. code: n/a ★ SEED
+- **Progressively Projected Newton (PPN)** | Fernández-Fernández, Löschner, Bender **2026** CGF 45(2)/Eurographics (10.1111/cgf.70386; arXiv:2505.21013) | H,S | selective subset projection (<10% of PN); controlled head-to-head vs PN/PDN incl. contact. code: via SymX (no standalone repo) ★
+- **Eigenvalue Blending for Projected Newton** | Cheng, Liu, Fu 2025 CGF 44(2)/Eurographics (10.1111/cgf.70027) | H | blend clamped+absolute via descent constraint. code:[?]
 - **Isotropic ARAP Energy Using Cauchy-Green Invariants** | Kim et al. 2022 TOG/SA | E,H | simpler analytic eigensystem. code:[?]
 
 ### Reformulation / accelerator / alt-descent (metric = residual-to-tolerance OR fixed-budget)
@@ -80,9 +80,9 @@ LS=linear-solver/preconditioner, C=convergence-criterion, A=acceleration.
 - **A Chebyshev Semi-Iterative Approach** | Wang 2015 TOG | A | Chebyshev on PD/PBD; ≥10×. code:[?]
 - **ADMM ⊇ Projective Dynamics** | Narain, Overby, Brown 2016 SCA (TVCG 2017) | S,E,LS | ADMM generalizes PD to general constitutive; residual metric. code: yes (admm-elastic)
 - **Accelerating ADMM (Anderson)** | Zhang et al. 2019 TOG | A | Anderson on ADMM fixed-point. code: yes (AA-ADMM)
-- **Vertex Block Descent (VBD)** | Chen, Liu, Yang, Yuksel 2024 TOG | S,C | vertex Gauss-Seidel; unconditional stability; GENERAL; fixed-budget claims. code: yes[?]
-- **Second-Order Stencil Descent** | Lan et al. 2023 TOG | S,H | per-stencil 2nd-order; up to 100× vs CPU; also World 3. code:[?]
-- **JGS2: Near-2nd-order Jacobi/GS for GPU Elastodynamics** | Lan et al. 2025 TOG | S,A | near-quadratic parallel iteration; 50–100× vs prior GPU. code:[?]
+- **Vertex Block Descent (VBD)** | Chen, Liu, Yang, Yuksel 2024 TOG | S,C | vertex Gauss-Seidel; unconditional stability; GENERAL; fixed-budget claims. code: yes (github.com/AnkaChan/Gaia) · contact = **penalty/soft (NOT IPC-guaranteed)**
+- **Second-Order Stencil Descent** | Lan et al. 2023 TOG (10.1145/3592104) | S,H | per-stencil 2nd-order; up to 100× vs CPU; also World 3. code: none found · contact = **IPC-guaranteed** (interior-point + local-global CCD)
+- **JGS2: Near-2nd-order Jacobi/GS for GPU Elastodynamics** | Lan et al. 2025 TOG/SIGGRAPH (10.1145/3731182) | S,A | near-quadratic parallel iteration; 50–100× vs prior GPU. code: none found · contact = **IPC-guaranteed** (integrates IPC barrier)
 - **Position-Based Nonlinear Gauss-Seidel for Quasistatic Hyperelasticity** | Chen, Han, Teran et al. 2024 TOG | S,A,C | genuinely convergent PB-GS; GENERAL. code:[?]
 - **Primal Extended Position Based Dynamics** | Chen, Han, ... Fedkiw, Teran 2023 MIG | C,S | fixes XPBD stagnation on backward-Euler residual. code:[?]
 - **Position Based Dynamics** | Müller et al. 2007 | S,C | Gauss-Seidel constraint projection; NO convergence (fixed budget) — foundational caveat. code: yes
@@ -105,12 +105,12 @@ LS=linear-solver/preconditioner, C=convergence-criterion, A=acceleration.
 - **Codimensional IPC (C-IPC)** | Li, Kaufman, Jiang 2021 TOG | barrier,E | codim-0/1/2/3 + strain limiting. code: yes
 - **Intersection-free Rigid Body Dynamics (Rigid-IPC)** | Ferguson et al. 2021 TOG | E,L | curved-trajectory CCD. code: yes
 - **Medial IPC** | Lan et al. 2021 TOG | E,LS | medial reduced elastics + IPC. code:[?]
-- **Affine Body Dynamics (ABD)** | Lan et al. 2022 TOG | E | affine reduced DOFs; up to ~10,000× GPU. code:[?]
-- **Convergent IPC** | Li et al. 2023 arXiv[?] | barrier,C | continuous formulation converges under joint mesh/Δt/d̂ refinement — evidence d̂ is coupled to accuracy.
+- **Affine Body Dynamics (ABD)** | Lan et al. 2022 TOG | E | affine reduced DOFs; up to ~10,000× GPU. code: yes (github.com/Autodesk/affine-body-dynamics)
+- **Convergent IPC** | Li, Ferguson, Schneider, Langlois, Zorin, Panozzo, Jiang, Kaufman 2023 arXiv:2307.15908 (preprint, unpublished) | barrier,C | continuous formulation converges under joint mesh/Δt/d̂ refinement — evidence d̂ is coupled to accuracy.
 
 ### GPU-scaling (SAME barrier fixed, vary inner solve → the fair contact sub-track)
 - **GIPC: Gauss-Newton IPC Barrier** | Huang, Yang et al. 2024 TOG | H,LS,S | analytic-eigensystem GN + PCG, GPU. code: yes ★
-- **StiffGIPC** | Huang et al. 2024/25 TOG | LS | connectivity-aware MAS preconditioner. code:[?]
+- **StiffGIPC** | Huang, Lu, Lin, Komura, Li 2025 TOG/SIGGRAPH | LS | connectivity-aware MAS preconditioner. code: yes (github.com/KemengHuang/Stiff-GIPC)
 - **Barrier-Augmented Lagrangian for GPU Elastodynamic Contact** | Guo et al. 2024 TOG | barrier,LS,C | aug-Lagrangian improves conditioning; inexact Newton-PCG. code:[?]
 - **Second-Order Stencil Descent** — see World 2 (interior-point contact variant).
 - **Efficient GPU Cloth w/ Non-distance Barriers & Subspace Reuse** | Lan et al. 2024 TOG | barrier,LS | non-distance barrier + subspace reuse. code:[?]
@@ -119,10 +119,10 @@ LS=linear-solver/preconditioner, C=convergence-criterion, A=acceleration.
 
 ### Contact-MODEL swaps (NOT metric-comparable — capability demos only)
 - **A Cubic Barrier with Elasticity-Inclusive Dynamic Stiffness** | Ando 2024 TOG | barrier,E | cubic non-log barrier; tight gaps. code:[?]
-- **Robust Penetration-Free Elastodynamics without Barriers** | Zheng, Luo, Li 2025 TOG | barrier-free,L,LS | aug-Lagrangian; avoids TOI locking. code: yes[?]
+- **Robust and Efficient Penetration-Free Elastodynamics without Barriers** | Zheng, Luo, Li (CMU/Genesis AI) 2025 TOG (10.1145/3811035) | barrier-free,L,LS | aug-Lagrangian; avoids TOI locking. code: likely (project page)
 - **Offset Geometric Contact (OGC)** | Chen et al. 2025 TOG | barrier,L | offset geometry, displacement bounds replace CCD; >100×. code: yes[?]
 - **Fast But Accurate: Real-Time Hyperelastic w/ Robust Frictional Contact** | Zeng et al. 2025 TOG | barrier,LS | NCP complementarity instead of log-barrier. code:[?]
-- **JGS2** — see World 2 (contact guarantee unconfirmed[?]).
+- **JGS2** — see World 2 (contact = IPC-guaranteed barrier — confirmed).
 
 ### Friction models (reused across the family)
 - IPC lagged semi-implicit friction (smoothed static↔kinetic via ε_v) — defined in IPC 2020, reused by C-IPC/Rigid-IPC/ABD/GIPC.

@@ -371,9 +371,16 @@ established technique. Cite as adaptations, not inventions.
   or whose minimizer lies in a *learned reduced subspace* — these solve related but distinct
   (approximate or amortized) problems and are not commensurable on our exact-convergence axis."
 
-## Key uncertainties carried forward (verify before citing as settled)
-Venue/refereeing of "Pitfalls of Projection" (arXiv 2311.14526) and "Convergent IPC"
-(arXiv 2307.15908); code-release status of Trust-Region filtering, PPN, ABD-original,
-StiffGIPC, several 2024–25 GPU papers; whether VBD/JGS2/SOSD carry an IPC-style *guaranteed*
-non-penetration barrier vs soft contact; some 2025 arXiv IDs surfaced with placeholder-looking
-2604/2605/2606 prefixes — verify existence before citing.
+## Uncertainties — status (verification pass #6, 2026-08)
+**Resolved:** Pitfalls of Projection & Convergent IPC are **unpublished preprints** (no venue —
+do not assign one). PPN corrected to **Eurographics 2026, CGF 45(2), 10.1111/cgf.70386** (was
+mislabeled 2025). Trust-Region filtering venue/DOI (SIGGRAPH Asia 2024, 10.1145/3680528.3687650)
+and code (honglin-c/trust-region-newton) confirmed. Code confirmed: ABD (Autodesk/affine-body-
+dynamics), StiffGIPC (KemengHuang/Stiff-GIPC), VBD (AnkaChan/Gaia); **no public repo** found for
+JGS2 or Second-Order Stencil Descent. Contact classification: **VBD = penalty/soft (NOT
+IPC-guaranteed)**; **JGS2 & Second-Order Stencil Descent = IPC-guaranteed**. Barrier-free title
+corrected ("Robust *and Efficient*…", 10.1145/3811035). Citations filled: Zhang-Mischaikow-Turk
+2005 (10.1145/1037957.1037958), Kraevoy-Sheffer-Gotsman MatchMaker 2003 (10.1145/1201775.882271),
+Martin-Weinkauf-Seidel 2013 (10.1111/cgf.12019).
+**Still open:** exact title/venue of the "Total Unsigned Area" (Xu et al. ~2011) reference —
+pull from the TLC (Du et al. 2020) bibliography; Martin 2013 full author list (medium confidence).

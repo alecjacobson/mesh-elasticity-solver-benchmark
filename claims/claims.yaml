@@ -14,9 +14,9 @@ nodes:
   - {id: full-newton, title: "Full Newton (unfiltered Hessian) + line search", authors: "—", year: 0, venue: classical, world: 0, ref: "N&W §3.3"}
   - {id: projected-newton, title: "Newton / Projected Newton (2nd-order baseline)", authors: "—", year: 0, venue: classical, world: 2, ref: "clamp variant = clamp-filtering"}
   - {id: absolute-filtering, title: "Stabler Neo-Hookean: Absolute Eigenvalue Filtering", authors: "Chen, Liu, Levin, Zheng, Jacobson", year: 2024, venue: SIGGRAPH, world: 2, ref: "arXiv:2406.05928"}
-  - {id: trust-region-filtering, title: "Trust-Region Eigenvalue Filtering for Projected Newton", authors: "Chen, Liu, Jacobson, Levin, Zheng", year: 2024, venue: "SIGGRAPH Asia", world: 2, ref: "arXiv:2410.10102"}
-  - {id: pitfalls-projection, title: "Pitfalls of Projection: Newton-type solvers for incremental potentials", authors: "Longva, Löschner, Fernández-Fernández et al.", year: 2023, venue: "arXiv [?]", world: 2, ref: "arXiv:2311.14526"}
-  - {id: progressively-projected-newton, title: "Progressively Projected Newton (PPN)", authors: "Fernández-Fernández, Löschner, Bender", year: 2025, venue: "CGF", world: 2, ref: "arXiv:2505.21013"}
+  - {id: trust-region-filtering, title: "Trust-Region Eigenvalue Filtering for Projected Newton", authors: "Chen, Liu, Jacobson, Levin, Zheng", year: 2024, venue: "SIGGRAPH Asia", world: 2, ref: "10.1145/3680528.3687650; arXiv:2410.10102; code github.com/honglin-c/trust-region-newton"}
+  - {id: pitfalls-projection, title: "Pitfalls of Projection: Newton-type solvers for incremental potentials", authors: "Longva, Löschner, Fernández-Fernández, Larionov, Ascher, Bender", year: 2023, venue: "arXiv preprint (unpublished)", world: 2, ref: "arXiv:2311.14526"}
+  - {id: progressively-projected-newton, title: "Progressively Projected Newton (PPN)", authors: "Fernández-Fernández, Löschner, Bender", year: 2026, venue: "CGF 45(2) / Eurographics 2026", world: 2, ref: "10.1111/cgf.70386; arXiv:2505.21013"}
   - {id: eigenvalue-blending, title: "Eigenvalue Blending for Projected Newton", authors: "Cheng, Liu, Fu", year: 2025, venue: CGF, world: 2, ref: "10.1111/cgf.70027"}
   - {id: project-on-demand-newton, title: "Project-on-Demand Newton (PDN)", authors: "from Pitfalls of Projection", year: 2023, venue: arXiv, world: 2, ref: "arXiv:2311.14526"}
   - {id: numeric-eigendecomposition, title: "Numerical eigendecomposition (generic PSD Hessian projection)", authors: classical, year: 0, venue: baseline, world: 2, ref: "[?]"}
@@ -49,10 +49,10 @@ nodes:
   - {id: lipman-2012, title: "Bounded Distortion Mapping Spaces", authors: "Lipman", year: 2012, venue: SIGGRAPH, world: 1, ref: "10.1145/2185520.2185604"}
   - {id: weber-zorin-2014, title: "Locally Injective Parametrization w/ Arbitrary Fixed Boundaries", authors: "Weber, Zorin", year: 2014, venue: SIGGRAPH, world: 1, ref: "10.1145/2601097.2601227"}
   - {id: lim, title: "Locally Injective Mappings (LIM)", authors: "Schüller, Kavan, Panozzo, Sorkine-Hornung", year: 2013, venue: SGP, world: 1, ref: "10.1111/cgf.12179"}
-  - {id: zhang-2005, title: "Feature-based scaffold surface parameterization", authors: "Zhang et al.", year: 2005, venue: "[?]", world: 1, ref: "[?]"}
+  - {id: zhang-2005, title: "Feature-based surface parameterization and texture mapping", authors: "Zhang, Mischaikow, Turk", year: 2005, venue: "TOG 24(1)", world: 1, ref: "10.1145/1037957.1037958"}
   - {id: air-meshes, title: "Air Meshes", authors: "Müller et al.", year: 2015, venue: SIGGRAPH, world: 1, ref: "[?]"}
   - {id: tua, title: "Total Unsigned Area foldover removal (Xu et al. 2011)", authors: "Xu et al.", year: 2011, venue: "[?]", world: 1, ref: "[?]"}
-  - {id: matchmaker, title: "MatchMaker", authors: "Kraevoy et al.", year: 2003, venue: "[?]", world: 1, ref: "[?]"}
+  - {id: matchmaker, title: "Matchmaker: constructing constrained texture maps", authors: "Kraevoy, Sheffer, Gotsman", year: 2003, venue: "SIGGRAPH", world: 1, ref: "10.1145/1201775.882271"}
   - {id: fp-tutte, title: "Floating-point Tutte embedding (libigl impl.)", authors: "—", year: 0, venue: baseline, world: 1, ref: "[?]"}
   - {id: gauss-newton-nls, title: "Nonlinear least-squares / Gauss-Newton (Tang-style)", authors: "—", year: 0, venue: baseline, world: 1, ref: "[?]"}
 
@@ -65,8 +65,8 @@ nodes:
   - {id: descent-gpu, title: "Descent Methods for Elastic Body Simulation on the GPU", authors: "Wang, Yang", year: 2016, venue: "SIGGRAPH Asia", world: 2, ref: "10.1145/2980179.2980236"}
   - {id: admm-pd, title: "ADMM ⊇ Projective Dynamics", authors: "Narain, Overby, Brown", year: 2016, venue: SCA, world: 2, ref: "admm-pd 2016"}
   - {id: aa-admm, title: "Accelerating ADMM (Anderson) / AA-ADMM", authors: "Zhang, Peng, Ouyang, Deng", year: 2019, venue: "SIGGRAPH Asia", world: 2, ref: "arXiv:1909.00470"}
-  - {id: vertex-block-descent, title: "Vertex Block Descent (VBD)", authors: "Chen, Liu, Yang, Yuksel", year: 2024, venue: SIGGRAPH, world: 2, ref: "arXiv:2403.06321"}
-  - {id: jgs2, title: "JGS2: Near second-order Jacobi/Gauss-Seidel for GPU Elastodynamics", authors: "Lan et al.", year: 2025, venue: TOG, world: 2, ref: "arXiv:2506.06494"}
+  - {id: vertex-block-descent, title: "Vertex Block Descent (VBD)", authors: "Chen, Liu, Yang, Yuksel", year: 2024, venue: SIGGRAPH, world: 2, ref: "arXiv:2403.06321; code github.com/AnkaChan/Gaia; contact = penalty/soft (NOT IPC-guaranteed)"}
+  - {id: jgs2, title: "JGS2: Near second-order Jacobi/Gauss-Seidel for GPU Elastodynamics", authors: "Lan, Lu, Yuan, Xu, Su, Wang, Jiang, Yang", year: 2025, venue: "TOG / SIGGRAPH 2025", world: 2, ref: "10.1145/3731182; arXiv:2506.06494; no public code found; contact = IPC-guaranteed"}
   - {id: second-order-stencil-descent, title: "Second-Order Stencil Descent for Interior-Point Hyperelasticity", authors: "Lan et al.", year: 2023, venue: TOG, world: 2, ref: "10.1145/3592104"}
   - {id: pbng, title: "Position-Based Nonlinear Gauss-Seidel for Quasistatic Hyperelasticity", authors: "Chen, Han, Teran et al.", year: 2024, venue: TOG, world: 2, ref: "arXiv:2306.09021"}
   - {id: primal-xpbd, title: "Primal Extended Position Based Dynamics", authors: "Chen, Han, Fedkiw, Teran", year: 2023, venue: MIG, world: 2, ref: "10.1145/3623264.3624437"}
@@ -79,20 +79,20 @@ nodes:
   - {id: l-bfgs, title: "L-BFGS (limited-memory quasi-Newton)", authors: "Liu, Nocedal", year: 1989, venue: classical, world: 0, ref: "Liu-Nocedal 1989"}
   - {id: gradient-descent, title: "Gradient descent", authors: "Cauchy", year: 1847, venue: classical, world: 0, ref: "—"}
   - {id: accelerated-gradient-descent, title: "Accelerated Gradient Descent (baseline)", authors: "Nesterov-style", year: 0, venue: classical, world: 0, ref: "—"}
-  - {id: martin-multiscale, title: "Multi-scale gradient filtering (Martin et al. 2013)", authors: "Martin et al.", year: 2013, venue: "[?]", world: 1, ref: "[?]"}
+  - {id: martin-multiscale, title: "Efficient Non-linear Optimization via Multi-scale Gradient Filtering", authors: "Martin, Weinkauf, Seidel", year: 2013, venue: CGF, world: 1, ref: "10.1111/cgf.12019"}
 
   # ---- World 3: contact / IPC family + baselines ----
   - {id: ipc, title: "Incremental Potential Contact (IPC)", authors: "Li et al.", year: 2020, venue: TOG, world: 3, ref: "10.1145/3386569.3392425"}
   - {id: c-ipc, title: "Codimensional IPC (C-IPC)", authors: "Li, Kaufman, Jiang", year: 2021, venue: TOG, world: 3, ref: "arXiv:2012.04457"}
   - {id: rigid-ipc, title: "Intersection-free Rigid Body Dynamics (Rigid-IPC)", authors: "Ferguson et al.", year: 2021, venue: TOG, world: 3, ref: "10.1145/3450626.3459802"}
-  - {id: abd, title: "Affine Body Dynamics (ABD)", authors: "Lan et al.", year: 2022, venue: TOG, world: 3, ref: "arXiv:2201.10022"}
+  - {id: abd, title: "Affine Body Dynamics (ABD)", authors: "Lan et al.", year: 2022, venue: TOG, world: 3, ref: "arXiv:2201.10022; code github.com/Autodesk/affine-body-dynamics"}
   - {id: medial-ipc, title: "Medial IPC", authors: "Lan et al.", year: 2021, venue: TOG, world: 3, ref: "10.1145/3450626.3459753"}
   - {id: gipc, title: "GIPC: Gauss-Newton IPC Barrier", authors: "Huang et al.", year: 2024, venue: TOG, world: 3, ref: "arXiv:2308.09400"}
-  - {id: stiffgipc, title: "StiffGIPC", authors: "Huang et al.", year: 2025, venue: TOG, world: 3, ref: "arXiv:2411.06224"}
+  - {id: stiffgipc, title: "StiffGIPC", authors: "Huang, Lu, Lin, Komura, Li", year: 2025, venue: "TOG / SIGGRAPH 2025", world: 3, ref: "arXiv:2411.06224; code github.com/KemengHuang/Stiff-GIPC"}
   - {id: barrier-aug-lagrangian, title: "Barrier-Augmented Lagrangian for GPU Elastodynamic Contact", authors: "Guo et al.", year: 2024, venue: "SIGGRAPH Asia", world: 3, ref: "arXiv:2407.00046"}
   - {id: ogc, title: "Offset Geometric Contact (OGC)", authors: "Chen et al.", year: 2025, venue: SIGGRAPH, world: 3, ref: "10.1145/3731205"}
   - {id: cubic-barrier-ando, title: "A Cubic Barrier with Elasticity-Inclusive Dynamic Stiffness", authors: "Ando", year: 2024, venue: "SIGGRAPH Asia", world: 3, ref: "10.1145/3687908"}
-  - {id: barrier-free-elastodynamics, title: "Robust Penetration-Free Elastodynamics without Barriers", authors: "Zheng, Luo, Li", year: 2025, venue: TOG, world: 3, ref: "arXiv:2512.12151"}
+  - {id: barrier-free-elastodynamics, title: "Robust and Efficient Penetration-Free Elastodynamics without Barriers", authors: "Zheng, Luo, Li (CMU / Genesis AI)", year: 2025, venue: TOG, world: 3, ref: "10.1145/3811035; arXiv:2512.12151"}
   - {id: gpu-ipc, title: "GPU-IPC (generic GPU IPC baseline)", authors: "various", year: 2023, venue: "—", world: 3, ref: "[?]"}
   - {id: arcsim, title: "ARCSim Adaptive Cloth", authors: "Narain et al.", year: 2012, venue: TOG, world: 3, ref: "ARCSim"}
   - {id: prior-rigid-engines, title: "Prior rigid-body engines (Bullet/MuJoCo/Chrono/Houdini)", authors: various, year: 2020, venue: "—", world: 3, ref: "[?]"}
