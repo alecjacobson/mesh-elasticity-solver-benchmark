@@ -25,6 +25,8 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | W2filt | filter head-to-head (clamp/absolute/trust-region, P1 vs P2) | [`world2_filters.md`](world2_filters.md) | trust-region tracks the *worse* filter on locking P1 but **BEATS both clamp and absolute on P2** — the switchboard claim validated, but discretization-conditional |
 | E2 | World-1 accelerators across regimes | [`e2.md`](e2.md) | Sobolev-init helps only in the ill-conditioned regime (validated); **AQP does NOT beat a well-implemented L-BFGS** (paper's ×200 was vs MATLAB — a baseline-quality confound) |
 | 3Dν | ν-claim in 3D (P1 tets) | [`3d_nu.md`](3d_nu.md) | the P1-locking confound **generalizes to 3D** — absolute under-performs clamp near-incompressible on P1 tets (worse than 2D) |
+| **SLIM** | official libigl SLIM vs AQP | [`slim.md`](slim.md) | to a fair energy-tol **SLIM (5 it) beats AQP (19)** — `slim->aqp` **validated** with official code (unlike `aqp->l-bfgs`, which didn't reproduce) |
+| W1prof | World-1 data profiles | [`world1_profiles.md`](world1_profiles.md) | aggregate ordering over 6 instances: Newton < L-BFGS < Sobolev-L-BFGS/AQP (energy-tol), stable across meshes/seeds |
 
 ## What these already demonstrate for the benchmark's thesis
 
@@ -58,6 +60,9 @@ python -m bench.run_p2_nu        # SETTLE ν-claim (P1 vs P2) -> p2_nu.md
 python -m bench.run_world2_filters # filter head-to-head -> world2_filters.md
 python -m bench.run_e2           # World-1 accelerators -> e2.md
 python -m bench.run_3d_nu        # 3D ν-claim -> 3d_nu.md
+python -m bench.run_slim         # SLIM vs AQP (official) -> slim.md
+python -m bench.run_world1_profiles # World-1 profiles -> world1_profiles.md
+python -m bench.analytic_eig     # analytic eigensystem check
 ```
 
 ## Honest limitations (→ next P1 steps)
