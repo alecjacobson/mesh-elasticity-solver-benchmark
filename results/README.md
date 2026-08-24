@@ -29,6 +29,7 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | W1prof | World-1 data profiles | [`world1_profiles.md`](world1_profiles.md) | aggregate ordering over 6 instances: Newton < L-BFGS < Sobolev-L-BFGS/AQP (energy-tol), stable across meshes/seeds |
 | AA | Anderson vs local-global (sheared-target ARAP) | [`anderson.md`](anderson.md) | Anderson **12 it vs 23 it** to the same non-trivial minimum, mesh-independent; **wall-clock speedup < iteration speedup** (lstsq overhead) — history-buffer zero-column bug fixed (#36) |
 | AE | analytic vs numeric eigensystem (2D+3D) | [`analytic_eig.md`](analytic_eig.md) | projection **provably identical** (~1e-15); but with a **fair** baseline the closed form is **~3.7×/5× *slower*** than LAPACK `eigh` — the old "3.3× faster" was FD-assembly cost; the real advantage is autodiff-free SPD projection, not a faster eigensolve (#37) |
+| SNH | Stable Neo-Hookean absolute-vs-clamp | [`stable_nu.md`](stable_nu.md) | on the **correct** (stable, finite-for-all-J) energy the ν-sweep shows the same locking confound; and in the **inverted-init** regime absolute is designed for (barrier NH is +∞ there) absolute-vs-clamp is a **near-null** — within 1–2 iters, no decisive win (#31) |
 
 ## What these already demonstrate for the benchmark's thesis
 
@@ -65,6 +66,7 @@ python -m bench.run_3d_nu        # 3D ν-claim -> 3d_nu.md
 python -m bench.run_slim         # SLIM vs AQP (official) -> slim.md
 python -m bench.run_world1_profiles # World-1 profiles -> world1_profiles.md
 python -m bench.run_anderson     # Anderson vs local-global -> anderson.md
+python -m bench.run_stable_nu    # Stable Neo-Hookean absolute-vs-clamp -> stable_nu.md
 python -m bench.analytic_eig     # analytic eigensystem check
 ```
 

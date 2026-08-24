@@ -9,6 +9,11 @@ HONEST CAVEAT up front: this is a small 2D plane-strain displacement-only protot
 control C1 (locking-free element) is NOT applied, so at very high nu results are partly
 confounded by volumetric locking -- exactly the confound docs/protocol.md flags. We therefore
 report this as an indicative probe, not a settled reproduction.
+
+NOTE (review-r1 #31): this uses the CLASSICAL log-barrier Neo-Hookean (+inf for J<=0). The
+absolute-filtering paper is built on STABLE Neo-Hookean; see bench/run_stable_nu.py
+(results/stable_nu.md) for the same comparison on that energy plus the inverted-element regime
+the barrier energy cannot represent.
 """
 import os
 import numpy as np

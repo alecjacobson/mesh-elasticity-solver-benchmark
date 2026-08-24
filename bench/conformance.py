@@ -63,14 +63,39 @@ def check_energy_reference(n=2000, tol=1e-12, seed=2):
     return worst, worst < tol
 
 
+def check_stable_neohookean(n=200, h=1e-6, tol=1e-5, seed=4):
+    """Stable Neo-Hookean (Smith-Kim-de Goes 2018): analytic gradient vs FD, rest state F=I
+    stress-free, and FINITENESS under inversion (J<=0) -- the property that distinguishes it from
+    the classical barrier NH and admits the inverted-element regime (review-r1 #31)."""
+    from .energy_stable_neohookean import make, lam_from_nu
+    et, psi_s, grad_s, _ = make(mu=1.0, lam=lam_from_nu(0.45))
+    rng = np.random.default_rng(seed)
+    worst = 0.0
+    for _ in range(n):
+        F = np.eye(2) + 0.3 * rng.standard_normal((2, 2))
+        G = grad_s(F).reshape(4); Ff = F.reshape(4); Gfd = np.zeros(4)
+        for k in range(4):
+            fp = Ff.copy(); fp[k] += h; fm = Ff.copy(); fm[k] -= h
+            Gfd[k] = (psi_s(fp.reshape(2, 2)) - psi_s(fm.reshape(2, 2))) / (2 * h)
+        worst = max(worst, np.max(np.abs(G - Gfd)) / (np.max(np.abs(Gfd)) + 1e-12))
+    rest = float(np.max(np.abs(grad_s(np.eye(2)))))
+    Finv = np.diag([-0.5, 1.0])
+    finite = bool(np.isfinite(psi_s(Finv)) and np.all(np.isfinite(grad_s(Finv))))
+    ok = worst < tol and rest < 1e-8 and finite
+    return worst, rest, finite, ok
+
+
 def run():
     r1, ok1 = check_grad_psi()
     r2, ok2 = check_global_gradient()
     r3, ok3 = check_energy_reference()
+    s_grad, s_rest, s_fin, ok4 = check_stable_neohookean()
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
     print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
-    ok = ok1 and ok2 and ok3
+    print(f"[conformance] stable-NH grad/rest/inv: {s_grad:.2e} / {s_rest:.1e} / finite={s_fin} "
+          f"-> {'PASS' if ok4 else 'FAIL'}")
+    ok = ok1 and ok2 and ok3 and ok4
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 

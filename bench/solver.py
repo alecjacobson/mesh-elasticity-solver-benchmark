@@ -77,7 +77,8 @@ def _spd_shift_solve(Hff, gf):
 
 
 def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
-          linsolver="direct", linesearch="backtracking", max_iter=400, tol=1e-6, c=1e-4):
+          linsolver="direct", linesearch="backtracking", max_iter=400, tol=1e-6, c=1e-4,
+          log_x=False):
     x = x0.copy()
     log = []
     counts = {"assemblies": 0, "energy_evals": 0, "lin_solves": 0,
@@ -97,9 +98,12 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
         gf = g[free]
         gnorm = float(np.max(np.abs(gf)))
         Hff = H[np.ix_(free, free)]
-        log.append({"iter": it, "energy": E, "grad_inf": gnorm,
-                    "wall_s": time.perf_counter() - t0,
-                    "assemblies": counts["assemblies"], "lin_solves": counts["lin_solves"]})
+        entry = {"iter": it, "energy": E, "grad_inf": gnorm,
+                 "wall_s": time.perf_counter() - t0,
+                 "assemblies": counts["assemblies"], "lin_solves": counts["lin_solves"]}
+        if log_x:
+            entry["x"] = x.copy()
+        log.append(entry)
         if gnorm < tol:
             status = "converged"; break
 
