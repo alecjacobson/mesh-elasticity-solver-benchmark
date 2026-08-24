@@ -41,7 +41,7 @@ non-penetration) · `generality` (range of energies/meshes/materials) · `scalab
 
 ### `status`  — how well the claim holds up (the hardening ladder)
 - `self-claimed` — asserted by the `from` authors; not independently checked here.
-- `validated` — reproduced/confirmed by an independent study or our benchmark (`assessed_by` says which).
+- `validated` — reproduced/confirmed by an independent study or our benchmark (`assessed_by` says which). **Standard (review-r2):** a single instance/seed does not by itself earn `validated` — an edge qualifies only with either (a) official-code regression, (b) an effect swept across a controlled axis (e.g. mesh sizes), or (c) a seed-averaged data profile with reported spread. Single-seed `validated` edges must carry an explicit "single-seed; profile pending" caveat in `notes` (or be `qualified (indicative)` instead). Verdicts drawn from iteration count alone are never `validated` — pair with a HW-independent cost + wall-clock.
 - `qualified` — holds only under stated conditions (regime, energy, mesh, metric); `notes` states them.
 - `unvalidated` — insufficient evidence either way.
 - `refuted` — contradicted by evidence (`assessed_by`/`notes` cite it).

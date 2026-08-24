@@ -79,21 +79,26 @@ def main():
          "| mesh | free dof | Newton | AQP | L-BFGS |", "|---|---|---|---|---|"]
     for r in rows:
         L.append(f"| {r['n']}×{r['n']} | {r['ndof']} | {r['newton']} | {r['aqp']} | {r['l-bfgs']} |")
-    L += ["", "## Observed", "",
-          f"- Over a **{dof_growth:.1f}× DOF increase**, iterations-to-tol grow by: "
+    L += ["", "## Observed (suggestive, NOT established — review-r2 #52)", "",
+          f"- Over a **{dof_growth:.1f}× DOF increase**, iterations-to-tol change by: "
           f"Newton **{g_nw:.1f}×**, AQP **{g_aqp:.1f}×**, L-BFGS **{g_lb:.1f}×**." if all(
               [g_nw, g_aqp, g_lb]) else "- See table (some methods did not reach the tol).",
-          f"- **AQP's iteration count is far flatter than L-BFGS's** across refinement"
-          + (f" (AQP {g_aqp:.1f}× vs L-BFGS {g_lb:.1f}× for {dof_growth:.1f}× more DOFs)" if (g_aqp and g_lb) else "")
-          + " — this is the mesh-independence AQP was built for, and it is **invisible to the "
-          "single-resolution iteration comparison in E2**. So the honest reading of `aqp→l-bfgs` is: "
-          "AQP loses on raw iterations at a fixed mesh, but its proxy delivers the mesh-independent "
-          "*scaling* that is its real contribution. Newton is mesh-independent too (its known "
-          "property) but pays a factorization per iteration (see e2).",
+          f"- AQP's count ({rows[0]['aqp']}→{rows[1]['aqp']}→{rows[-1]['aqp']}) stays roughly flat "
+          f"(it even *decreases* on the coarse→mid step — consistent with the coarse mesh needing a "
+          f"couple extra iterations to hit the *relative*-energy tol, not a clean asymptotic trend), "
+          f"while L-BFGS's ({rows[0]['l-bfgs']}→{rows[1]['l-bfgs']}→{rows[-1]['l-bfgs']}) grows "
+          f"monotonically. This is **consistent with** the mesh-independence AQP was built for — the "
+          f"scaling axis E2's single-resolution comparison cannot see.",
+          "- **But this is only 3 mesh sizes and one seed, so it is SUGGESTIVE, not established.** "
+          "A non-monotone AQP count over 3 points does not prove asymptotic mesh-independence, and "
+          "L-BFGS's growth could partly reflect its own (un-preconditioned) scaling rather than a fair "
+          "contrast. The honest reading of `aqp→l-bfgs`: AQP loses on raw iterations at a fixed mesh "
+          "(e2), and its proxy *appears* to give mesh-independent scaling here — a hypothesis that "
+          "needs a wider refinement sweep (to ~20×20+) and multiple seeds with error bars to confirm.",
           "",
-          "_Caveat: 2D, single stretch/seed, dense; energy-tolerance criterion. This tests the "
-          "*scaling* axis (mesh-independence), complementing E2's fixed-resolution comparison — the "
-          "two together are the fair picture of AQP (#29)._"]
+          "_Caveat: 2D, 3 sizes / single seed / dense / energy-tol — indicative only. Path to a real "
+          "verdict: more refinements + seed-averaged counts with spread (#52). Newton is "
+          "mesh-independent too (known) but pays a factorization per iteration (see e2)._"]
     with open("results/mesh_independence.md", "w") as f:
         f.write("\n".join(L) + "\n")
     print("\nwrote results/mesh_independence.md")
