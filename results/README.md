@@ -17,7 +17,7 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | E5 | criterion sensitivity | [`e5.md`](e5.md) | **3 different "fastest" filters across 4 criteria** — ranking is a criterion artifact |
 | 1b | dynamic incremental potential | [`1b_dynamic.md`](1b_dynamic.md) | inertia regularizes the Hessian → unfiltered Newton **beats** clamp (opposite of statics; Pitfalls-of-Projection theme) |
 | E-lock | locking sensitivity (crossed mesh) | [`locking.md`](locking.md) | on a lower-locking crossed mesh the absolute−clamp gap at ν=0.499 **collapses 141→0 it**, and absolute **converges at ν=0.4999** where it had failed — strong evidence the ν-result was a locking artifact (C1) |
-| scale | mesh-independence + scaling | [`scaling.md`](scaling.md) | Newton iterations stay in **[7,15] as DOFs grow 18→338** (refinement-independent); wall-clock too noisy at prototype scale to fit a law |
+| scale | mesh-independence + CG conditioning (sparse) | [`scaling.md`](scaling.md) | Newton iters **mesh-independent [7,11] over DOFs 98→3042**, while unpreconditioned **CG mat-vecs/iter grow 53→348 (~√DOFs)** — the quantitative case for preconditioning; sparse-direct wall ~DOFs¹·⁰¹ |
 | LS | linear-solver axis (direct vs CG) | [`ls.md`](ls.md) | same Newton iterations, but **wall-clock ranks the two solvers oppositely across scenarios** while the mat-vec count stays consistent — rank on the HW-independent count, not wall-clock |
 
 ## What these already demonstrate for the benchmark's thesis
