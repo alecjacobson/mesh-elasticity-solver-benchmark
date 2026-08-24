@@ -9,7 +9,7 @@ solver, since it is not a per-element operation. See claims/claims.yaml for the 
 """
 import numpy as np
 
-PER_ELEMENT = ("none", "clamp", "absolute")
+PER_ELEMENT = ("none", "clamp", "absolute", "project-on-demand")
 GLOBAL = ("identity-shift",)
 ALL = PER_ELEMENT + GLOBAL
 
@@ -18,7 +18,11 @@ def project_element(H, kind, eps=1e-9):
     if kind == "none":
         return H
     w, V = np.linalg.eigh(H)
-    if kind == "clamp":
+    if kind == "project-on-demand":
+        if w.min() >= eps:            # already (near-)SPD -> leave raw (keep true Newton curvature)
+            return H
+        w = np.maximum(w, eps)        # only project the indefinite ones (per-element PDN variant)
+    elif kind == "clamp":
         w = np.maximum(w, eps)
     elif kind == "absolute":
         w = np.maximum(np.abs(w), eps)

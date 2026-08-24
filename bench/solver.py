@@ -28,7 +28,7 @@ def assemble(x, tris, Bs, areas, filt, eterms=_sd_element_terms):
         if not np.isfinite(Ee):
             return np.inf, None, None
         E += Ee
-        if filt in ("clamp", "absolute"):
+        if filt in ("clamp", "absolute", "project-on-demand"):
             He = project_element(He, filt)
         g[dofs] += ge
         H[np.ix_(dofs, dofs)] += He

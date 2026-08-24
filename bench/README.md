@@ -17,7 +17,7 @@ python -m bench.run_e1_nu     # E1 near-incompressible nu-sweep (Neo-Hookean)  -
 | slot (`harness.md`) | this slice |
 |---|---|
 | energy ψ | `energy.py` — 2D symmetric Dirichlet (analytic gradient; FD-of-gradient element Hessian) |
-| Hessian filter | `filters.py` — `none`, `clamp`, `absolute` (per-element), `identity-shift` (global Levenberg) |
+| Hessian filter | `filters.py` — `none`, `clamp`, `absolute`, `project-on-demand` (per-element; PDN-style), `identity-shift` (global Levenberg) |
 | search direction | `solver.py` — projected Newton |
 | line search | `solver.py` — Armijo backtracking with an inversion guard (ψ=∞ on det F ≤ 0) |
 | linear solver | dense `np.linalg.solve` / Cholesky-with-shift |

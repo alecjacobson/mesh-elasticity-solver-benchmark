@@ -52,7 +52,7 @@ def main():
     print("== E1 (near-incompressible): absolute vs clamp as nu -> 1/2 ==\n")
     sc = stretch_scenario()
     nus = [0.30, 0.45, 0.49, 0.499, 0.4999]
-    filters = ["clamp", "absolute", "none", "identity-shift"]
+    filters = ["clamp", "absolute", "project-on-demand", "none", "identity-shift"]
 
     header = f"{'nu':>8} {'lam':>10} | " + " | ".join(f"{f:>14}" for f in filters)
     print(header); print("-" * len(header))
@@ -85,15 +85,16 @@ def main():
         "",
         f"Mesh {sc['nx']}×{sc['ny']}; cells = iterations to converge (or failure status).",
         "",
-        "| ν | λ | clamp | absolute | none (full Newton) | identity-shift |",
-        "|---|---|---|---|---|---|",
+        "| ν | λ | clamp | absolute | project-on-demand | none (full Newton) | identity-shift |",
+        "|---|---|---|---|---|---|---|",
     ]
     for row in table:
         def cell(f):
             r = row[f]
             return f"{r['iters']} it" if r["status"] == "converged" else f"**{r['status']}**"
         lines.append(f"| {row['nu']:.4f} | {row['lam']:.1f} | {cell('clamp')} | "
-                     f"{cell('absolute')} | {cell('none')} | {cell('identity-shift')} |")
+                     f"{cell('absolute')} | {cell('project-on-demand')} | {cell('none')} | "
+                     f"{cell('identity-shift')} |")
     lines += [
         "",
         "**Observed (this run):** filters agree at ν=0.3 (well-conditioned, Hessian SPD); as "
