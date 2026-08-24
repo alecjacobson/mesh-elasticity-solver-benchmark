@@ -12,16 +12,17 @@ dimension. Each edge is *hardened* from `self-claimed` toward `validated` / `qua
 
 ## Stats
 
-- **160 edges**, **81 nodes**. Status: **115 self-claimed**, **21 qualified**, **2 validated**, **22 unmeasured**, 0 refuted — being hardened by the benchmark (`bench/`, `results/`).
+- **160 edges**, **81 nodes**. Status: **115 self-claimed**, **19 qualified**, **4 validated**, **22 unmeasured**, 0 refuted — being hardened by the benchmark (`bench/`, `results/`).
 - The **22 `unmeasured`** edges are *all* of World 3 (contact): decision **D4 defers contact to v2**, so v1 makes **no measured contact claim**. They are shown below for completeness but are the papers' own assertions, not benchmark results (machine-readable rule: an edge is `unmeasured` iff either endpoint has `world: 3`). See [`schema.md`](schema.md).
 
 **Benchmark-hardened so far** (`assessed_by: benchmark`; see [`hardening.md`](hardening.md)):
 - `anderson-geometry → local-global` — **validated** (Anderson 12 it vs local-global 23 it on a non-trivial sheared-target ARAP, mesh-independent, same minimum; reproducible `python -m bench.run_anderson`, `results/anderson.md`; wall-clock reported alongside — a smaller speedup than the iteration ratio).
 - `absolute-filtering → clamp-filtering` — **qualified/settled**: P1 "refutation" is a locking artifact; on the P2 element absolute matches/beats clamp (`results/p2_nu.md`).
-- `trust-region-filtering → {clamp, absolute}` — **qualified**: on P2 trust-region beats both; on locking P1 it degrades to absolute (`results/world2_filters.md`).
+- `trust-region-filtering → {clamp, absolute}` — **validated**: the faithful three-state blend λ_eff=(1−w)λ+w|λ| (which reproduces full-Newton/clamp/absolute exactly, conformance-gated) beats **both** filters on **both** P1 (139 vs 242/maxiter) and P2 (39 vs 53/41); restoring the w=0 full-Newton branch is what wins on locking P1 (`results/world2_filters.md`).
+- `slim → aqp` — **validated (HW-independent)**: official libigl SLIM 5 it vs AQP 19 (soft-constraint drift 4e-16 clears the confound); wall-clock is C++/Python-confounded so counts carry it (`results/slim.md`).
+- `pitfalls-projection → clamp-filtering` — **affine-invariance sub-claim validated**: unfiltered Newton is affine-covariant to 3e-13 under coordinate rescaling; clamp/absolute/global-PDN all break it (60.8/0.21/60.8) — a claim iteration-count can't test (`results/pitfalls.md`).
 - `aqp → l-bfgs` — **qualified/unreproduced**: AQP loses to a well-implemented L-BFGS; the ×200 was a MATLAB-baseline confound (`results/e2.md`).
 - `sobolev-lbfgs → l-bfgs` — **qualified**: the *isolated* Sobolev-preconditioning component (D0=L⁻¹, one of BCQN's three) helps only in the ill-conditioned regime (34 vs 55 it), not the well-conditioned one (`results/e2.md`). `bcqn → l-bfgs` itself is **reverted to self-claimed** — the full blended method (barrier-aware line-search filter + blend + criterion) and its E3 factorial are unimplemented, so the measured win belongs to the component, not to BCQN.
-- `pitfalls-projection → clamp-filtering` — **qualified**: consistent with the 1b-dynamic result (projecting-when-unneeded hurts).
 - Dimensions: speed 55 · convergence 36 · robustness 35 · quality 13 · generality 10 · scalability 9 · simplicity 1.
 - Most-targeted baselines: `full-newton` (13), `ipc` (11), `xpbd` (10), `slim` (9), `clamp-filtering` (7), `l-bfgs` (7).
 

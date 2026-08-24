@@ -72,6 +72,24 @@ def _spd_project_solve(Hff, gf, eps=1e-9):
     return d, 1
 
 
+def _blend_step(Hff, gf, w, eps=0.01):
+    """Faithful trust-region eigenvalue blend (Chen et al. 2024): a SINGLE operator
+    lambda_eff = (1-w) lambda + w |lambda| with w in {0, 0.5, 1} unifying the three named states:
+      w=0   -> lambda            (full Newton -- the branch the old two-state switchboard lacked)
+      w=0.5 -> 0 for lambda<0    (clamp-to-zero; floored to eps to stay invertible)
+      w=1   -> |lambda|          (absolute).
+    Floors at eps=0.01 (the paper's value) when w>0; leaves raw eigenvalues for full Newton.
+    Returns (d, n_factorizations=1)."""
+    wv, V = np.linalg.eigh(Hff)
+    lam = (1.0 - w) * wv + w * np.abs(wv)
+    if w > 0.0:
+        lam = np.maximum(lam, eps)
+    else:
+        lam = np.where(np.abs(lam) < 1e-12, 1e-12, lam)   # guard exact singularities only
+    d = V @ ((V.T @ (-gf)) / lam)
+    return d, 1
+
+
 def _spd_shift_solve(Hff, gf):
     """Levenberg identity-shift; returns (d, tau, n_factorizations)."""
     n = Hff.shape[0]
@@ -97,12 +115,16 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
     t0 = time.perf_counter()
     status = "maxiter"
     tr_rho = 1.0                                  # trust-region model-fit ratio (filt="trust-region")
-    TR_EPS = 0.01
+    tr_w = 0.5
     for it in range(max_iter):
-        # trust-region eigenvalue filtering (Chen et al. 2024): global per-step choice --
-        # clamp when the quadratic model fit ok (|rho-1|<=eps), else absolute.
-        eff = (("clamp" if abs(tr_rho - 1.0) <= TR_EPS else "absolute")
-               if filt == "trust-region" else filt)
+        # trust-region eigenvalue blend (Chen et al. 2024): THREE-STATE, driven by the model-fit
+        # ratio rho. Good fit -> trust the raw Hessian (w=0, full Newton); ok -> clamp (w=0.5);
+        # bad/negative -> absolute (w=1). Assemble the RAW Hessian and blend at eigenvalue level.
+        if filt == "trust-region":
+            eff = "none"
+            tr_w = 0.0 if tr_rho >= 0.75 else (1.0 if tr_rho <= 0.0 else 0.5)
+        else:
+            eff = filt
         E, g, H = assemble(x, tris, Bs, areas, eff, eterms); counts["assemblies"] += 1
         if not np.isfinite(E):
             status = "infeasible"; break
@@ -118,7 +140,13 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
         if gnorm < tol:
             status = "converged"; break
 
-        if filt == "identity-shift":
+        if filt == "trust-region":
+            counts["lin_solves"] += 1
+            d, nf = _blend_step(Hff, gf, tr_w); counts["factorizations"] += nf
+            if float(gf @ d) >= 0.0 and tr_w < 1.0:   # non-descent -> escalate to absolute (SPD)
+                d, nf = _blend_step(Hff, gf, 1.0); counts["factorizations"] += nf
+                tr_w = 1.0
+        elif filt == "identity-shift":
             d, _, nf = _spd_shift_solve(Hff, gf)
             counts["factorizations"] += nf; counts["lin_solves"] += 1
         elif filt == "global-pdn":

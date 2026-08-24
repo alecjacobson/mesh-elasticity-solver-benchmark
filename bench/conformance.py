@@ -85,17 +85,42 @@ def check_stable_neohookean(n=200, h=1e-6, tol=1e-5, seed=4):
     return worst, rest, finite, ok
 
 
+def check_trust_region_blend(n=300, tol=1e-9, seed=5):
+    """Regression grounding for the trust-region switchboard (review-r1 #38): the single blended
+    operator lambda_eff=(1-w)lambda+w|lambda| must EXACTLY reproduce the three named states --
+    w=0 full Newton, w=0.5 clamp-to-eps, w=1 absolute -- on indefinite Hessians. (We lack the
+    official trust-region-newton code, so this exact-reproduction identity is the admissibility
+    check that the switchboard is faithful, not an ad-hoc two-state hack.)"""
+    from .solver import _blend_step
+    rng = np.random.default_rng(seed)
+    wn = wc = wa = 0.0
+    for _ in range(n):
+        m = 6; A = rng.standard_normal((m, m)); H = (A + A.T) / 2; g = rng.standard_normal(m)
+        w, V = np.linalg.eigh(H)
+        dN = np.linalg.solve(H, -g); d0, _ = _blend_step(H, g, 0.0)
+        wn = max(wn, np.linalg.norm(d0 - dN) / (np.linalg.norm(dN) + 1e-12))
+        dC = V @ ((V.T @ -g) / np.maximum(w, 0.01)); d5, _ = _blend_step(H, g, 0.5)
+        wc = max(wc, np.linalg.norm(d5 - dC) / (np.linalg.norm(dC) + 1e-12))
+        dA = V @ ((V.T @ -g) / np.maximum(np.abs(w), 0.01)); d1, _ = _blend_step(H, g, 1.0)
+        wa = max(wa, np.linalg.norm(d1 - dA) / (np.linalg.norm(dA) + 1e-12))
+    ok = wn < tol and wc < tol and wa < tol
+    return wn, wc, wa, ok
+
+
 def run():
     r1, ok1 = check_grad_psi()
     r2, ok2 = check_global_gradient()
     r3, ok3 = check_energy_reference()
     s_grad, s_rest, s_fin, ok4 = check_stable_neohookean()
+    tn, tc, ta, ok5 = check_trust_region_blend()
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
     print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
     print(f"[conformance] stable-NH grad/rest/inv: {s_grad:.2e} / {s_rest:.1e} / finite={s_fin} "
           f"-> {'PASS' if ok4 else 'FAIL'}")
-    ok = ok1 and ok2 and ok3 and ok4
+    print(f"[conformance] TR blend=Newton/clamp/abs: {tn:.1e}/{tc:.1e}/{ta:.1e} "
+          f"-> {'PASS' if ok5 else 'FAIL'}")
+    ok = ok1 and ok2 and ok3 and ok4 and ok5
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 
