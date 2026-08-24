@@ -229,3 +229,80 @@ def solve_sparse(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
             "iters": len(log) - (1 if status == "converged" else 0),
             "final_energy": Efin, "final_grad_inf": gfin, "wall_s": wall,
             "counts": counts, "x": x, "log": log}
+
+
+# ---------------------------------------------------------------------------
+# Trust-region (Steihaug-CG) Newton: handles indefinite Hessians INTRINSICALLY
+# (negative-curvature-aware truncated CG in a trust radius) -- no eigenvalue
+# filter. Tests the survey thesis that graphics filtering ~ classical modified
+# Newton / trust region. Uses the raw (unfiltered) Hessian.
+# ---------------------------------------------------------------------------
+
+def _steihaug(gf, Hff, Delta, cg_tol, maxit):
+    """Truncated CG for min gf.p + 0.5 p.Hff.p s.t. ||p|| <= Delta (Nocedal-Wright Alg 7.2)."""
+    p = np.zeros_like(gf)
+    r = gf.copy()
+    d = -r
+    r0 = float(np.sqrt(r @ r))
+    if r0 < cg_tol:
+        return p, 0
+    for j in range(maxit):
+        Hd = Hff @ d
+        dHd = float(d @ Hd)
+        if dHd <= 0:                                   # negative curvature -> to boundary
+            a, b, cc = float(d @ d), 2 * float(p @ d), float(p @ p) - Delta * Delta
+            tau = (-b + np.sqrt(max(b * b - 4 * a * cc, 0.0))) / (2 * a)
+            return p + tau * d, j + 1
+        alpha = float(r @ r) / dHd
+        p_new = p + alpha * d
+        if np.sqrt(p_new @ p_new) >= Delta:            # crossed boundary -> intersect
+            a, b, cc = float(d @ d), 2 * float(p @ d), float(p @ p) - Delta * Delta
+            tau = (-b + np.sqrt(max(b * b - 4 * a * cc, 0.0))) / (2 * a)
+            return p + tau * d, j + 1
+        r_new = r + alpha * Hd
+        if np.sqrt(r_new @ r_new) < cg_tol * r0:
+            return p_new, j + 1
+        beta = float(r_new @ r_new) / float(r @ r)
+        d = -r_new + beta * d
+        p, r = p_new, r_new
+    return p, maxit
+
+
+def solve_trust_region(x0, tris, Bs, areas, free, eterms=_sd_element_terms,
+                       max_iter=400, tol=1e-6, Delta0=1.0, Delta_max=1e3, eta=0.1):
+    x = x0.copy()
+    log = []
+    counts = {"assemblies": 0, "energy_evals": 0, "mat_vecs": 0, "lin_solves": 0}
+    Delta = Delta0
+    t0 = time.perf_counter()
+    status = "maxiter"
+    for it in range(max_iter):
+        E, g, H = assemble(x, tris, Bs, areas, "none", eterms); counts["assemblies"] += 1
+        if not np.isfinite(E):
+            status = "infeasible"; break
+        gf = g[free]
+        gnorm = float(np.max(np.abs(gf)))
+        Hff = H[np.ix_(free, free)]
+        log.append({"iter": it, "energy": E, "grad_inf": gnorm, "wall_s": time.perf_counter() - t0})
+        if gnorm < tol:
+            status = "converged"; break
+        p, nmv = _steihaug(gf, Hff, Delta, cg_tol=1e-6, maxit=2 * gf.size)
+        counts["mat_vecs"] += nmv; counts["lin_solves"] += 1
+        pred = -(float(gf @ p) + 0.5 * float(p @ (Hff @ p)))
+        xf0 = x[free].copy(); x[free] = xf0 + p
+        E_new = energy_only(x, tris, Bs, areas, eterms); counts["energy_evals"] += 1
+        ared = (E - E_new) if np.isfinite(E_new) else -np.inf
+        rho = ared / pred if pred > 0 else -np.inf
+        if rho < 0.25:
+            Delta *= 0.25
+        elif rho > 0.75 and np.sqrt(p @ p) > 0.99 * Delta:
+            Delta = min(2 * Delta, Delta_max)
+        if not (rho > eta):
+            x[free] = xf0                              # reject step
+    wall = time.perf_counter() - t0
+    Efin = log[-1]["energy"] if log else np.inf
+    gfin = log[-1]["grad_inf"] if log else np.inf
+    return {"filter": "trust-region", "status": status,
+            "iters": len(log) - (1 if status == "converged" else 0),
+            "final_energy": Efin, "final_grad_inf": gfin, "wall_s": wall,
+            "counts": counts, "x": x, "log": log}

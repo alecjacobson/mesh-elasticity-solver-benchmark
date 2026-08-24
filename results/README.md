@@ -19,6 +19,7 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | E-lock | locking sensitivity (crossed mesh) | [`locking.md`](locking.md) | on a lower-locking crossed mesh the absolute−clamp gap at ν=0.499 **collapses 141→0 it**, and absolute **converges at ν=0.4999** where it had failed — strong evidence the ν-result was a locking artifact (C1) |
 | scale | mesh-independence + CG conditioning (sparse) | [`scaling.md`](scaling.md) | Newton iters **mesh-independent [7,11] over DOFs 98→3042**, while unpreconditioned **CG mat-vecs/iter grow 53→348 (~√DOFs)** — the quantitative case for preconditioning; sparse-direct wall ~DOFs¹·⁰¹ |
 | LS | linear-solver axis (direct vs CG) | [`ls.md`](ls.md) | same Newton iterations, but **wall-clock ranks the two solvers oppositely across scenarios** while the mat-vec count stays consistent — rank on the HW-independent count, not wall-clock |
+| TR | trust-region vs filtering | [`tr.md`](tr.md) | classical **trust-region (Steihaug-CG, no filter) converges across the whole ν-sweep** — incl. ν=0.4999 where absolute fails — supporting the lineage claim that filtering ≈ modified-Newton/trust-region |
 
 ## What these already demonstrate for the benchmark's thesis
 
@@ -46,12 +47,13 @@ python -m bench.run_1b_dynamic   # dynamic   -> 1b_dynamic.md
 python -m bench.run_locking      # locking   -> locking.md
 python -m bench.run_scaling      # scaling   -> scaling.md
 python -m bench.run_ls           # LS axis   -> ls.md
+python -m bench.run_tr           # trust-region -> tr.md
 ```
 
 ## Honest limitations (→ next P1 steps)
 
 Dense solve (small meshes); 2D only; filters = {none, clamp, absolute, project-on-demand,
-identity-shift, global-pdn} (trust-region, analytic-eigensystem, eigenvalue-blending not yet);
+identity-shift, global-pdn} + a trust-region (Steihaug-CG) solver (analytic-eigensystem, eigenvalue-blending not yet);
 **no locking-free element** (so the ν-claim is not settled —
 only shown to be locking-confounded); single scenario/seed for most experiments; no official-code
 regression yet (grounding is the FD conformance test). Sparse solve, a Taylor–Hood/MINI
