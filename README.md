@@ -122,7 +122,7 @@ Tracked in [GitHub issues](../../issues). Phases follow `docs/design.md` §11.
 | phase | what | state |
 |---|---|---|
 | **P0 — design & curation** | taxonomy, corpus, metrics, harness architecture, protocol freeze, experiment specs, claims graph | ✅ **complete** (this repo) |
-| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the eigenvalue-filter ablation (E1) + E2/E4/E5 | 🟡 **in progress** — [`bench/`](bench/) prototype runs [E1, E1ν, data profiles, E4, E5, 1b-dynamic, locking](results/); next: locking-free element, more filters, sparse solve, official-code regression |
+| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the eigenvalue-filter ablation (E1) + E2/E4/E5 | 🟡 **in progress** — [`bench/`](bench/) prototype (6 filters, 2 linear solvers, conformance + smoke test + CI) runs 9 measured experiments [E1, E1ν, profiles, E4, E5, 1b-dynamic, locking, scaling, LS-axis](results/); next: locking-free element (settle ν-claim), sparse solver, trust-region/analytic-eigensystem filters, official-code regression, E2 |
 | **P2 — 1a + feasibility** | distortion accelerators + injectivity suites; BCQN triple-split (E3); full performance profiles | ⬜ |
 | **P3 — paper + release** | write the STAR; release harness as living-benchmark seed (closed/open divisions, hidden tier) | ⬜ |
 | **v2 — contact + learned** | Track-2 contact via the scenario layer; learned-accelerator companion track | ⬜ |
