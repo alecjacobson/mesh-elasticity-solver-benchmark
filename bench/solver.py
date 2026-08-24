@@ -197,13 +197,17 @@ def solve_sparse(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
         if gnorm < tol:
             status = "converged"; break
         counts["lin_solves"] += 1
-        if linsolver == "cg":
+        if linsolver in ("cg", "pcg-jacobi"):
             mv = [0]
             def matvec(v, _Hff=Hff, _mv=mv):
                 _mv[0] += 1
                 return _Hff @ v
             A = spla.LinearOperator(Hff.shape, matvec=matvec)
-            d, _ = spla.cg(A, -gf, rtol=1e-9, maxiter=10000)
+            M = None
+            if linsolver == "pcg-jacobi":                # diagonal (Jacobi) preconditioner
+                dinv = 1.0 / Hff.diagonal()
+                M = spla.LinearOperator(Hff.shape, matvec=lambda v, _di=dinv: _di * v)
+            d, _ = spla.cg(A, -gf, rtol=1e-9, maxiter=10000, M=M)
             counts["mat_vecs"] += mv[0]
         else:
             counts["factorizations"] += 1
