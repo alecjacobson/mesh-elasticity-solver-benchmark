@@ -22,6 +22,9 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | TR | trust-region vs filtering | [`tr.md`](tr.md) | classical **trust-region (Steihaug-CG, no filter) converges across the whole ν-sweep** — incl. ν=0.4999 where absolute fails — supporting the lineage claim that filtering ≈ modified-Newton/trust-region |
 | LSrch | line-search axis (null result) | [`linesearch.md`](linesearch.md) | backtracking ≡ full-step for clamp-projected Newton — a strong filter makes the **line-search axis inert** (axes interact); it becomes decisive only for first-order/aggressive steps |
 | **P2** ⭐ | **settling the ν-claim (P1 vs P2 element)** | [`p2_nu.md`](p2_nu.md) | **on P1 absolute fails vs clamp; on a locking-relieved P2 element absolute matches/BEATS clamp** — the P1 result was a discretization artifact; the paper's claim is validated once locking is removed |
+| W2filt | filter head-to-head (clamp/absolute/trust-region, P1 vs P2) | [`world2_filters.md`](world2_filters.md) | trust-region tracks the *worse* filter on locking P1 but **BEATS both clamp and absolute on P2** — the switchboard claim validated, but discretization-conditional |
+| E2 | World-1 accelerators across regimes | [`e2.md`](e2.md) | Sobolev-init helps only in the ill-conditioned regime (validated); **AQP does NOT beat a well-implemented L-BFGS** (paper's ×200 was vs MATLAB — a baseline-quality confound) |
+| 3Dν | ν-claim in 3D (P1 tets) | [`3d_nu.md`](3d_nu.md) | the P1-locking confound **generalizes to 3D** — absolute under-performs clamp near-incompressible on P1 tets (worse than 2D) |
 
 ## What these already demonstrate for the benchmark's thesis
 
@@ -52,6 +55,9 @@ python -m bench.run_ls           # LS axis   -> ls.md
 python -m bench.run_tr           # trust-region -> tr.md
 python -m bench.run_linesearch   # line-search -> linesearch.md
 python -m bench.run_p2_nu        # SETTLE ν-claim (P1 vs P2) -> p2_nu.md
+python -m bench.run_world2_filters # filter head-to-head -> world2_filters.md
+python -m bench.run_e2           # World-1 accelerators -> e2.md
+python -m bench.run_3d_nu        # 3D ν-claim -> 3d_nu.md
 ```
 
 ## Honest limitations (→ next P1 steps)

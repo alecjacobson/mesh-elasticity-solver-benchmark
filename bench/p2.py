@@ -129,8 +129,11 @@ def energy_p2(x, elems, quad, eterms):
 def solve_p2(x0, elems, quad, free, eterms, filt, max_iter=400, tol=1e-6, c=1e-4):
     import time
     x = x0.copy(); it_done = 0; status = "maxiter"; t0 = time.perf_counter()
+    tr_rho = 1.0                                        # trust-region model-fit ratio
     for it in range(max_iter):
-        E, g, H = assemble_p2(x, elems, quad, eterms, filt)
+        eff = (("clamp" if abs(tr_rho - 1.0) <= 0.01 else "absolute")
+               if filt == "trust-region" else filt)
+        E, g, H = assemble_p2(x, elems, quad, eterms, eff)
         if not np.isfinite(E):
             status = "infeasible"; break
         gf = g[free]; it_done = it
@@ -155,6 +158,10 @@ def solve_p2(x0, elems, quad, free, eterms, filt, max_iter=400, tol=1e-6, c=1e-4
                 x[free] = xf0; status = "linesearch"; break
         if status == "linesearch":
             break
+        if filt == "trust-region":
+            p = alpha * d
+            pred = -(float(gf @ p) + 0.5 * float(p @ (Hff @ p)))
+            tr_rho = ((E - En) / pred) if pred > 1e-30 else 1.0
     return {"filter": filt, "status": status, "iters": it_done,
             "final_energy": E, "wall_s": time.perf_counter() - t0, "x": x}
 

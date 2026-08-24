@@ -111,11 +111,11 @@ edges:
      claim: "Local per-element absolute filtering is dramatically cheaper than global absolute-value projection.",
      evidence: "0.25 s/iter (local) vs >3 hr/iter for global abs on a 38k×38k Hessian.", source: "arXiv:2406.05928", assessed_by: self,
      notes: "Target is 'global abs' full eigendecomposition, not per-element clamping."}
-  - {from: trust-region-filtering, to: clamp-filtering, dimension: convergence, status: self-claimed,
+  - {from: trust-region-filtering, to: clamp-filtering, dimension: convergence, status: qualified,
      claim: "Trust-region-adaptive filtering beats stand-alone clamping across quasistatic deformable-solid experiments.",
-     evidence: "Iteration/acceleration over a large quasistatic dataset.", source: "arXiv:2410.10102", assessed_by: self, notes: "Unifies Newton/clamp/absolute as one adaptive rule (the 'switchboard')."}
-  - {from: trust-region-filtering, to: absolute-filtering, dimension: convergence, status: self-claimed,
-     claim: "Adaptive trust-region selection outperforms stand-alone absolute filtering.", evidence: "Beats all stand-alone variants over a large quasistatic dataset.", source: "arXiv:2410.10102", assessed_by: self, notes: ""}
+     evidence: "Iteration/acceleration over a large quasistatic dataset.", source: "arXiv:2410.10102", assessed_by: "self; benchmark(world2_filters, validated on P2)", notes: "Unifies Newton/clamp/absolute as one adaptive rule. BENCHMARK (results/world2_filters.md): on the locking-free P2 element trust-region BEATS both clamp and absolute (39 vs 53/41 it at nu=0.4999) -- VALIDATED. But on locking P1 it tracks the WORSE component (absolute) because locking wrecks the quadratic-model fit -> qualified: the switchboard advantage is real but discretization-conditional (control C1)."}
+  - {from: trust-region-filtering, to: absolute-filtering, dimension: convergence, status: qualified,
+     claim: "Adaptive trust-region selection outperforms stand-alone absolute filtering.", evidence: "Beats all stand-alone variants over a large quasistatic dataset.", source: "arXiv:2410.10102", assessed_by: "self; benchmark(world2_filters)", notes: "BENCHMARK (results/world2_filters.md): on P2 trust-region beats absolute (39 vs 41 it at nu=0.4999) -- validated; on locking P1 it degrades TO absolute (identical, both bad). Qualified: discretization-conditional."}
   - {from: trust-region-filtering, to: full-newton, dimension: robustness, status: self-claimed,
      claim: "Recovers full-Newton convergence when the model fits, without its indefiniteness failures.", evidence: "Unification argument + experiments.", source: "arXiv:2410.10102", assessed_by: self, notes: ""}
   - {from: pitfalls-projection, to: clamp-filtering, dimension: convergence, status: qualified,
