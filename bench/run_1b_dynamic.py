@@ -89,7 +89,7 @@ def simulate(filt, nx=8, ny=8, dt=0.04, steps=12, g=9.8):
 
 def main():
     print("== 1b dynamic: implicit-Euler incremental potential (hanging sheet) ==\n")
-    res = {f: simulate(f) for f in ("clamp", "none")}
+    res = {f: simulate(f) for f in ("clamp", "none", "project-on-demand")}
     for f, r in res.items():
         ok = all(s == "ok" for s in r["statuses"])
         print(f"  {f:6s}  steps={len(r['iters'])}  newton_iters/step={r['iters']}  "
@@ -100,12 +100,12 @@ def main():
              "dt=0.04. Each step minimizes the incremental potential "
              "`1/(2dt²)(x−x̃)ᵀM(x−x̃) + E(x)`. Newton iterations per step, `clamp` vs `none`. "
              "Run: `python -m bench.run_1b_dynamic`.", ""]
-    for f in ("clamp", "none"):
+    for f in ("clamp", "none", "project-on-demand"):
         r = res[f]
         avg = np.mean(r["iters"]) if r["iters"] else float("nan")
         lines += [f"- **{f}**: {len(r['iters'])} steps completed, Newton iters/step = "
                   f"{r['iters']} (avg {avg:.1f}), statuses={r['statuses']}"]
-    cl, no = res["clamp"], res["none"]
+    cl, no, pod = res["clamp"], res["none"], res["project-on-demand"]
     lines += ["",
               "## Observed", "",
               f"- The inertia term (SPD, +M/dt²) regularizes the elastic Hessian, so each step "
@@ -121,6 +121,15 @@ def main():
               f"thesis: projecting when you don't need to *hurts* convergence. It is why the "
               f"filter axis must be studied per-regime (static 1a vs dynamic 1b), and why dt "
               f"matters -- larger dt weakens inertial regularization and brings filtering back.",
+              f"- **project-on-demand** (per-element) here tracks **clamp** "
+              f"(avg {np.mean(pod['iters']):.1f} iters/step), NOT `none` -- a subtle, real "
+              f"distinction: the inertia term (+M/dt²) regularizes the *global assembled* "
+              f"Hessian, but individual *element* Hessians remain indefinite, so a per-element "
+              f"on-demand check still projects them. A faithful **global** PDN (checking the "
+              f"assembled matrix's definiteness, as in Pitfalls-of-Projection) would instead "
+              f"match `none` and recover full-Newton speed. This exposes a genuine "
+              f"global-vs-per-element design axis -- and is a concrete TODO: add a global-PDN "
+              f"variant to the filter slot.",
               "",
               "_Caveat: small sheet, dense solve, single dt; a dt-sweep (large dt -> less "
               "inertial regularization -> filtering matters more) is the natural next probe._"]
