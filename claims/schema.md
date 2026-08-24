@@ -47,6 +47,21 @@ non-penetration) · `generality` (range of energies/meshes/materials) · `scalab
 - `refuted` — contradicted by evidence (`assessed_by`/`notes` cite it).
 - `unmeasured` — **out of scope of the v1 benchmark by construction, so no measurement was even attempted here** (distinct from `self-claimed`, which *could* be measured in v1 but hasn't been). All World-3 (contact-coupled) edges are `unmeasured`: decision D4 defers contact to v2, so v1 makes *no* measured contact claim. Machine-readable rule: an edge is `unmeasured` iff either endpoint node has `world: 3`. Do not read an `unmeasured` edge as a leaderboard result — it is the paper's own assertion, awaiting a v2 contact track.
 
+### `guarantee_preserved` — (World-3 edges only) does the source keep IPC's contact guarantee?
+IPC's core contribution is a **binary** guarantee: intersection- and inversion-free trajectories
+*by construction* at every iterate. A "faster/better" arrow that **drops or weakens** that
+guarantee is not comparable to IPC on IPC's own axis — it lives in a different capability cell
+(taxonomy Face-B: feasibility goal). So every World-3 edge carries:
+- `"yes"` — keeps the barrier + CCD guarantee-by-construction (the IPC family, incl. reduced-space
+  variants like ABD/Medial-IPC and barrier variants like the cubic barrier).
+- `"approx"` — relaxes it: satisfied only at convergence / empirically / within a tolerance, not by
+  construction (augmented-Lagrangian `barrier-aug-lagrangian`, offset-geometry `ogc`, and
+  `barrier-free-elastodynamics`, which claims *empirical parity* robustness, not a guarantee).
+- `"n/a"` — the comparison is orthogonal to the non-penetration guarantee.
+
+A speed edge with `guarantee_preserved: "approx"` must **not** be read as "beats IPC" without the
+asterisk that it also changed what is guaranteed.
+
 ### Conventions
 - A "method" node may be a **baseline family** (e.g. `clamp-filtering`, `projected-newton`,
   `local-global`) even if no single paper "owns" it — needed as a claim target.

@@ -193,6 +193,13 @@ flowchart LR
 > ⚠️ **Every edge in this World-3 diagram is `unmeasured`** (dotted): v1 benchmarks no contact
 > (decision D4 → v2). These are the papers' self-claims, shown for map completeness only — **not**
 > a measured contact leaderboard.
+>
+> Each World-3 edge also carries **`guarantee_preserved`** (`schema.md`): whether the source keeps
+> IPC's intersection/inversion-free guarantee *by construction*. **15 edges = `"yes"`** (IPC family,
+> incl. ABD/Medial-IPC/cubic-barrier); **7 = `"approx"`** — they *change what is guaranteed*
+> (`barrier-aug-lagrangian` ALM, `ogc` offset-geometry, `barrier-free-elastodynamics`). A speed win
+> tagged `"approx"` is **not** a like-for-like beat of IPC: it also relaxed the guarantee. Those 7
+> belong to a different capability cell, not the same leaderboard.
 
 *Two comparison regimes: **fair** = same barrier / same GPU, vary the inner solve (GIPC's 3×
 eigensystem, StiffGIPC & Barrier-Aug-Lagrangian vs GIPC). **Confounded / capability-only** =
