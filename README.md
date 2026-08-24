@@ -120,7 +120,7 @@ Tracked in [GitHub issues](../../issues). Phases follow `docs/design.md` §11.
 | phase | what | state |
 |---|---|---|
 | **P0 — design & curation** | taxonomy, corpus, metrics, harness architecture, protocol freeze, experiment specs, claims graph | ✅ **complete** (this repo) |
-| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the eigenvalue-filter ablation (E1) + E2/E4/E5 | ⬜ next |
+| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the eigenvalue-filter ablation (E1) + E2/E4/E5 | 🟡 **started** — [`bench/`](bench/) prototype + first measured [E1 result](results/e1.md) |
 | **P2 — 1a + feasibility** | distortion accelerators + injectivity suites; BCQN triple-split (E3); full performance profiles | ⬜ |
 | **P3 — paper + release** | write the STAR; release harness as living-benchmark seed (closed/open divisions, hidden tier) | ⬜ |
 | **v2 — contact + learned** | Track-2 contact via the scenario layer; learned-accelerator companion track | ⬜ |
