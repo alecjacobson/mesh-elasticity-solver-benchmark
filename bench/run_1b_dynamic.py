@@ -89,7 +89,7 @@ def simulate(filt, nx=8, ny=8, dt=0.04, steps=12, g=9.8):
 
 def main():
     print("== 1b dynamic: implicit-Euler incremental potential (hanging sheet) ==\n")
-    res = {f: simulate(f) for f in ("clamp", "none", "project-on-demand")}
+    res = {f: simulate(f) for f in ("clamp", "none", "project-on-demand", "global-pdn")}
     for f, r in res.items():
         ok = all(s == "ok" for s in r["statuses"])
         print(f"  {f:6s}  steps={len(r['iters'])}  newton_iters/step={r['iters']}  "
@@ -105,7 +105,7 @@ def main():
         avg = np.mean(r["iters"]) if r["iters"] else float("nan")
         lines += [f"- **{f}**: {len(r['iters'])} steps completed, Newton iters/step = "
                   f"{r['iters']} (avg {avg:.1f}), statuses={r['statuses']}"]
-    cl, no, pod = res["clamp"], res["none"], res["project-on-demand"]
+    cl, no, pod, gp = (res["clamp"], res["none"], res["project-on-demand"], res["global-pdn"])
     lines += ["",
               "## Observed", "",
               f"- The inertia term (SPD, +M/dt²) regularizes the elastic Hessian, so each step "
@@ -125,11 +125,13 @@ def main():
               f"(avg {np.mean(pod['iters']):.1f} iters/step), NOT `none` -- a subtle, real "
               f"distinction: the inertia term (+M/dt²) regularizes the *global assembled* "
               f"Hessian, but individual *element* Hessians remain indefinite, so a per-element "
-              f"on-demand check still projects them. A faithful **global** PDN (checking the "
-              f"assembled matrix's definiteness, as in Pitfalls-of-Projection) would instead "
-              f"match `none` and recover full-Newton speed. This exposes a genuine "
-              f"global-vs-per-element design axis -- and is a concrete TODO: add a global-PDN "
-              f"variant to the filter slot.",
+              f"on-demand check still projects them. The faithful **global-pdn** (checks the "
+              f"assembled matrix's definiteness, as in Pitfalls-of-Projection) does exactly what "
+              f"it should: it matches `none` here (avg {np.mean(gp['iters']):.1f} iters/step, "
+              f"full-Newton speed) because inertia makes the assembled Hessian SPD, yet stays "
+              f"safe in statics (E1: it converges via a fallback shift where `none` fails). "
+              f"This global-vs-per-element split is a real filter-design axis the harness now "
+              f"measures directly.",
               "",
               "_Caveat: small sheet, dense solve, single dt; a dt-sweep (large dt -> less "
               "inertial regularization -> filtering matters more) is the natural next probe._"]

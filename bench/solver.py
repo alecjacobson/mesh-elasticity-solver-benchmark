@@ -83,6 +83,13 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
         if filt == "identity-shift":
             d, _, nf = _spd_shift_solve(Hff, gf)
             counts["factorizations"] += nf; counts["lin_solves"] += 1
+        elif filt == "global-pdn":
+            counts["lin_solves"] += 1
+            try:                                    # try true Newton; project (shift) only if indefinite
+                L = np.linalg.cholesky(Hff); counts["factorizations"] += 1
+                d = np.linalg.solve(L.T, np.linalg.solve(L, -gf))
+            except np.linalg.LinAlgError:
+                d, _, nf = _spd_shift_solve(Hff, gf); counts["factorizations"] += nf
         else:
             counts["factorizations"] += 1; counts["lin_solves"] += 1
             try:

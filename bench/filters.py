@@ -10,7 +10,7 @@ solver, since it is not a per-element operation. See claims/claims.yaml for the 
 import numpy as np
 
 PER_ELEMENT = ("none", "clamp", "absolute", "project-on-demand")
-GLOBAL = ("identity-shift",)
+GLOBAL = ("identity-shift", "global-pdn")   # global-pdn: project (shift) only if assembled H is indefinite
 ALL = PER_ELEMENT + GLOBAL
 
 
