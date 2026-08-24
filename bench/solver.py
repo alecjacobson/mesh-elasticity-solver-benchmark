@@ -84,8 +84,14 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
               "factorizations": 0, "mat_vecs": 0}
     t0 = time.perf_counter()
     status = "maxiter"
+    tr_rho = 1.0                                  # trust-region model-fit ratio (filt="trust-region")
+    TR_EPS = 0.01
     for it in range(max_iter):
-        E, g, H = assemble(x, tris, Bs, areas, filt, eterms); counts["assemblies"] += 1
+        # trust-region eigenvalue filtering (Chen et al. 2024): global per-step choice --
+        # clamp when the quadratic model fit ok (|rho-1|<=eps), else absolute.
+        eff = (("clamp" if abs(tr_rho - 1.0) <= TR_EPS else "absolute")
+               if filt == "trust-region" else filt)
+        E, g, H = assemble(x, tris, Bs, areas, eff, eterms); counts["assemblies"] += 1
         if not np.isfinite(E):
             status = "infeasible"; break
         gf = g[free]
@@ -137,6 +143,10 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
                 x[free] = xf0; status = "linesearch"; break
         if status == "linesearch":
             break
+        if filt == "trust-region":                # update model-fit ratio for NEXT iteration
+            p = alpha * d
+            pred = -(float(gf @ p) + 0.5 * float(p @ (Hff @ p)))
+            tr_rho = ((E - En) / pred) if pred > 1e-30 else 1.0
     wall = time.perf_counter() - t0
     Efin = log[-1]["energy"] if log else np.inf
     gfin = log[-1]["grad_inf"] if log else np.inf
