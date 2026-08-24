@@ -85,6 +85,8 @@ taxonomy → capability cells → tiered problem classes
 | [`docs/paper-outline.md`](docs/paper-outline.md) | STAR-style survey+benchmark paper structure and figure plan |
 | [`docs/corpus.md`](docs/corpus.md) | Annotated corpus (~180 entries) across Worlds 0–3, with axis tags, comparability notes, code availability |
 | [`claims/`](claims/) | **Superiority-claims graph** — machine-readable edges (`claims.yaml`) + rendered Mermaid graph ([`claims/README.md`](claims/README.md)) + [`schema`](claims/schema.md) + [hardening ledger](claims/hardening.md) |
+| [`bench/`](bench/) | Prototype **component-factored harness** (Python/NumPy): energy/filter/direction/line-search/solver/criterion slots, conformance-gated |
+| [`results/`](results/) | **Measured** decomposition-experiment outputs (E1, E1ν, data profiles, E4, E5, 1b dynamic, locking) — see [`results/README.md`](results/README.md) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Conventions for **humans and agents** adding papers, claims, and findings |
 
 ## The superiority-claims graph
@@ -120,7 +122,7 @@ Tracked in [GitHub issues](../../issues). Phases follow `docs/design.md` §11.
 | phase | what | state |
 |---|---|---|
 | **P0 — design & curation** | taxonomy, corpus, metrics, harness architecture, protocol freeze, experiment specs, claims graph | ✅ **complete** (this repo) |
-| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the eigenvalue-filter ablation (E1) + E2/E4/E5 | 🟡 **started** — [`bench/`](bench/) prototype + first measured [E1 result](results/e1.md) |
+| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the eigenvalue-filter ablation (E1) + E2/E4/E5 | 🟡 **in progress** — [`bench/`](bench/) prototype runs [E1, E1ν, data profiles, E4, E5, 1b-dynamic, locking](results/); next: locking-free element, more filters, sparse solve, official-code regression |
 | **P2 — 1a + feasibility** | distortion accelerators + injectivity suites; BCQN triple-split (E3); full performance profiles | ⬜ |
 | **P3 — paper + release** | write the STAR; release harness as living-benchmark seed (closed/open divisions, hidden tier) | ⬜ |
 | **v2 — contact + learned** | Track-2 contact via the scenario layer; learned-accelerator companion track | ⬜ |

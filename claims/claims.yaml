@@ -102,8 +102,8 @@ edges:
   - {from: absolute-filtering, to: clamp-filtering, dimension: convergence, status: qualified,
      claim: "Absolute eigenvalue filtering needs fewer Newton iterations than clamping for Neo-Hookean / volume-preserving energies.",
      evidence: "~2.5× avg iteration speedup on 593 TetWild/Thingi10k meshes; clamping fails (>200 iters) on 11× stretch at ν=0.4999 while abs stays stable.",
-     source: "arXiv:2406.05928", assessed_by: self,
-     notes: "Author-stated regime limit: for small deformation (esp. compression) abs can slightly damp convergence vs clamping. Benchmark control C1 (locking-free element) needed — ν-edge may be confounded by locking."}
+     source: "arXiv:2406.05928", assessed_by: "self; benchmark(E1nu, locking-confounded)",
+     notes: "Author-stated regime limit: for small deformation (esp. compression) abs can slightly damp convergence vs clamping. Our E1nu probe (bench/, results/e1_nu.md): on displacement-P1 elements absolute UNDER-performed clamp as nu->1/2 (234it vs non-convergent at nu=0.4999) — consistent with a volumetric-LOCKING confound, NOT a filter refutation; the crossed-mesh probe (results/locking.md) shifts the gap, and settling this needs a locking-free element (control C1)."}
   - {from: absolute-filtering, to: clamp-filtering, dimension: robustness, status: self-claimed,
      claim: "Stabilizes optimization at high Poisson ratio (→0.5) and large volume change where clamping gives poor descent.",
      evidence: "Stability at ν∈[0.45,0.5); large negative eigenvalues when λ~100μ coincide with large J−1.", source: "arXiv:2406.05928", assessed_by: self, notes: ""}
@@ -121,7 +121,7 @@ edges:
   - {from: pitfalls-projection, to: clamp-filtering, dimension: convergence, status: qualified,
      claim: "Unconditional PSD projection (clamping) reduces asymptotic convergence rate vs classical Newton and breaks affine invariance; PDN recovers it.",
      evidence: "Controlled ablation on hyperelastic + contact incremental potentials, dissecting resolution/element-order/projection/material/BCs.",
-     source: "arXiv:2311.14526", assessed_by: corpus, notes: "Independent study (not the clamp authors) → qualifies clamp's implicit convergence claim. Degradation is asymptotic/regime; clamping still aids robustness far from the solution."}
+     source: "arXiv:2311.14526", assessed_by: "corpus; benchmark(1b-dynamic)", notes: "Independent study (not the clamp authors) → qualifies clamp's implicit convergence claim. Degradation is asymptotic/regime; clamping still aids robustness far from the solution. Our 1b dynamic probe (bench/, results/1b_dynamic.md) is consistent: with inertial regularization (SPD +M/dt^2) unfiltered Newton converged in FEWER iterations than clamp — i.e. projecting when unneeded hurts, exactly this paper's thesis."}
   - {from: pitfalls-projection, to: full-newton, dimension: robustness, status: self-claimed,
      claim: "Project-on-Demand Newton keeps Projected-Newton robustness where classical Newton fails.", evidence: "PDN robust where unprojected Newton diverges; Kinetic Newton avoids projection via regularization.", source: "arXiv:2311.14526", assessed_by: self, notes: "Entangled: hybrid combines robustness + convergence axes."}
   - {from: progressively-projected-newton, to: clamp-filtering, dimension: convergence, status: qualified,

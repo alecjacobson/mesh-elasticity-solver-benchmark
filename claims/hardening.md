@@ -69,6 +69,26 @@ Captured verbatim from the papers; E4 will convert or `qualify` them:
 | E4 1st-vs-2nd-order | fixed-budget sim edges → converged or qualified |
 | E5 criterion sensitivity | meta-annotate every speed/convergence edge |
 
+## Benchmark-hardened (P1 prototype, `bench/` + `results/`)
+
+First edges annotated with *our own* measured evidence (`assessed_by` now includes `benchmark`):
+
+- **`absolute-filtering → clamp-filtering` (convergence)** — our E1ν probe (`results/e1_nu.md`)
+  found absolute *under*-performing clamp on displacement-P1 elements as ν→½. Status stays
+  `qualified` (NOT refuted): this is the **volumetric-locking confound** (the crossed-mesh probe
+  `results/locking.md` shifts the gap), and settling the claim needs a locking-free element
+  (control C1). The benchmark's contribution here is *identifying the confound*, not ruling.
+- **`pitfalls-projection → clamp-filtering` (convergence)** — our 1b dynamic probe
+  (`results/1b_dynamic.md`) is consistent: with inertial regularization, unfiltered Newton
+  converged in *fewer* iterations than clamp, i.e. projecting-when-unneeded hurts — this paper's
+  thesis, reproduced in miniature. Stays `qualified`, now with `benchmark(1b-dynamic)` evidence.
+
+General P1 finding feeding future hardening: unfiltered full Newton (`none`) fails 25–58% of
+static instances (`results/profiles.md`) — quantitative support that *some* Hessian modification
+is necessary (the shared premise under the whole eigenvalue-filtering cohort). The *ranking among*
+filters remains regime- and criterion-dependent (E5, E1ν), so those edges stay `qualified` pending
+the locking-free + more-filters runs.
+
 ## Bookkeeping rules
 
 - One edge = one `(from,to,dimension)`; harden in place, never duplicate.
