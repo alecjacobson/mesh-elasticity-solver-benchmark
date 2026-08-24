@@ -73,11 +73,14 @@ Captured verbatim from the papers; E4 will convert or `qualify` them:
 
 First edges annotated with *our own* measured evidence (`assessed_by` now includes `benchmark`):
 
-- **`absolute-filtering → clamp-filtering` (convergence)** — our E1ν probe (`results/e1_nu.md`)
-  found absolute *under*-performing clamp on displacement-P1 elements as ν→½. Status stays
-  `qualified` (NOT refuted): this is the **volumetric-locking confound** (the crossed-mesh probe
-  `results/locking.md` shifts the gap), and settling the claim needs a locking-free element
-  (control C1). The benchmark's contribution here is *identifying the confound*, not ruling.
+- **`absolute-filtering → clamp-filtering` (convergence)** — **SETTLED** (`results/p2_nu.md`).
+  On P1 elements absolute under-performs clamp and *fails* at ν=0.4999; but on a locking-relieved
+  **P2 (quadratic) element**, from the same init, absolute **matches and beats** clamp near
+  incompressibility (41 vs 53 it at ν=0.4999). So the P1 "refutation" is a **volumetric-locking
+  artifact** and the paper's claim is **validated once a proper discretization is used**. Status
+  stays `qualified` only because it is conditional on a non-locking element. This is the benchmark
+  doing its core job: separating a real solver effect from a discretization confound (via the
+  crossed-mesh probe `results/locking.md` and the definitive P1-vs-P2 experiment).
 - **`pitfalls-projection → clamp-filtering` (convergence)** — our 1b dynamic probe
   (`results/1b_dynamic.md`) is consistent: with inertial regularization, unfiltered Newton
   converged in *fewer* iterations than clamp, i.e. projecting-when-unneeded hurts — this paper's

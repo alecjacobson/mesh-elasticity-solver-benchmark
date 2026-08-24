@@ -21,6 +21,7 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | LS | linear-solver axis (direct vs CG) | [`ls.md`](ls.md) | same Newton iterations, but **wall-clock ranks the two solvers oppositely across scenarios** while the mat-vec count stays consistent — rank on the HW-independent count, not wall-clock |
 | TR | trust-region vs filtering | [`tr.md`](tr.md) | classical **trust-region (Steihaug-CG, no filter) converges across the whole ν-sweep** — incl. ν=0.4999 where absolute fails — supporting the lineage claim that filtering ≈ modified-Newton/trust-region |
 | LSrch | line-search axis (null result) | [`linesearch.md`](linesearch.md) | backtracking ≡ full-step for clamp-projected Newton — a strong filter makes the **line-search axis inert** (axes interact); it becomes decisive only for first-order/aggressive steps |
+| **P2** ⭐ | **settling the ν-claim (P1 vs P2 element)** | [`p2_nu.md`](p2_nu.md) | **on P1 absolute fails vs clamp; on a locking-relieved P2 element absolute matches/BEATS clamp** — the P1 result was a discretization artifact; the paper's claim is validated once locking is removed |
 
 ## What these already demonstrate for the benchmark's thesis
 
@@ -50,14 +51,14 @@ python -m bench.run_scaling      # scaling   -> scaling.md
 python -m bench.run_ls           # LS axis   -> ls.md
 python -m bench.run_tr           # trust-region -> tr.md
 python -m bench.run_linesearch   # line-search -> linesearch.md
+python -m bench.run_p2_nu        # SETTLE ν-claim (P1 vs P2) -> p2_nu.md
 ```
 
 ## Honest limitations (→ next P1 steps)
 
 Dense solve (small meshes); 2D only; filters = {none, clamp, absolute, project-on-demand,
 identity-shift, global-pdn} + a trust-region (Steihaug-CG) solver (analytic-eigensystem, eigenvalue-blending not yet);
-**no locking-free element** (so the ν-claim is not settled —
-only shown to be locking-confounded); single scenario/seed for most experiments; no official-code
+a locking-relieving **P2 element now settles the ν-claim** (a fully locking-free Taylor–Hood P2–P1 is future work); single scenario/seed for most experiments; no official-code
 regression yet (grounding is the FD conformance test). Sparse solve, a Taylor–Hood/MINI
 locking-free element, more filters, and porting an official reference (TinyAD/libigl) are the
 next steps (`docs/experiments.md`, `docs/protocol.md`).
