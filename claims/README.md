@@ -12,7 +12,15 @@ dimension. Each edge is *hardened* from `self-claimed` toward `validated` / `qua
 
 ## Stats
 
-- **159 edges**, **80 nodes**. Status: **143 self-claimed**, **16 qualified**, 0 validated, 0 refuted (hardening is issue #5).
+- **159 edges**, **80 nodes**. Status: **138 self-claimed**, **20 qualified**, **1 validated**, 0 refuted — being hardened by the benchmark (`bench/`, `results/`).
+
+**Benchmark-hardened so far** (`assessed_by: benchmark`; see [`hardening.md`](hardening.md)):
+- `anderson-geometry → local-global` — **validated** (Anderson 11 it vs local-global 17 it, mesh-independent; `results`/world1).
+- `absolute-filtering → clamp-filtering` — **qualified/settled**: P1 "refutation" is a locking artifact; on the P2 element absolute matches/beats clamp (`results/p2_nu.md`).
+- `trust-region-filtering → {clamp, absolute}` — **qualified**: on P2 trust-region beats both; on locking P1 it degrades to absolute (`results/world2_filters.md`).
+- `aqp → l-bfgs` — **qualified/unreproduced**: AQP loses to a well-implemented L-BFGS; the ×200 was a MATLAB-baseline confound (`results/e2.md`).
+- `bcqn → l-bfgs` — **qualified**: the Sobolev-preconditioning component helps only in the ill-conditioned regime (`results/e2.md`).
+- `pitfalls-projection → clamp-filtering` — **qualified**: consistent with the 1b-dynamic result (projecting-when-unneeded hurts).
 - Dimensions: speed 55 · convergence 36 · robustness 35 · quality 13 · generality 10 · scalability 9 · simplicity 1.
 - Most-targeted baselines: `full-newton` (13), `ipc` (11), `xpbd` (10), `slim` (9), `clamp-filtering` (7), `l-bfgs` (7).
 
