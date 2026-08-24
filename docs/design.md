@@ -207,7 +207,8 @@ HOBAK (Dynamic Deformables). Governance template: MLPerf closed/open divisions.
   benchmark numbers are always *measured against a validated implementation*, never asserted.
   This neutralizes the implementation-quality confound (a reimplementation that matches official
   code isolates the *algorithm*, not its C++), while keeping official code as both the port
-  target and the correctness oracle.
+  target and the correctness oracle. **First instance DEMONSTRATED (bench/check_libigl.py):** our
+  symmetric-Dirichlet solve reaches the same minimizer as libigl's SLIM to ~1e-9.
 - **D4 — Contact: LOCKED → defer to v2.** v1 is contact-free (Worlds 1–2). Track 2 is a v2
   extension; v1 harness must be *architected* to admit it (contact as a pluggable scenario
   layer + capability-track metrics) without a rewrite.

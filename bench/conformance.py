@@ -45,12 +45,32 @@ def check_global_gradient(nx=4, ny=4, h=1e-6, tol=1e-5, seed=1):
     return rel, rel < tol
 
 
+def check_energy_reference(n=2000, tol=1e-12, seed=2):
+    """Regression against the CANONICAL symmetric-Dirichlet definition (singular-value form
+    sigma1^2+sigma2^2+1/sigma1^2+1/sigma2^2 -- the energy libigl's SLIM implements as
+    igl.SYMMETRIC_DIRICHLET), via an independent SVD code path. This is the D3 'official-
+    reference' grounding for the energy: our Frobenius-based psi must equal the published
+    definition to machine precision, not merely be self-consistent under finite differences."""
+    rng = np.random.default_rng(seed)
+    worst = 0.0
+    for _ in range(n):
+        F = np.eye(2) + 0.4 * rng.standard_normal((2, 2))
+        if np.linalg.det(F) <= 0.05:
+            continue
+        s = np.linalg.svd(F, compute_uv=False)
+        ref = s[0] ** 2 + s[1] ** 2 + 1 / s[0] ** 2 + 1 / s[1] ** 2
+        worst = max(worst, abs(psi(F) - ref) / abs(ref))
+    return worst, worst < tol
+
+
 def run():
     r1, ok1 = check_grad_psi()
     r2, ok2 = check_global_gradient()
+    r3, ok3 = check_energy_reference()
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
-    ok = ok1 and ok2
+    print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
+    ok = ok1 and ok2 and ok3
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 

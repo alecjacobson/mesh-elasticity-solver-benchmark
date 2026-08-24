@@ -8,7 +8,8 @@ the finished benchmark.
 ## Run
 
 ```bash
-python -m bench.conformance      # grounding: analytic derivatives vs finite differences
+python -m bench.conformance      # grounding: FD derivatives + canonical symmetric-Dirichlet
+python -m bench.check_libigl     # OFFICIAL-CODE regression vs libigl SLIM (optional; needs libigl)
 python -m bench.test_smoke       # fast invariant checks (also run in CI)
 # experiments -> results/*.md
 python -m bench.run_e1           # E1 filter isolation (symmetric Dirichlet)
@@ -37,10 +38,13 @@ python -m bench.run_linesearch   # line-search axis (backtracking vs full-step)
 | **scenario** | grid + crossed (union-jack) meshes, pinned/stretched BCs, perturbation & dynamic (`mesh.py`, run scripts) |
 
 Metrics are computed **from the per-iteration telemetry log** (energy, \|g\|, wall-clock,
-assemblies, linear-solves, factorizations, mat-vecs, nnz) — never hand-reported. The
-conformance test (`conformance.py`) is the admissibility gate: for the classical analytic
-energy, matching finite differences *is* the reference until an official codebase (TinyAD /
-libigl) is ported for regression (D3).
+assemblies, linear-solves, factorizations, mat-vecs, nnz) — never hand-reported. Grounding
+(D3), strongest first: (1) **official-code regression** — our symmetric-Dirichlet solve reaches
+the **same minimum as libigl's SLIM** to ~1e-9 (`check_libigl.py`); (2) **canonical-definition
+regression** — our `psi` equals the published singular-value symmetric-Dirichlet form to machine
+precision (`conformance.py`); (3) **finite-difference** self-consistency of all analytic
+derivatives (`conformance.py`, incl. the P2 element). A component is admissible only when its
+grounding checks pass.
 
 ## Deliberately NOT yet done (tracked)
 
