@@ -7,9 +7,8 @@
 
 **Status:** 🚧 **Design complete (P0); prototype harness running with measured results (P1).**
 Full *survey design*, *annotated corpus*, *taxonomy*, *metric*/*protocol* specs, *harness
-architecture*, and a *superiority-claims graph* (80 nodes, 159 edges) — plus a runnable
-conformance-gated [`bench/`](bench/) harness covering **all six taxonomy axes** and **12
-measured experiments** ([`results/`](results/)). See [Status & roadmap](#status--roadmap).
+architecture*, and a *superiority-claims graph* (81 nodes, 160 edges) — plus a runnable
+conformance-gated [`bench/`](bench/) harness covering **all six taxonomy axes** and **19 measured experiments** ([`results/`](results/)). See [Status & roadmap](#status--roadmap).
 
 > **🔑 Worked example — the benchmark disentangling a live claim (2D, indicative).** A recent
 > SIGGRAPH paper claims *absolute* eigenvalue filtering beats *clamping* near incompressibility.
