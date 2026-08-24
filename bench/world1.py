@@ -93,7 +93,7 @@ def solve_aqp(x0, tris, rest, free_dof, eta=100.0, max_iter=3000, tol=1e-6, c=1e
     gfin = log[-1]["grad_inf"] if log else np.inf
     return {"filter": "aqp", "status": status, "iters": len(log) - (1 if status == "converged" else 0),
             "final_energy": Efin, "final_grad_inf": gfin, "wall_s": time.perf_counter() - t0,
-            "counts": counts, "x": x.reshape(-1)}
+            "counts": counts, "x": x.reshape(-1), "log": log}
 
 
 def solve_sobolev_lbfgs(x0, tris, rest, free_dof, m=5, max_iter=3000, tol=1e-6, c=1e-4):
