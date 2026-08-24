@@ -197,8 +197,17 @@ HOBAK (Dynamic Deformables). Governance template: MLPerf closed/open divisions.
 - **D2 — v1 anchor: LOCKED → full solver spine (Track 1a + 1b).** Both clean ablations —
   distortion accelerators AND eigenvalue filtering — for the broader survey story. Two metric
   regimes to standardize.
-- **D3 — Implementation strategy:** DEFERRED by user (do not fixate yet). Options recorded:
-  single common harness (reimplement) vs wrap author code vs hybrid+validate.
+- **D3 — Implementation strategy: LOCKED → common-harness reimplementation, official-code-first,
+  regression-tested.** One shared framework of hot-swappable components. Each component is
+  reimplemented in the harness but **uses / references the official codebase wherever one
+  exists**, and is **regression-tested against that official reference (or an independent
+  oracle: PETSc SNES/TAO, FEniCS, deal.II step-44)** before it may enter a comparison.
+  Trajectory: components become increasingly **agent-generated** under the same
+  grounding+regression rule — a component with no passing regression test is inadmissible, and
+  benchmark numbers are always *measured against a validated implementation*, never asserted.
+  This neutralizes the implementation-quality confound (a reimplementation that matches official
+  code isolates the *algorithm*, not its C++), while keeping official code as both the port
+  target and the correctness oracle.
 - **D4 — Contact: LOCKED → defer to v2.** v1 is contact-free (Worlds 1–2). Track 2 is a v2
   extension; v1 harness must be *architected* to admit it (contact as a pluggable scenario
   layer + capability-track metrics) without a rewrite.
@@ -218,8 +227,11 @@ seed of a living benchmark. The paper's *punchline* is honest attribution, not a
   {energy ψ, search direction, eigenvalue filter, line search, linear solver, convergence
   criterion}. A benchmark *config* = a point in this component space; the "closed division" =
   same skeleton, swap one slot. Must expose a scenario layer (mesh/BCs/energy/tolerance) so
-  v2 contact drops in as a scenario, not a fork. Implementation choice (D3) deferred, but the
-  architecture is not.
+  v2 contact drops in as a scenario, not a fork. Per D3: each slot implementation is
+  **official-code-first + regression-tested** against the official reference / oracle; a
+  component ships with its regression test (a **conformance suite**: match the official code's
+  iterates/energy to tolerance on canonical inputs) so agent-generated components are admissible
+  only when they pass. Metric layer per `docs/metrics.md`.
 - **W3 — Problem sets & tiers.**
   - *1a:* symmetric Dirichlet, free-boundary UV, shared mesh set curated from Thingi10K +
     Shay–Solomon–Stein 2022; feasibility sub-suite on Du-2020 (11,647). Easy/typical/adversarial
@@ -238,11 +250,14 @@ seed of a living benchmark. The paper's *punchline* is honest attribution, not a
       the solver. Declare up front whether load stepping is permitted, apply it uniformly, and
       **do not score divergence at a limit/snap-through point as a solver failure** — that's a
       wrong-parametrization artifact (needs arc-length), not a solver defect.
-- **W4 — Metric standardization.** One criterion per suite (characteristic gradient norm for
-  1a; Newton decrement for 1b). Report converged wall-clock + fixed-budget error + failure
-  counts. Aggregate with performance/data profiles (Dolan–Moré; Gould–Scott: multiple metrics,
-  drop-the-winner, no single-profile ranking for >2). Equal tuning budget. Wall-clock is the
-  only cross-cluster-honest cost; iterations never pooled across first/second-order.
+- **W4 — Metric standardization.** Full deliberation in [`metrics.md`](metrics.md) — the
+  over-complete candidate list curated to a per-capability-cell orthogonal core. Backbone: one
+  convergence criterion per suite (characteristic gradient norm for 1a; Newton decrement for
+  1b); pair a **hardware-dependent** cost (wall-clock) with a **hardware-independent** proxy
+  (linear-solves / matrix-vector products) so GPU-vs-CPU can't masquerade as algorithmic; report
+  converged cost + fixed-budget error + failure counts; aggregate with performance/data profiles
+  (Dolan–Moré; Gould–Scott caveats: multiple metrics, drop-the-winner, no single-profile ranking
+  for >2). Equal tuning budget. Iterations never pooled across first/second-order.
 - **W5 — Method roster** (from corpus, code-released first as fair-reimpl targets / oracles):
   - *1a direction/accelerator ablation:* AQP, SLIM, Composite Majorization, BCQN, Anderson,
     ABCD, Splitting/ADMM, analytic-Hessian projected Newton (TinyAD-backed). Feasibility:

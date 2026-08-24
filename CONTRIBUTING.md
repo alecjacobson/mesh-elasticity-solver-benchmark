@@ -5,9 +5,15 @@ Markdown / YAML** so it renders on GitHub and stays diff-friendly.
 
 ## Ground rules
 
-1. **Agents extract and organize; they do not invent numerics.** LLM agents are used for
-   corpus breadth, self-claim extraction, and cross-checking — never to generate solver
-   implementations or fabricate benchmark numbers.
+1. **Grounded implementations, never fabricated numbers.** *Current phase:* agents do corpus
+   breadth, self-claim extraction, and cross-checking — not solver code. *Trajectory:* the
+   benchmark harness is a common framework of **hot-swappable components** (energy / search
+   direction / Hessian filter / line search / linear solver / criterion), and components will
+   increasingly be **agent-generated**. The invariant that never relaxes: every implementation
+   is **grounded in official code where it exists** and **regression-tested against that
+   official reference (or an independent oracle)** before it enters a comparison; benchmark
+   numbers are always *measured*, never asserted by a model. An agent-written component with no
+   passing regression test against an official/oracle result is not admissible.
 2. **Cite or flag.** Every factual claim carries a source, or a `[?]` uncertainty flag. Do not
    silently upgrade a `[?]`; verify it, then remove the flag in the same commit.
 3. **Inclusion ≠ endorsement.** The claims graph records *authors' assertions*. A claim is

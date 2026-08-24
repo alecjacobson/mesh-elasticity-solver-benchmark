@@ -96,9 +96,13 @@ produces data. See [`claims/README.md`](claims/README.md).
 
 ## How this is built
 
-Progress is tracked in **GitHub issues**; commits reference the issue they address. Research
-and extraction are done by a mix of human curation and **LLM agents** (used for corpus breadth
-and claim extraction — never for generating numerical implementations). See
+Progress is tracked in **GitHub issues**; commits reference the issue they address. Today,
+research and extraction are done by a mix of human curation and **LLM agents** (corpus breadth
++ claim extraction). The benchmark harness is a **common framework of hot-swappable
+components**; components are reimplemented **from official code where it exists** and
+**regression-tested against that official reference (or an independent oracle)** — and will
+increasingly be **agent-generated** under that same rule. The invariant: benchmark numbers are
+always *measured against a validated implementation*, never asserted by a model. See
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Caveats
