@@ -17,5 +17,7 @@ jobs:
         run: python -m bench.conformance
       - name: p2 element conformance
         run: python -m bench.p2
+      - name: 3D tet conformance
+        run: python -m bench.tet
       - name: smoke test
         run: python -m bench.test_smoke
