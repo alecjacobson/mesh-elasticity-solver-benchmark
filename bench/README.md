@@ -8,7 +8,8 @@ conformance test. This is the start of P1, not the finished benchmark.
 
 ```bash
 python -m bench.conformance   # grounding: analytic derivatives vs finite differences
-python -m bench.run_e1        # experiment E1 (filter isolation) -> writes results/e1.md
+python -m bench.run_e1        # E1 filter isolation (symmetric Dirichlet) -> results/e1.md
+python -m bench.run_e1_nu     # E1 near-incompressible nu-sweep (Neo-Hookean)  -> results/e1_nu.md
 ```
 
 ## What's implemented (World-1 static distortion cell)

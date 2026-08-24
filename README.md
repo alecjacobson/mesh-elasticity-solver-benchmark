@@ -5,11 +5,11 @@
 > IPC-style contact — mostly from the SIGGRAPH literature (~2010–2025), placed against the
 > classical optimization, computational-mechanics, and ML-optimizer canon.
 
-**Status:** 🚧 **Design & curation complete (phase P0); harness implementation (P1) next.**
-This repo holds the full *survey design*, the *annotated corpus*, the *taxonomy*, the *metric*
-and *protocol* specs, the *harness architecture*, and a *superiority-claims graph* (80 nodes,
-159 edges). What remains is building the component-factored harness and running the
-decomposition experiments. See [Status & roadmap](#status--roadmap).
+**Status:** 🚧 **Design & curation complete (P0); harness prototype running (P1 started).**
+This repo holds the full *survey design*, *annotated corpus*, *taxonomy*, *metric* and
+*protocol* specs, *harness architecture*, and a *superiority-claims graph* (80 nodes, 159
+edges) — plus a runnable [`bench/`](bench/) prototype producing the first measured
+[decomposition-experiment results](results/). See [Status & roadmap](#status--roadmap).
 
 ---
 
