@@ -2,11 +2,21 @@
 
 Uses libigl's SLIM as the OFFICIAL SLIM implementation (D3 official-code-first). All methods
 minimize the same symmetric-Dirichlet energy; we compare on a FAIR shared criterion --
-iterations to reach a relative energy tolerance (E-E*)/(E0-E*) < 1e-4 -- since SLIM (like AQP)
-is a first-order proxy whose gradient tail differs from its energy convergence. Optional (needs
-libigl). Writes results/slim.md.
+iterations to reach a relative energy tolerance (E-E*)/(E0-E*) < 1e-4.
+
+SLIM is a *reweighted* (IRLS / Gauss-Newton) proxy -- NOT a first-order method like AQP; it
+refactorizes a global system each iteration. Two confounds the reviewer (review-r1 #35) flagged
+and this runner now addresses explicitly:
+  1. SOFT vs HARD constraints: libigl SLIM pins the boundary with a soft penalty (soft_p=1e8),
+     while our AQP/L-BFGS/Newton use hard pinned BCs, and E* is a hard-constrained Newton minimum.
+     -> We MEASURE the SLIM boundary drift ||UV[b]-bc||inf and report it; if it is negligible the
+        soft penalty ~ hard BC and the shared elastic-energy metric + hard E* are fair.
+  2. Iterations hide per-iteration cost. -> We report wall-clock AND a HW-independent cost
+     (global factorizations: SLIM and Newton refactorize each iter; AQP prefactors ONCE; L-BFGS 0).
+Optional (needs libigl). Writes results/slim.md.
 """
 import os
+import time
 import numpy as np
 
 
@@ -38,7 +48,7 @@ def main():
     rn = solve(x0, tris, Bs, areas, free, "clamp", eterms=sd, tol=1e-8)
     Estar = rn["final_energy"]; E0 = energy_only(x0, tris, Bs, areas, sd)
 
-    # official libigl SLIM, per-iteration energy
+    # official libigl SLIM, per-iteration energy + boundary drift + wall-clock
     bmask = ~free[0::2]; bidx = np.where(bmask)[0].astype(np.int32)
     bc = rest[bidx].astype(np.float64)
     V3 = np.hstack([rest, np.zeros((rest.shape[0], 1))]).astype(np.float64)
@@ -51,6 +61,7 @@ def main():
         if len(slim_E) > 1 and abs(slim_E[-1] - slim_E[-2]) < 1e-13:
             break
     slim_it = _iters_to_energy(slim_E, E0, Estar)
+    slim_drift = float(np.max(np.abs(UV[bidx] - bc)))   # boundary-constraint satisfaction
 
     # our methods, per-iteration energy from their logs
     ra = world1.solve_aqp(x0, tris, rest, free, max_iter=4000, tol=1e-7)
@@ -59,31 +70,84 @@ def main():
     lb_it = _iters_to_energy([e["energy"] for e in rl["log"]], E0, Estar)
     nw_it = _iters_to_energy([e["energy"] for e in rn["log"]], E0, Estar)
 
-    rows = [("SLIM (libigl, official)", slim_it), ("AQP", aqp_it),
-            ("L-BFGS", lb_it), ("Newton", nw_it)]
-    print("iters to (E-E*)/(E0-E*) < 1e-4  (E*=%.6f):" % Estar)
-    for name, it in rows:
-        print(f"  {name:24s} {it}")
+    # FAIR wall-clock: time each method TO THE ENERGY TOLERANCE (truncated to its *_it), not the
+    # full solve to gradient-tol (AQP's gradient tail is ~100x the work past the energy tol).
+    def _time_slim(k):
+        d = igl.slim_precompute(V3, tris.astype(np.int32), x0.reshape(-1, 2).astype(np.float64),
+                                igl.SYMMETRIC_DIRICHLET, bidx, bc, 1e8)
+        t = time.perf_counter()
+        for _ in range(max(k, 1)):
+            igl.slim_solve(d, 1)
+        return time.perf_counter() - t
 
+    def _time(fn):
+        t = time.perf_counter(); fn(); return time.perf_counter() - t
+
+    slim_wall = _time_slim(slim_it) if slim_it else None
+    aqp_wall = _time(lambda: world1.solve_aqp(x0, tris, rest, free, max_iter=aqp_it, tol=0.0)) if aqp_it else None
+    lb_wall = _time(lambda: solve_lbfgs(x0, tris, Bs, areas, free, element_eg, max_iter=lb_it, tol=0.0)) if lb_it else None
+    nw_wall = _time(lambda: solve(x0, tris, Bs, areas, free, "clamp", eterms=sd, max_iter=nw_it, tol=0.0)) if nw_it else None
+
+    # HW-independent cost: global factorizations to reach the tol (AQP prefactors once; L-BFGS none;
+    # SLIM & Newton refactorize per iteration).
+    rows = [
+        ("SLIM (libigl, official)", slim_it, slim_wall, slim_it),
+        ("AQP", aqp_it, aqp_wall, 1),
+        ("L-BFGS", lb_it, lb_wall, 0),
+        ("Newton", nw_it, nw_wall, nw_it),
+    ]
+    print("iters / wall / factorizations to (E-E*)/(E0-E*) < 1e-4  (E*=%.6f):" % Estar)
+    for name, it, wall, nf in rows:
+        w = f"{wall*1e3:.1f} ms" if wall else "n/a"
+        print(f"  {name:24s} it={it}  wall={w}  factorizations={nf}")
+    print(f"SLIM boundary drift ||UV[b]-bc||inf = {slim_drift:.2e}")
+
+    fair = slim_drift < 1e-6
     lines = ["# SLIM (official libigl) vs AQP / L-BFGS / Newton (measured)", "",
              "All minimize symmetric Dirichlet; SLIM is libigl's official implementation. Fair "
              "shared criterion: iterations to reach relative energy tolerance "
-             "`(E-E*)/(E0-E*) < 1e-4`. Run: `python -m bench.run_slim` (needs libigl).", "",
-             f"E\\* = {Estar:.6f} (Newton reference), E₀ = {E0:.4f}.", "",
-             "| method | iters to energy-tol |", "|---|---|"]
-    for name, it in rows:
-        lines.append(f"| {name} | {it} |")
-    lines += ["", "## Observed", "",
-              f"- **SLIM ({slim_it} it) dramatically beats AQP ({aqp_it} it)** to the same energy "
-              f"tolerance -- validating `slim->aqp` with the OFFICIAL libigl SLIM. SLIM's "
-              f"reweighted (second-order-ish) proxy converges far faster than AQP's fixed "
-              f"Laplacian proxy + momentum on this problem.",
-              f"- SLIM is competitive with L-BFGS ({lb_it}) and approaches Newton ({nw_it}) in "
-              f"iterations here. (Unlike the aqp->l-bfgs claim, `slim->aqp` reproduces.)",
+             "`(E-E*)/(E0-E*) < 1e-4`, **paired with wall-clock and a HW-independent cost "
+             "(global factorizations)** per docs/metrics.md. Run: `python -m bench.run_slim` "
+             "(needs libigl).", "",
+             f"E\\* = {Estar:.6f} (hard-constrained Newton reference), E₀ = {E0:.4f}.", "",
+             "| method | iters to energy-tol | wall (ms) | global factorizations |",
+             "|---|---|---|---|"]
+    for name, it, wall, nf in rows:
+        w = f"{wall*1e3:.1f}" if wall else "—"
+        lines.append(f"| {name} | {it} | {w} | {nf} |")
+    lines += ["", "## Constraint-satisfaction check (soft-vs-hard confound)", "",
+              f"SLIM pins the boundary with a **soft** penalty (`soft_p=1e8`); the other methods use "
+              f"**hard** pinned BCs and `E*` is the hard-constrained minimum. Measured SLIM boundary "
+              f"drift `||UV[b] − bc||∞ = {slim_drift:.2e}` "
+              + ("(**negligible** — the stiff penalty effectively enforces the hard BC, so the shared "
+                 "elastic-energy metric and hard `E*` are fair for SLIM)."
+                 if fair else
+                 "(**non-negligible** — the soft penalty lets the boundary drift, so SLIM is solving a "
+                 "slightly different problem; treat the head-to-head as indicative, not exact).") ,
+              "", "## Observed", "",
+              f"- **On the HW-independent axis (iterations / factorizations) `slim->aqp` reproduces:** "
+              f"SLIM reaches the tol in **{slim_it} iterations** vs AQP's **{aqp_it}**, with the "
+              f"OFFICIAL libigl SLIM. SLIM is a **reweighted (IRLS / Gauss-Newton) second-order-ish "
+              f"proxy** that refactorizes a global system each iteration -- *not* a first-order method "
+              f"like AQP; that is why it needs far fewer iterations.",
+              f"- **⚠️ Do NOT read the raw wall-clock across the SLIM row:** libigl SLIM is compiled "
+              f"**C++**, our AQP/L-BFGS/Newton are pure **Python/NumPy**. SLIM does the *same* "
+              f"{slim_it} iterations and {rows[0][3]} factorizations as Newton yet reports ~{nw_wall/slim_wall:.0f}× "
+              f"less wall-clock -- that gap is the **compiled-vs-interpreted implementation confound**, "
+              f"not an algorithmic property. Wall-clock is only comparable *within* the Python group "
+              f"(there L-BFGS {lb_wall*1e3:.0f}ms < Newton {nw_wall*1e3:.0f}ms < AQP {aqp_wall*1e3:.0f}ms).",
+              f"- **The real SLIM-vs-AQP tradeoff is factorizations vs iterations:** SLIM does "
+              f"**{rows[0][3]} full factorizations**; AQP does **1** (it prefactors its fixed Laplacian "
+              f"once) plus {aqp_it} cheap back-solves; L-BFGS does **0**. On small meshes a factorization "
+              f"is cheap so SLIM's few-factorization route wins; as the mesh grows and factorization "
+              f"dominates, AQP's single-factorization route becomes relatively more attractive -- so the "
+              f"iteration-count win does not by itself settle wall-clock at scale (mesh-independence "
+              f"untested here, #29).",
               "",
-              "_Caveat: SLIM uses soft constraints (soft_p=1e8); energy-tolerance criterion (SLIM "
-              "and AQP are first-order in the gradient tail); single scenario. Official-code SLIM "
-              "grounds this comparison (D3)._"]
+              "_Caveat: energy-tolerance criterion; single 8×8 scenario/seed; SLIM's scale- and "
+              "mesh-independence and no-flip headlines are NOT tested here (see #29). Official-code "
+              "SLIM grounds this comparison (D3), but the C++/Python wall-clock boundary means the "
+              "HW-independent counts carry the verdict, not raw milliseconds._"]
     os.makedirs("results", exist_ok=True)
     with open("results/slim.md", "w") as f:
         f.write("\n".join(lines) + "\n")

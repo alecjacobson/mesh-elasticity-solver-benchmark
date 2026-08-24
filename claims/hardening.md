@@ -109,6 +109,7 @@ the locking-free + more-filters runs.
 | edge | dim | verdict | evidence |
 |---|---|---|---|
 | anderson-geometry → local-global | convergence | **validated (2D)** | Anderson 12 it vs local-global 23 it on a non-trivial sheared-target ARAP, mesh-independent, same min; wall-clock speedup < iter speedup (anderson) |
+| slim → aqp | speed | **validated (HW-independent)** | official libigl SLIM 5 it vs AQP 19 (boundary drift 4e-16 clears the soft/hard confound). Wall-clock C++/Python-confounded → counts carry it; real tradeoff 5 factorizations vs AQP's 1 (slim) |
 | absolute-filtering → clamp-filtering | convergence | **qualified (indicative, 2D)** | P1 "refutation" consistent with locking; on locking-relieved P2 absolute matches/beats clamp (p2_nu). Crossed-mesh probe non-monotone; single 2D scenario |
 | trust-region-filtering → clamp-filtering | convergence | **qualified** | P2: TR beats clamp; P1: degrades to absolute — but P1 is locking-confounded, so non-attributable (world2_filters) |
 | trust-region-filtering → absolute-filtering | convergence | **qualified** | P2: TR beats absolute; P1: identical (world2_filters) |
