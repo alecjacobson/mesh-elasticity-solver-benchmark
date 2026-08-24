@@ -5,8 +5,11 @@
 > IPC-style contact — mostly from the SIGGRAPH literature (~2010–2025), placed against the
 > classical optimization, computational-mechanics, and ML-optimizer canon.
 
-**Status:** 🚧 pre-execution design & corpus. This repo currently holds the *survey design*,
-the *annotated corpus*, and a *superiority-claims graph*. The benchmark harness comes next.
+**Status:** 🚧 **Design & curation complete (phase P0); harness implementation (P1) next.**
+This repo holds the full *survey design*, the *annotated corpus*, the *taxonomy*, the *metric*
+and *protocol* specs, the *harness architecture*, and a *superiority-claims graph* (80 nodes,
+159 edges). What remains is building the component-factored harness and running the
+decomposition experiments. See [Status & roadmap](#status--roadmap).
 
 ---
 
@@ -109,6 +112,23 @@ components**; components are reimplemented **from official code where it exists*
 increasingly be **agent-generated** under that same rule. The invariant: benchmark numbers are
 always *measured against a validated implementation*, never asserted by a model. See
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## Status & roadmap
+
+Tracked in [GitHub issues](../../issues). Phases follow `docs/design.md` §11.
+
+| phase | what | state |
+|---|---|---|
+| **P0 — design & curation** | taxonomy, corpus, metrics, harness architecture, protocol freeze, experiment specs, claims graph | ✅ **complete** (this repo) |
+| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the eigenvalue-filter ablation (E1) + E2/E4/E5 | ⬜ next |
+| **P2 — 1a + feasibility** | distortion accelerators + injectivity suites; BCQN triple-split (E3); full performance profiles | ⬜ |
+| **P3 — paper + release** | write the STAR; release harness as living-benchmark seed (closed/open divisions, hidden tier) | ⬜ |
+| **v2 — contact + learned** | Track-2 contact via the scenario layer; learned-accelerator companion track | ⬜ |
+
+Open issues map to remaining P0 tails (consolidated taxonomy table #1, per-stratum mesh curation
+#2, concrete slot signatures #3, claims long-tail #4) and to P1+ execution (claim hardening #5,
+experiment runs #7, paper draft #8). Decisions resolved: D1 (paper→living-benchmark, phased),
+D2 (full 1a+1b spine), D3 (official-code-first, regression-tested harness), D4 (contact→v2).
 
 ## Caveats
 
