@@ -53,14 +53,33 @@ which published superiority claims survive confound control.
    profiles), and the frozen protocol (strata, controls C1/C2, reference protocol, equal budget,
    no per-problem tuning). (Sources: `harness.md`, `metrics.md`, `protocol.md`.)
 
-8. **Results — the decomposition experiments (E1–E5).** Filter isolation; seed-claim
-   decomposition; BCQN triple-split; first-vs-second-order wall-clock inversion; criterion
-   sensitivity. Each reported as attributed-vs-confound-borne, with the claims-graph edges it
-   hardened. (Source: `experiments.md`.) **This section is the paper's reason to exist.**
+8. **Results — the decomposition experiments.** **This section is the paper's reason to exist.**
+   Prototype-harness (`bench/`, `results/`) measurements already in hand (each with the
+   claims-graph edge it touches):
+   - **Filter isolation + the ν-claim settled** — on P1 constant-strain elements absolute
+     filtering under-performs clamp and fails at ν=0.4999; on a locking-relieved **P2** element
+     absolute matches/beats clamp — the P1 result was a **volumetric-locking artifact**; the
+     Stabler-Neo-Hookean claim is *validated* once locking is removed (`results/p2_nu.md`,
+     `results/locking.md`). *The benchmark separating a real solver effect from a discretization
+     confound is the paper's headline.*
+   - **First- vs second-order** — Newton wins iterations but **L-BFGS wins wall-clock** (skips
+     Hessian); full-batch **Adam plateaus** (honesty control) (`results/e4.md`).
+   - **Criterion sensitivity** — 3 different "fastest" filters across 4 criteria (`results/e5.md`).
+   - **Linear-solver axis** — same outer iterations; wall-clock ranks solvers *oppositely* across
+     scenarios while mat-vec counts stay consistent; unpreconditioned CG mat-vecs grow ~√DOFs,
+     Jacobi-PCG reduces it (`results/ls.md`, `results/scaling.md`).
+   - **Filtering ≈ trust region** — classical Steihaug-CG (no filter) converges across the whole
+     ν-sweep, incl. where absolute fails — supporting the lineage claim (`results/tr.md`).
+   - **Regime & axis interaction** — inertia makes filtering optional in dynamics
+     (`results/1b_dynamic.md`); a strong filter makes the line-search axis inert
+     (`results/linesearch.md`). *Full-scale reruns (official-code ports, 3D, E2/E3 seed splits)
+     are the remaining work; the prototype already demonstrates every headline effect.*
 
-9. **What survived.** The hardened claims graph as the summary contribution: which decade-old
-   superiority claims are `validated`, which are `qualified` (and by what regime), which are
-   `refuted`. Reflection on how much published advantage was confound-borne.
+9. **What survived.** The hardened claims graph (`claims/hardening.md`) as the summary
+   contribution: which decade-old superiority claims are `validated` (e.g. absolute≥clamp on a
+   proper element), `qualified` (regime/discretization-conditional), or `refuted`. Reflection on
+   how much published advantage was confound-borne — with the ν-claim as the worked example of a
+   result that *reverses* once a discretization confound is controlled.
 
 10. **Open problems & the living benchmark.** Contact track (v2); learned-accelerator companion
     track; the hidden-tier governance; what the community should standardize.
@@ -84,4 +103,6 @@ surrogates/PINNs are excluded from the core) stated once, tied to the scope ledg
 ## Status / mapping to issues
 
 Each section maps to a doc already in the repo; drafting = lifting + tightening those into prose.
-Blocked only on: benchmark *results* (E1–E5 need the harness, P1) for §8–9. §2–7 are writable now.
+§2–7 writable now; **§8–9 now have prototype data** (`bench/` + `results/`, 12 experiments incl.
+the ν-claim settled via the P2 element). Remaining for a full paper: official-code-regression
+ports, 3D, E2/E3 seed-method splits, and larger-scale reruns.
