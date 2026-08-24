@@ -5,11 +5,20 @@
 > IPC-style contact — mostly from the SIGGRAPH literature (~2010–2025), placed against the
 > classical optimization, computational-mechanics, and ML-optimizer canon.
 
-**Status:** 🚧 **Design & curation complete (P0); harness prototype running (P1 started).**
-This repo holds the full *survey design*, *annotated corpus*, *taxonomy*, *metric* and
-*protocol* specs, *harness architecture*, and a *superiority-claims graph* (80 nodes, 159
-edges) — plus a runnable [`bench/`](bench/) prototype producing the first measured
-[decomposition-experiment results](results/). See [Status & roadmap](#status--roadmap).
+**Status:** 🚧 **Design complete (P0); prototype harness running with measured results (P1).**
+Full *survey design*, *annotated corpus*, *taxonomy*, *metric*/*protocol* specs, *harness
+architecture*, and a *superiority-claims graph* (80 nodes, 159 edges) — plus a runnable
+conformance-gated [`bench/`](bench/) harness covering **all six taxonomy axes** and **12
+measured experiments** ([`results/`](results/)). See [Status & roadmap](#status--roadmap).
+
+> **🔑 Worked example — the benchmark settling a live claim.** A recent SIGGRAPH paper claims
+> *absolute* eigenvalue filtering beats *clamping* near incompressibility. On standard P1
+> constant-strain elements our harness finds the **opposite** (absolute is slower and *fails* at
+> ν=0.4999). But that's a **volumetric-locking artifact of the element**: on a locking-relieved
+> **P2** element, absolute **matches and beats** clamp — *validating the paper's claim*. The
+> benchmark separated a real solver effect from a discretization confound — [see
+> `results/p2_nu.md`](results/p2_nu.md). This is exactly the entanglement the project exists to
+> untangle, demonstrated end-to-end.
 
 ---
 
