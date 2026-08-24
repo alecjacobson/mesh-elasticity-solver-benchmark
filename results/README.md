@@ -48,8 +48,9 @@ python -m bench.run_scaling      # scaling   -> scaling.md
 
 ## Honest limitations (→ next P1 steps)
 
-Dense solve (small meshes); 2D only; filters = {none, clamp, absolute, identity-shift} (trust-region,
-analytic-eigensystem, PPN not yet); **no locking-free element** (so the ν-claim is not settled —
+Dense solve (small meshes); 2D only; filters = {none, clamp, absolute, project-on-demand,
+identity-shift, global-pdn} (trust-region, analytic-eigensystem, eigenvalue-blending not yet);
+**no locking-free element** (so the ν-claim is not settled —
 only shown to be locking-confounded); single scenario/seed for most experiments; no official-code
 regression yet (grounding is the FD conformance test). Sparse solve, a Taylor–Hood/MINI
 locking-free element, more filters, and porting an official reference (TinyAD/libigl) are the
