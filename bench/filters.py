@@ -4,11 +4,23 @@ Per-element filters project a 6x6 element Hessian to (near-)SPD via its eigensys
   - none            : identity (raw Hessian; full Newton -- may be indefinite)
   - clamp           : lambda -> max(lambda, eps)          [Teran 2005 / analytic-eigensystems]
   - absolute        : lambda -> max(|lambda|, eps)        [Stabler Neo-Hookean 2024]
-The global filter (identity-shift / Levenberg) is applied to the assembled matrix in the
-solver, since it is not a per-element operation. See claims/claims.yaml for the edges E1 hardens.
+Global filters act on the ASSEMBLED matrix in the solver:
+  - identity-shift : Levenberg tau*I shift (a modified-Newton globalization, NOT a projection)
+  - global-pdn     : the FAITHFUL projected Newton -- try Cholesky (true Newton when SPD), else
+                     eigendecompose the assembled Hessian and clamp its eigenvalues (a true PSD
+                     PROJECTION of the global operator, not an identity shift).
+
+NAMING NOTE (review-r1 #39): the per-element `project-on-demand` is a *per-element* on-demand
+variant (project only the elements whose 6x6 block is indefinite). It is NOT the faithful
+"Projected Newton" of the Pitfalls-of-Projection literature, which projects the ASSEMBLED Hessian
+-- that is `global-pdn`. Read `project-on-demand` as "per-element-on-demand"; when comparing
+against the Pitfalls thesis use `global-pdn`. (The string is kept stable so existing results
+remain reproducible.) See claims/claims.yaml for the edges E1 hardens.
 """
 import numpy as np
 
+# 'project-on-demand' == per-element-on-demand (see NAMING NOTE above); the faithful assembled
+# Projected Newton is the GLOBAL filter 'global-pdn'.
 PER_ELEMENT = ("none", "clamp", "absolute", "project-on-demand")
 GLOBAL = ("identity-shift", "global-pdn", "trust-region")  # trust-region: adaptive clamp/absolute per step
 ALL = PER_ELEMENT + GLOBAL

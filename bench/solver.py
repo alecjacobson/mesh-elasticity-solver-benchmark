@@ -61,6 +61,17 @@ def _cg_solve(Hff, gf, counts, rtol=1e-9, maxiter=5000):
     return d
 
 
+def _spd_project_solve(Hff, gf, eps=1e-9):
+    """Faithful ASSEMBLED PSD projection (global projected Newton): eigendecompose the assembled
+    Hessian, clamp its eigenvalues to eps, and solve. This is the true 'project the global Hessian'
+    step -- NOT a Levenberg identity-shift (which adds tau*I, a different operator). Returns
+    (d, n_factorizations); the eigendecomposition is the dominant O(n^3) op, counted as one."""
+    w, V = np.linalg.eigh(Hff)
+    w = np.maximum(w, eps)
+    d = V @ ((V.T @ (-gf)) / w)
+    return d, 1
+
+
 def _spd_shift_solve(Hff, gf):
     """Levenberg identity-shift; returns (d, tau, n_factorizations)."""
     n = Hff.shape[0]
@@ -112,11 +123,11 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
             counts["factorizations"] += nf; counts["lin_solves"] += 1
         elif filt == "global-pdn":
             counts["lin_solves"] += 1
-            try:                                    # try true Newton; project (shift) only if indefinite
-                L = np.linalg.cholesky(Hff); counts["factorizations"] += 1
-                d = np.linalg.solve(L.T, np.linalg.solve(L, -gf))
-            except np.linalg.LinAlgError:
-                d, _, nf = _spd_shift_solve(Hff, gf); counts["factorizations"] += nf
+            try:                                    # true Newton when SPD; else PROJECT the assembled
+                L = np.linalg.cholesky(Hff); counts["factorizations"] += 1  # Hessian's eigenvalues
+                d = np.linalg.solve(L.T, np.linalg.solve(L, -gf))           # (faithful global PDN,
+            except np.linalg.LinAlgError:                                   # not a Levenberg shift)
+                d, nf = _spd_project_solve(Hff, gf); counts["factorizations"] += nf
         else:
             counts["lin_solves"] += 1
             if linsolver == "cg":            # iterative inner solve (SPD-filtered Hff)
