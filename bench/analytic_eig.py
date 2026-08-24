@@ -157,7 +157,9 @@ def run():
         "we time only `eigh + clamp + reassemble` — NOT a finite-difference Hessian assembly. The "
         "analytic path is timed from `F` (`svd + closed-form + clamp + reassemble`). Excluding H "
         "assembly from the numeric timing *favours* the numeric path (the analytic route never "
-        "assembles the raw Hessian), so the multiplier below is a **conservative lower bound**. "
+        "assembles the raw Hessian); the **sign of the bias depends on how the alternative builds H** "
+        "— against an autodiff/FD Hessian the analytic route wins, against a free assembled H it does "
+        "not, so this is not a one-directional 'conservative bound'. "
         "Run: `python -m bench.analytic_eig`.",
         "",
         "| dim | eigenvalues vs FD (rel) | projection vs numeric (rel) | analytic (svd+closed-form) | numeric (eigh only) | analytic/numeric |",

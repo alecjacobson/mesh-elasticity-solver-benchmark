@@ -1,11 +1,11 @@
 # Analytic eigensystems vs numeric eigendecomposition (measured)
 
-Hardens `analytic-eigensystems -> numeric`. Closed-form SPD projection (Smith-de Goes-Kim 2019) vs `numpy.linalg.eigh`. **Fair baseline (review-r1 #37):** the numeric path consumes the *analytically assembled exact Hessian* (assembled once, outside the timed region) and we time only `eigh + clamp + reassemble` — NOT a finite-difference Hessian assembly. The analytic path is timed from `F` (`svd + closed-form + clamp + reassemble`). Excluding H assembly from the numeric timing *favours* the numeric path (the analytic route never assembles the raw Hessian), so the multiplier below is a **conservative lower bound**. Run: `python -m bench.analytic_eig`.
+Hardens `analytic-eigensystems -> numeric`. Closed-form SPD projection (Smith-de Goes-Kim 2019) vs `numpy.linalg.eigh`. **Fair baseline (review-r1 #37):** the numeric path consumes the *analytically assembled exact Hessian* (assembled once, outside the timed region) and we time only `eigh + clamp + reassemble` — NOT a finite-difference Hessian assembly. The analytic path is timed from `F` (`svd + closed-form + clamp + reassemble`). Excluding H assembly from the numeric timing *favours* the numeric path (the analytic route never assembles the raw Hessian); the **sign of the bias depends on how the alternative builds H** — against an autodiff/FD Hessian the analytic route wins, against a free assembled H it does not, so this is not a one-directional 'conservative bound'. Run: `python -m bench.analytic_eig`.
 
 | dim | eigenvalues vs FD (rel) | projection vs numeric (rel) | analytic (svd+closed-form) | numeric (eigh only) | analytic/numeric |
 |---|---|---|---|---|---|
-| 2D | 1.4e-10 | 1.5e-15 | 338 ms | 92 ms | **3.65× slower** |
-| 3D | 2.3e-10 | 2.4e-15 | 709 ms | 144 ms | **4.92× slower** |
+| 2D | 1.4e-10 | 1.5e-15 | 343 ms | 93 ms | **3.70× slower** |
+| 3D | 2.3e-10 | 2.4e-15 | 711 ms | 142 ms | **5.00× slower** |
 
 ## Observed (an honest surprise)
 

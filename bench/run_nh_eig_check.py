@@ -91,7 +91,7 @@ def main():
           f"Hessian's eigenvalues match the machine-precision complex-step reference to **~1e-9** "
           f"(it is a central difference of the *analytic* gradient, not FD-of-FD), and the "
           f"**clamp/absolute projection decision flips in {tot_flips} of them**.",
-          ("- **So the FD-based ν-sweep is vindicated:** even though many states have a near-zero "
+          ("- **So the FD-based ν-sweep is robust on this spanning sample:** even though many states have a near-zero "
            "eigenvalue (where clamp and absolute differ), the FD error (~1e-9) is far smaller than "
            "the eigenvalue magnitudes that actually occur, so it never changes which eigenvalues get "
            "projected. The clamp-vs-absolute ranking in `e1_nu`/`stable_nu` is a real solver effect, "

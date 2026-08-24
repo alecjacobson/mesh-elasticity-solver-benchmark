@@ -6,12 +6,12 @@ Hardens the `anderson-geometry -> local-global` edge with a *reproducible* runne
 
 | mesh | free dof | method | status | iters (= back-solves) | wall (ms) | final E |
 |---|---|---|---|---|---|---|
-| 6×6 | 50 | local-global | converged | 23 | 88.7 | 1.2689e-01 |
-| 6×6 | 50 | anderson | converged | 12 | 74.5 | 1.2689e-01 |
-| 9×9 | 128 | local-global | converged | 23 | 195.1 | 1.2689e-01 |
-| 9×9 | 128 | anderson | converged | 12 | 164.2 | 1.2689e-01 |
-| 12×12 | 242 | local-global | converged | 24 | 359.9 | 1.2689e-01 |
-| 12×12 | 242 | anderson | converged | 13 | 336.9 | 1.2689e-01 |
+| 6×6 | 50 | local-global | converged | 23 | 92.9 | 1.2689e-01 |
+| 6×6 | 50 | anderson | converged | 12 | 77.1 | 1.2689e-01 |
+| 9×9 | 128 | local-global | converged | 23 | 201.7 | 1.2689e-01 |
+| 9×9 | 128 | anderson | converged | 12 | 169.5 | 1.2689e-01 |
+| 12×12 | 242 | local-global | converged | 24 | 370.7 | 1.2689e-01 |
+| 12×12 | 242 | anderson | converged | 13 | 317.4 | 1.2689e-01 |
 
 ## Observed
 
@@ -30,4 +30,4 @@ Anderson's defining property is that it accelerates an *arbitrary* fixed-point i
 
 - The same core cuts plain Jacobi's **374** iterations to **62** (m=5, 6.0×) and **37** (m=10, 10.1×) on a map that has *nothing* to do with ARAP — confirming the acceleration is a property of the **generic Anderson core**, not of the local-global map. This is the faithful, general Anderson (Peng et al.): m history, min-norm `lstsq`, energy-decrease safeguard, applied to whatever `G` you hand it.
 
-_Scope: 2D, single seed; the two maps (ARAP local-global + Jacobi linear solve) exercise the generality. Wrapping the official SLIM reweighting as a third map is a natural extension._
+_Scope: 2D, single seed; the two maps (ARAP local-global + Jacobi linear solve) exercise the generality. Wrapping the official SLIM reweighting as a third map is a natural extension. NB the Jacobi map is an SPD quadratic, so the energy-decrease safeguard is near-trivially satisfied -- this demonstrates map-agnosticism of the core, not a stress test of the safeguard (the non-convex ARAP map exercises that)._

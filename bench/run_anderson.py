@@ -161,7 +161,9 @@ def main():
         "",
         "_Scope: 2D, single seed; the two maps (ARAP local-global + Jacobi linear solve) exercise "
         "the generality. Wrapping the official SLIM reweighting as a third map is a natural "
-        "extension._",
+        "extension. NB the Jacobi map is an SPD quadratic, so the energy-decrease safeguard is near-trivially "
+        "satisfied -- this demonstrates map-agnosticism of the core, not a stress test of the safeguard "
+        "(the non-convex ARAP map exercises that)._",
     ]
     with open("results/anderson.md", "w") as f:
         f.write("\n".join(lines) + "\n")

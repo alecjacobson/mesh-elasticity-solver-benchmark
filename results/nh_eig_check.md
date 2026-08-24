@@ -13,7 +13,7 @@ The ν-sweep filters an FD 6×6 element Hessian; clamp and absolute disagree exa
 ## Observed
 
 - Across all ν and **19970 deformation states**, the FD element Hessian's eigenvalues match the machine-precision complex-step reference to **~1e-9** (it is a central difference of the *analytic* gradient, not FD-of-FD), and the **clamp/absolute projection decision flips in 0 of them**.
-- **So the FD-based ν-sweep is vindicated:** even though many states have a near-zero eigenvalue (where clamp and absolute differ), the FD error (~1e-9) is far smaller than the eigenvalue magnitudes that actually occur, so it never changes which eigenvalues get projected. The clamp-vs-absolute ranking in `e1_nu`/`stable_nu` is a real solver effect, not an FD-noise artifact.
+- **So the FD-based ν-sweep is robust on this spanning sample:** even though many states have a near-zero eigenvalue (where clamp and absolute differ), the FD error (~1e-9) is far smaller than the eigenvalue magnitudes that actually occur, so it never changes which eigenvalues get projected. The clamp-vs-absolute ranking in `e1_nu`/`stable_nu` is a real solver effect, not an FD-noise artifact.
 
 - Complex-step differentiation of the analytic gradient is, for this purpose, an **analytic-accuracy eigensystem** (exact to ~1e-15) without deriving the closed-form NH eigenpairs — it is the cheapest faithful reference and could replace the FD Hessian in the sweep wholesale if ever needed.
 

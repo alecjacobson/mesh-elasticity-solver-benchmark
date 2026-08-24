@@ -72,8 +72,9 @@ def main():
               "and the slim/aqp result (AQP's fixed Laplacian proxy is the weakest of the proxy "
               "family on these problems).",
               "- The profile is on the HW-independent iteration budget; it aggregates the E2 "
-              "single-instance findings over a set (Moré-Wild style), showing the ordering is "
-              "stable across meshes/seeds, not an artifact of one instance.",
+              "single-instance findings over a set (Moré-Wild style), showing the *pairwise* orderings are "
+              "consistent across these 6 instances (single run each; no error bars -- descriptive, not a "
+              "validated total order; Gould-Scott caution against N-solver total orders).",
               "- **Read the x-axis as *iterations*, not cost:** a Newton iteration is a full Hessian "
               "factorization while Sobolev-L-BFGS/AQP prefactor once and L-BFGS back-solves only, so "
               "an iteration-budget profile *understates* Newton's per-iteration cost. See the "
