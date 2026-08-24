@@ -16,7 +16,7 @@ dimension. Each edge is *hardened* from `self-claimed` toward `validated` / `qua
 - The **22 `unmeasured`** edges are *all* of World 3 (contact): decision **D4 defers contact to v2**, so v1 makes **no measured contact claim**. They are shown below for completeness but are the papers' own assertions, not benchmark results (machine-readable rule: an edge is `unmeasured` iff either endpoint has `world: 3`). See [`schema.md`](schema.md).
 
 **Benchmark-hardened so far** (`assessed_by: benchmark`; see [`hardening.md`](hardening.md)):
-- `anderson-geometry → local-global` — **validated** (Anderson 11 it vs local-global 17 it, mesh-independent; `results`/world1).
+- `anderson-geometry → local-global` — **validated** (Anderson 12 it vs local-global 23 it on a non-trivial sheared-target ARAP, mesh-independent, same minimum; reproducible `python -m bench.run_anderson`, `results/anderson.md`; wall-clock reported alongside — a smaller speedup than the iteration ratio).
 - `absolute-filtering → clamp-filtering` — **qualified/settled**: P1 "refutation" is a locking artifact; on the P2 element absolute matches/beats clamp (`results/p2_nu.md`).
 - `trust-region-filtering → {clamp, absolute}` — **qualified**: on P2 trust-region beats both; on locking P1 it degrades to absolute (`results/world2_filters.md`).
 - `aqp → l-bfgs` — **qualified/unreproduced**: AQP loses to a well-implemented L-BFGS; the ×200 was a MATLAB-baseline confound (`results/e2.md`).

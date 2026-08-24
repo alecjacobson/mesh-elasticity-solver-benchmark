@@ -255,9 +255,8 @@ def solve_anderson(x0, tris, rest, free_dof, m=5, max_iter=2000, tol=1e-6):
         return float(np.max(np.abs((2.0 * (M @ x - _arap_rhs(x, tris, Bs, areas)))[free])))
 
     x = x0.copy()
-    Gx = G(x); Fk = (Gx - x)[free]
     dF, dG = [], []                                    # rolling buffers of last m differences
-    F_prev, G_prev = Fk.copy(), Gx.copy()
+    F_prev, G_prev = None, None                        # no previous residual yet (no zero seed)
     log = []; t0 = time.perf_counter(); status = "maxiter"; E_acc = En(x)
     for it in range(max_iter):
         gn = gnorm(x)
@@ -265,6 +264,12 @@ def solve_anderson(x0, tris, rest, free_dof, m=5, max_iter=2000, tol=1e-6):
         if gn < tol:
             status = "converged"; break
         Gx = G(x); Fk = (Gx - x)[free]
+        # append a difference only once a genuine previous residual exists (Peng et al.);
+        # seeding from G(x0) before the loop would push a spurious zero column and waste a slot.
+        if F_prev is not None:
+            dF.append(Fk - F_prev); dG.append((Gx - G_prev)[free])
+            if len(dF) > m:
+                dF.pop(0); dG.pop(0)
         if dF:
             D = np.array(dF).T                          # (nfree, k)
             theta, *_ = np.linalg.lstsq(D, Fk, rcond=None)
@@ -277,10 +282,6 @@ def solve_anderson(x0, tris, rest, free_dof, m=5, max_iter=2000, tol=1e-6):
             x_new = x_aa
         else:
             x_new = Gx
-        # update difference buffers
-        dF.append(Fk - F_prev); dG.append((Gx - G_prev)[free])
-        if len(dF) > m:
-            dF.pop(0); dG.pop(0)
         F_prev, G_prev, E_acc = Fk.copy(), Gx.copy(), En(x_new)
         x = x_new
     return {"filter": "anderson", "status": status,

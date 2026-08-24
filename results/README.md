@@ -27,6 +27,7 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | 3Dν | ν-claim in 3D (P1 tets) | [`3d_nu.md`](3d_nu.md) | the P1-locking confound **generalizes to 3D** — absolute under-performs clamp near-incompressible on P1 tets (worse than 2D) |
 | **SLIM** | official libigl SLIM vs AQP | [`slim.md`](slim.md) | to a fair energy-tol **SLIM (5 it) beats AQP (19)** — `slim->aqp` **validated** with official code (unlike `aqp->l-bfgs`, which didn't reproduce) |
 | W1prof | World-1 data profiles | [`world1_profiles.md`](world1_profiles.md) | aggregate ordering over 6 instances: Newton < L-BFGS < Sobolev-L-BFGS/AQP (energy-tol), stable across meshes/seeds |
+| AA | Anderson vs local-global (sheared-target ARAP) | [`anderson.md`](anderson.md) | Anderson **12 it vs 23 it** to the same non-trivial minimum, mesh-independent; **wall-clock speedup < iteration speedup** (lstsq overhead) — history-buffer zero-column bug fixed (#36) |
 
 ## What these already demonstrate for the benchmark's thesis
 
@@ -62,6 +63,7 @@ python -m bench.run_e2           # World-1 accelerators -> e2.md
 python -m bench.run_3d_nu        # 3D ν-claim -> 3d_nu.md
 python -m bench.run_slim         # SLIM vs AQP (official) -> slim.md
 python -m bench.run_world1_profiles # World-1 profiles -> world1_profiles.md
+python -m bench.run_anderson     # Anderson vs local-global -> anderson.md
 python -m bench.analytic_eig     # analytic eigensystem check
 ```
 
