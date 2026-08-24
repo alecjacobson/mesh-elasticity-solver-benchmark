@@ -31,6 +31,7 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | AE | analytic vs numeric eigensystem (2D+3D) | [`analytic_eig.md`](analytic_eig.md) | projection **provably identical** (~1e-15); but with a **fair** baseline the closed form is **~3.7×/5× *slower*** than LAPACK `eigh` — the old "3.3× faster" was FD-assembly cost; the real advantage is autodiff-free SPD projection, not a faster eigensolve (#37) |
 | PoP | Pitfalls: affine-invariance + rate | [`pitfalls.md`](pitfalls.md) | **definitive:** unfiltered Newton affine-invariant (3e-13); clamp/absolute/global-PDN all break it (60.8/0.21/60.8) — projection depends on coordinates, a claim iteration-count can't test (#39) |
 | MI | AQP mesh-independence (design regime) | [`mesh_independence.md`](mesh_independence.md) | **AQP iteration count FLAT (9→6→6) over 5.6× DOFs while L-BFGS grows 16→26→37** — validates AQP's real design claim (mesh-independence) that e2's fixed-resolution comparison missed (#29) |
+| NHeig | NH sweep: FD-vs-complex-step Hessian (clamp/abs decision) | [`nh_eig_check.md`](nh_eig_check.md) | FD eigenvalues match a machine-precision complex-step reference to ~1e-9; the clamp/absolute decision **never flips across ~20k states** — the ν-sweep ranking is a real effect, not FD noise (#32) |
 | SNH | Stable Neo-Hookean absolute-vs-clamp | [`stable_nu.md`](stable_nu.md) | on the **correct** (stable, finite-for-all-J) energy the ν-sweep shows the same locking confound; and in the **inverted-init** regime absolute is designed for (barrier NH is +∞ there) absolute-vs-clamp is a **near-null** — within 1–2 iters, no decisive win (#31) |
 
 ## What these already demonstrate for the benchmark's thesis
@@ -71,6 +72,7 @@ python -m bench.run_anderson     # Anderson vs local-global -> anderson.md
 python -m bench.run_stable_nu    # Stable Neo-Hookean absolute-vs-clamp -> stable_nu.md
 python -m bench.run_pitfalls     # affine-invariance + rate -> pitfalls.md
 python -m bench.run_mesh_independence # AQP mesh-independence -> mesh_independence.md
+python -m bench.run_nh_eig_check  # NH FD-vs-complex-step eig check -> nh_eig_check.md
 python -m bench.analytic_eig     # analytic eigensystem check
 ```
 
