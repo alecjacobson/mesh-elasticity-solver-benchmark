@@ -161,7 +161,7 @@ def solve_sobolev_lbfgs(x0, tris, rest, free_dof, m=5, max_iter=3000, tol=1e-6, 
     return {"filter": "sobolev-lbfgs", "status": status,
             "iters": len(log) - (1 if status == "converged" else 0),
             "final_energy": Efin, "final_grad_inf": gfin, "wall_s": time.perf_counter() - t0,
-            "counts": counts, "x": x}
+            "counts": counts, "x": x, "log": log}
 
 
 # ---------------------------------------------------------------------------
