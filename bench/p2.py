@@ -145,14 +145,27 @@ def solve_p2(x0, elems, quad, free, eterms, filt, max_iter=400, tol=1e-6, c=1e-4
         if float(np.max(np.abs(gf))) < tol:
             status = "converged"; break
         Hff = H[np.ix_(free, free)]
-        try:
-            d = np.linalg.solve(Hff, -gf)
-        except np.linalg.LinAlgError:
-            d = np.linalg.lstsq(Hff, -gf, rcond=None)[0]
-        if float(gf @ d) >= 0 and filt == "trust-region" and tr_w < 1.0:  # re-assemble at w=1 (SPD)
-            tr_w = 1.0
-            _, _, Ha = assemble_p2(x, elems, quad, eterms, "trust-region", tr_w=1.0)
-            Hff = Ha[np.ix_(free, free)]; d = np.linalg.solve(Hff, -gf)
+        if filt == "trust-region" and tr_w == 0.0:
+            # SPD-probe (review-r3 TR#1): raw Newton only if the Hessian is SPD, else clamp
+            try:
+                Lc = np.linalg.cholesky(Hff)
+                d = np.linalg.solve(Lc.T, np.linalg.solve(Lc, -gf))
+            except np.linalg.LinAlgError:
+                tr_w = 0.5
+                _, _, Ha = assemble_p2(x, elems, quad, eterms, "trust-region", tr_w=0.5)
+                Hff = Ha[np.ix_(free, free)]; d = np.linalg.solve(Hff, -gf)
+        else:
+            try:
+                d = np.linalg.solve(Hff, -gf)
+            except np.linalg.LinAlgError:
+                d = np.linalg.lstsq(Hff, -gf, rcond=None)[0]
+        if filt == "trust-region":   # safety net: escalate clamp -> absolute if still non-descent
+            for w_next in (wn for wn in (0.5, 1.0) if wn > tr_w):
+                if float(gf @ d) < 0.0:
+                    break
+                tr_w = w_next
+                _, _, Ha = assemble_p2(x, elems, quad, eterms, "trust-region", tr_w=tr_w)
+                Hff = Ha[np.ix_(free, free)]; d = np.linalg.solve(Hff, -gf)
         gd = float(gf @ d)
         if gd >= 0:
             status = "nondescent"; break
@@ -170,7 +183,7 @@ def solve_p2(x0, elems, quad, free, eterms, filt, max_iter=400, tol=1e-6, c=1e-4
         if filt == "trust-region":
             p = alpha * d
             pred = -(float(gf @ p) + 0.5 * float(p @ (Hff @ p)))
-            tr_rho = ((E - En) / pred) if pred > 1e-30 else 1.0
+            tr_rho = ((E - En) / pred) if pred > 1e-30 else 0.5  # pred<=0: keep conservative clamp, not Newton (review-r3 TR#7)
     return {"filter": filt, "status": status, "iters": it_done,
             "final_energy": E, "wall_s": time.perf_counter() - t0, "x": x}
 

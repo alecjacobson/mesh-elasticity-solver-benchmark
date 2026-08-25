@@ -7,56 +7,56 @@ Neo-Hookean ν-sweep (stretch init), only the filter swapped. **Three axes** per
 | ν | clamp | absolute | trust-region |
 |---|---|---|---|
 | 0.3000 | 4 | 4 | 4 |
-| 0.4500 | 9 | 9 | 7 |
+| 0.4500 | 9 | 9 | 6 |
 | 0.4900 | 44 | 79 | 9 |
-| 0.4990 | 139 | 314 | 100 |
-| 0.4999 | 242 | maxiter | 114 |
+| 0.4990 | 139 | 314 | 69 |
+| 0.4999 | 242 | maxiter | 120 |
 
 _(P2, locking-relieved)_
 
 | ν | clamp | absolute | trust-region |
 |---|---|---|---|
 | 0.3000 | 4 | 4 | 4 |
-| 0.4500 | 9 | 8 | 12 |
-| 0.4900 | 15 | 15 | 22 |
-| 0.4990 | 23 | 23 | 50 |
-| 0.4999 | 53 | 41 | 94 |
+| 0.4500 | 9 | 8 | 9 |
+| 0.4900 | 15 | 15 | 15 |
+| 0.4990 | 23 | 23 | 22 |
+| 0.4999 | 53 | 41 | 52 |
 
 ### Wall-clock (ms)
 
 | ν | clamp | absolute | trust-region |
 |---|---|---|---|
-| 0.3000 | 238 | 201 | 187 |
-| 0.4500 | 425 | 426 | 339 |
-| 0.4900 | 1961 | 3518 | 448 |
-| 0.4990 | 6126 | 13918 | 6309 |
-| 0.4999 | 10737 | 17634 | 7327 |
+| 0.3000 | 205 | 204 | 192 |
+| 0.4500 | 429 | 429 | 322 |
+| 0.4900 | 2369 | 3693 | 511 |
+| 0.4990 | 6433 | 14453 | 4795 |
+| 0.4999 | 11058 | 18285 | 8036 |
 
 _(P2)_
 
 | ν | clamp | absolute | trust-region |
 |---|---|---|---|
-| 0.3000 | 604 | 587 | 557 |
-| 0.4500 | 1282 | 1177 | 1825 |
-| 0.4900 | 2236 | 2122 | 3567 |
-| 0.4990 | 3464 | 3111 | 9978 |
-| 0.4999 | 9031 | 5901 | 20988 |
+| 0.3000 | 642 | 639 | 870 |
+| 0.4500 | 1345 | 1252 | 2084 |
+| 0.4900 | 3275 | 2377 | 3754 |
+| 0.4990 | 3607 | 3301 | 5372 |
+| 0.4999 | 9408 | 6208 | 17088 |
 
 ### Global factorizations (P1 solver; P2 solver does not expose counts)
 
 | ν | clamp | absolute | trust-region |
 |---|---|---|---|
 | 0.3000 | 4 | 4 | 4 |
-| 0.4500 | 9 | 9 | 8 |
-| 0.4900 | 44 | 79 | 11 |
-| 0.4990 | 139 | 314 | 173 |
-| 0.4999 | 242 | 400 | 135 |
+| 0.4500 | 9 | 9 | 6 |
+| 0.4900 | 44 | 79 | 9 |
+| 0.4990 | 139 | 314 | 69 |
+| 0.4999 | 242 | 400 | 120 |
 
-## Observed (round-2 fair-cost re-implementation)
+## Observed (round-3 refined: faithful per-element blend + principled schedule)
 
-Trust-region is now the **faithful PER-ELEMENT three-state blend** λ_eff=(1−w)λ+w|λ|, w∈{0,0.5,1} → {full Newton, clamp, absolute} driven by the global model-fit ratio ρ. It is the **same per-iteration cost** as clamp/absolute (one per-element projection + one factorization) — conformance-gated to equal `filters.project_element` exactly — and **P1 and P2 now use the identical implementation** (the round-1 P1-assembled / P2-per-element split, and the expensive global `eigh`, are gone; review-r2 #42/#44). This changes the verdict:
-- **On P1 (locking): trust-region wins on BOTH axes.** P1 at ν=0.4999: **TR 114 it / 7327 ms** · clamp 242 it / 10737 ms · absolute maxiter it / 17634 ms. TR ≤ both filters on iterations **and** wall-clock here — with a fair per-step cost, the adaptive back-off to raw Newton genuinely helps escape the locking element.
-- **On P2 (locking-relieved): trust-region LOSES to both.** P2 at ν=0.4999: **TR 94 it / 20988 ms** · clamp 53 it / 9031 ms · absolute 41 it / 5901 ms. TR is worse than both clamp and absolute on iterations **and** wall-clock — where the model already fits well, ρ picks w=0 (Newton), which is indefinite at high ν, so each step wastes a failed-Newton attempt before escalating; plain clamp/absolute just converge.
-- **This REVERSES the round-1 P2 story.** Round 1 reported 'TR beats both on P2' — but that used the expensive global **assembled**-`eigh` operator, a *different and costlier* projection than per-element filtering. With the faithful, fair-cost per-element operator the P2 win disappears. So the switchboard's benefit is **discretization-dependent**: it helps on the ill-conditioned/locking element and *hurts* on the well-conditioned one (its ρ-driven adaptivity is counter-productive when the plain filter already converges fast). The `trust-region→{clamp,absolute}` edges stay **qualified/indicative**.
+This filter labelled **trust-region** is a ρ-driven **switchboard** over the per-element eigenvalue blend λ_eff=(1−w)λ+w|λ|, w∈{0,0.5,1} → {Newton, clamp, absolute} — **not** a trust-region *radius* method (that is `solve_trust_region`, `results/tr.md`); it is named by analogy to Chen et al. 2024. Same per-iteration cost as clamp/absolute (conformance-gated to equal `filters.project_element` exactly). The schedule is now principled (review-r3): an **SPD-probe** uses raw Newton only when the assembled Hessian is actually SPD (Cholesky), escalation tries **clamp before absolute**, and pred≤0 keeps clamp — so the verdict below is not an artifact of implementation shortcuts.
+- **On P1 (locking): the switchboard wins.** P1 at ν=0.4999: **TR 120 it / 8036 ms** · clamp 242 it / 11058 ms · absolute maxiter it / 18285 ms. TR ≤ both filters on iterations **and** (now, per-element) wall-clock — the adaptive back-off to raw Newton (when SPD) genuinely helps escape the locking element.
+- **On P2 (locking-relieved): a wash on iterations, penalized on wall-clock.** P2 at ν=0.4999: **TR 52 it / 17088 ms** · clamp 53 it / 9408 ms · absolute 41 it / 6208 ms. The **SPD-probe brought TR's iteration count to parity with clamp** (52 vs 53) — so the *earlier* larger P2 loss was partly bad raw-Newton steps, now fixed. But TR is still ~1.8× **slower than clamp in wall-clock** (the SPD-probe + clamp-before-absolute escalation adds extra per-iteration assemblies), and **absolute is best outright**. So on a well-conditioned element the adaptive switchboard buys nothing over a fixed filter and costs more per step.
+- **Discretization-dependent verdict.** The switchboard clearly **wins on the ill-conditioned/locking P1** element (fewer iterations *and* less wall-clock than both filters), but on the well-conditioned P2 it is **at best a wash** (iteration-parity with clamp, wall-clock-penalized, beaten by absolute) — the adaptivity helps only when the problem is hard. (Round 1's 'TR beats both on P2' was an artifact of a costlier global assembled-`eigh` operator, reversed here.) The `trust-region→{clamp,absolute}` edges stay **qualified/indicative** — a real, regime-dependent finding, not a decisive win.
 
-_Caveat: dense solve, single stretch/mesh/seed, single τ=1e-6 — indicative. ρ→w thresholds ρ≥0.75→Newton, ≤0→absolute, else clamp (untuned; a better schedule might help P2). No official-code regression (code unavailable); the per-element operator is conformance-gated to equal the real clamp/absolute filters (eps=1e-9) exactly._
+_Caveat: dense solve, single stretch/mesh/seed, single τ=1e-6 — indicative. The ρ→w thresholds (≥0.75→Newton, ≤0→absolute, else clamp) are ONE untuned schedule; a smarter schedule could change the P2 outcome, but the ρ-switching *mechanism* is what's measured. Named-by-analogy filter, not a radius-TR; no official-code regression (code unavailable)._

@@ -101,9 +101,12 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
     tr_rho = 1.0                                  # trust-region model-fit ratio (filt="trust-region")
     tr_w = 0.5
     for it in range(max_iter):
-        # trust-region eigenvalue blend (Chen et al. 2024): THREE-STATE, driven by the model-fit
-        # ratio rho. Good fit -> trust the raw Hessian (w=0, full Newton); ok -> clamp (w=0.5);
-        # bad/negative -> absolute (w=1). Assemble the RAW Hessian and blend at eigenvalue level.
+        # "trust-region" filter (Chen et al. 2024): a rho-driven SWITCHBOARD over the eigenvalue
+        # blend w in {0,0.5,1} -> {Newton, clamp, absolute}, NOT a trust-region RADIUS method (the
+        # true Steihaug TR with a radius is solve_trust_region, results/tr.md). Named by analogy to
+        # the paper; it selects a FILTER from the model-fit ratio, with no radius/step-length control.
+        # Good fit -> try raw Newton (w=0), then escalate up the SPD ladder on non-descent; ok ->
+        # clamp (w=0.5); bad -> absolute (w=1). Per-element blend, same cost as clamp/absolute.
         if filt == "trust-region":
             eff = "trust-region"
             tr_w = 0.0 if tr_rho >= 0.75 else (1.0 if tr_rho <= 0.0 else 0.5)
@@ -128,13 +131,24 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
             # Hff is already per-element-blended at tr_w (assembled above) -- a NORMAL solve, the
             # SAME per-iteration cost as clamp/absolute (per-element projection + one factorization),
             # NOT a global assembled eigendecomposition (review-r2 #42/#44 root fix).
-            counts["lin_solves"] += 1; counts["factorizations"] += 1
-            try:
+            counts["lin_solves"] += 1
+            if tr_w == 0.0:
+                # SPD-PROBE (review-r3 TR#1): raw Newton ONLY if the assembled Hessian is actually
+                # SPD (cheap Cholesky). A lagged rho saying 'good model fit' does NOT imply the raw
+                # Hessian is SPD -- near incompressibility it is structurally indefinite, and a poor
+                # raw-Newton descent step there converges slower than clamp. On failure fall to clamp.
+                try:
+                    Lc = np.linalg.cholesky(Hff); counts["factorizations"] += 1
+                    d = np.linalg.solve(Lc.T, np.linalg.solve(Lc, -gf))
+                except np.linalg.LinAlgError:
+                    tr_w = 0.5
+                    _, _, Ha = assemble(x, tris, Bs, areas, "trust-region", eterms, tr_w=0.5)
+                    counts["assemblies"] += 1; counts["factorizations"] += 1
+                    Hff = Ha[np.ix_(free, free)]; d = np.linalg.solve(Hff, -gf)
+            else:
+                counts["factorizations"] += 1
                 d = np.linalg.solve(Hff, -gf)
-            except np.linalg.LinAlgError:
-                d = np.linalg.lstsq(Hff, -gf, rcond=None)[0]
-            # non-descent -> escalate UP the SPD ladder w -> 0.5 (clamp) -> 1.0 (absolute), trying the
-            # CHEAPER clamp state before absolute (review-r3: don't jump Newton->absolute skipping clamp)
+            # safety net: escalate clamp -> absolute if still non-descent
             for w_next in (wn for wn in (0.5, 1.0) if wn > tr_w):
                 if float(gf @ d) < 0.0:
                     break
@@ -186,7 +200,7 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
         if filt == "trust-region":                # update model-fit ratio for NEXT iteration
             p = alpha * d
             pred = -(float(gf @ p) + 0.5 * float(p @ (Hff @ p)))
-            tr_rho = ((E - En) / pred) if pred > 1e-30 else 1.0
+            tr_rho = ((E - En) / pred) if pred > 1e-30 else 0.5  # pred<=0: keep conservative clamp, not Newton (review-r3 TR#7)
     wall = time.perf_counter() - t0
     Efin = log[-1]["energy"] if log else np.inf
     gfin = log[-1]["grad_inf"] if log else np.inf
