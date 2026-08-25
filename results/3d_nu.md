@@ -1,5 +1,9 @@
 # 3D ν-claim: absolute vs clamp on P1 tetrahedra (measured)
 
+![3D tet](../figures/tet3d_stretch_J.png)
+
+_`figures/tet3d_stretch_J.png` (polyscope headless / EGL): a P1-tet box stretched at near-incompressible ν, coloured by per-tet J=det F (centred at 1, true range). The Poisson necking and the same locking-driven J excursions seen in 2D appear here — the confound is not a 2D peculiarity._
+
 Neo-Hookean ν-sweep on a 4x4x4 tet box (125 verts, 384 tets), uniform-stretch init, only the Hessian filter swapped. P1-tet element is conformance-gated (`python -m bench.tet`). Run: `python -m bench.run_3d_nu`.
 
 | ν | clamp | absolute |

@@ -1,5 +1,9 @@
 # AQP mesh-independence — rigorous (measured)
 
+![mesh independence](../figures/mesh_independence.png)
+
+_`figures/mesh_independence.png`: iterations-to-τ vs free DOF (log-log), min–max band over seeds, CI-gated growth exponent p (iters∝DOF^p). **Loose τ=1e-3:** AQP p=−0.09±0.32 (CI spans 0 → mesh-independent). **Tight τ=1e-6:** AQP p=+0.68±0.11 (grows). The Laplacian proxy gives mesh-independent *initial* progress but a first-order *tail* that is not — the round-1 "AQP is mesh-independent" was a loose-tolerance artifact. Whether AQP's tight-τ growth exceeds L-BFGS's (p=+0.45±0.15) is within noise (overlapping CIs)._
+
 Round-2/3 hardening of the mesh-independence test (#48/#50/#51/#52; #R1/#R2/#R3): a wider sweep with **3 seeds** (median [min–max] + k/N converged), an **independent high-accuracy E\*** (Newton to |g|<1e-9, *not* best-of-compared), a **τ-sweep** (τ∈{1e-3,1e-6}), and a **growth exponent with a 95% CI** — fit on the median over only the sizes where all seeds converged and no solver hit its (raised) iteration cap, so no censored cell enters the fit. Cap-touched any cell: **False**. Run: `python -m bench.run_mesh_independence`.
 
 Test: growth exponent p in `iters ∝ DOF^p` (p≈0 → mesh-independent). A verdict is only asserted when the 95% CI clears the flat band or two CIs separate.

@@ -1,5 +1,9 @@
 # Factorization-vs-iteration cost at scale (measured counts + complexity model)
 
+![scale cost](../figures/scale_cost.png)
+
+_`figures/scale_cost.png`: modeled relative cost (Newton=1) vs DOF from measured iteration counts + the 2D sparse-Cholesky model. Whether AQP's single factorization beats Newton at scale hinges on AQP's iteration count staying bounded — which `results/mesh_independence.md` shows it does only to loose τ._
+
 Answers 'does AQP's single-factorization route beat Newton's per-iteration factorizations at scale?' (review-r3 Fresh #3). We measure the **HW-independent cost structure** (factorizations + back-solves to reach τ=1e-6) — the honest axis, since raw wall-clock is C++/Python-confounded (`results/slim.md`) — and project the crossover with the standard 2D sparse-Cholesky model (factorization ~ DOF^1.5, back-solve ~ DOF, L-BFGS iter ~ m·DOF). Run: `python -m bench.run_scale_cost`.
 
 ## Measured counts (iterations to τ=1e-6)

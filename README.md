@@ -91,6 +91,20 @@ taxonomy → capability cells → tiered problem classes
 
 ---
 
+## Figures
+
+Deterministic, regenerable (`python -m bench.run_figures`); full index + captions in
+[`figures/README.md`](figures/README.md). A few headliners:
+
+| | |
+|---|---|
+| [![locking](figures/locking_p1_p2_sri.png)](figures/locking_p1_p2_sri.png) | **The confound, visual.** Near-incompressible stretch coloured by J=det F: P1 buckles into spurious modes (volumetric locking, 130 it); P2/SRI-P2 deform smoothly (26/66 it). Why the absolute-vs-clamp verdict flips between elements. |
+| [![ledger](figures/claims_ledger.png)](figures/claims_ledger.png) | **The epistemic scoreboard.** Of 160 extracted superiority-edges, 115 are the papers' own word and only 2 are independently validated here — the benchmark *qualifies* rather than overturns. |
+| [![mesh independence](figures/mesh_independence.png)](figures/mesh_independence.png) | **Rigor.** AQP's "mesh-independence" is tolerance-dependent — flat growth exponent at loose τ (p≈0), clearly growing at tight τ (p=+0.68±0.11). |
+| [![tet3d](figures/tet3d_stretch_J.png)](figures/tet3d_stretch_J.png) | **3D, polyscope headless (EGL).** A P1-tet box stretched near-incompressibly; the 2D locking story confirmed in genuine 3D. |
+
+---
+
 ## Repository map
 
 | Path | What |

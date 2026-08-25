@@ -6,6 +6,11 @@ vs finite differences, ~1e-9). These are **small controlled slices** (2D, dense 
 filters, no locking-free element yet), not the finished benchmark — but they exercise the full
 loop and already reproduce several of the design's predicted effects. Caveats are in each file.
 
+**Figures** for these results (deterministic, `python -m bench.run_figures`) are indexed in
+[`figures/README.md`](../figures/README.md) — convergence curves, the locking visualization, the
+mesh-independence log-log with CI, Dolan–Moré/data profiles, the claims-graph render, and the
+polyscope-headless 3D tet.
+
 ## Findings so far
 
 | # | experiment | file | headline (measured) |

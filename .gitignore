@@ -5,3 +5,6 @@
 scratch/
 __pycache__/
 *.pyc
+
+# polyscope headless scratch
+imgui.ini

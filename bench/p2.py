@@ -132,6 +132,7 @@ def solve_p2(x0, elems, quad, free, eterms, filt, max_iter=400, tol=1e-6, c=1e-4
     import time
     x = x0.copy(); it_done = 0; status = "maxiter"; t0 = time.perf_counter()
     tr_rho = 1.0; tr_w = 0.5                             # trust-region model-fit ratio + blend weight
+    log = []
     for it in range(max_iter):
         if filt == "trust-region":                      # three-state per-element blend (review-r2 #44)
             eff = "trust-region"
@@ -142,6 +143,7 @@ def solve_p2(x0, elems, quad, free, eterms, filt, max_iter=400, tol=1e-6, c=1e-4
         if not np.isfinite(E):
             status = "infeasible"; break
         gf = g[free]; it_done = it
+        log.append({"energy": float(E), "gnorm": float(np.max(np.abs(gf)))})
         if float(np.max(np.abs(gf))) < tol:
             status = "converged"; break
         Hff = H[np.ix_(free, free)]
@@ -185,7 +187,7 @@ def solve_p2(x0, elems, quad, free, eterms, filt, max_iter=400, tol=1e-6, c=1e-4
             pred = -(float(gf @ p) + 0.5 * float(p @ (Hff @ p)))
             tr_rho = ((E - En) / pred) if pred > 1e-30 else 0.5  # pred<=0: keep conservative clamp, not Newton (review-r3 TR#7)
     return {"filter": filt, "status": status, "iters": it_done,
-            "final_energy": E, "wall_s": time.perf_counter() - t0, "x": x}
+            "final_energy": E, "wall_s": time.perf_counter() - t0, "x": x, "log": log}
 
 
 def _conformance(seed=0, h=1e-6):

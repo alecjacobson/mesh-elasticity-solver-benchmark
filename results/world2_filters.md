@@ -1,5 +1,13 @@
 # World-2 filter head-to-head: clamp / absolute / trust-region, P1 vs P2 (measured)
 
+![locking](../figures/locking_p1_p2_sri.png)
+
+_The confound made visual (`figures/locking_p1_p2_sri.png`): a near-incompressible Neo-Hookean stretch, coloured by J=det F (true range, centred at J=1). **P1** (constant-strain) can't accommodate the stretch smoothly so it **buckles into spurious modes** — volumetric locking — and needs 130 iterations; **P2** and **SRI-P2** deform smoothly and converge in 26/66. (Note the honest detail: P1's J range [0.85,1.23] is not more extreme than P2's [0.76,1.40] — the locking signature here is the buckled *geometry* and iteration count, not a J excursion.) This is why the absolute-vs-clamp verdict below is discretization-dependent._
+
+![filter convergence](../figures/filter_convergence_p1_p2.png)
+
+_Per-iteration energy gap (`figures/filter_convergence_p1_p2.png`): on **locking P1** (left) absolute drags a long plateau tail (314 it) while trust-region backs off to Newton and finishes in 69; on **relieved P2** (right) all three converge in ~22 it and absolute is marginally best. The filter you should pick depends on the element, not the paper._
+
 Neo-Hookean ν-sweep (stretch init), only the filter swapped. **Three axes** per cell (docs/metrics.md): iterations, wall-clock, and — where available — global factorizations. Run: `python -m bench.run_world2_filters`.
 
 ### Iterations to converge

@@ -1,5 +1,9 @@
 # World-1 accelerators — rigorous data profile (measured)
 
+![profiles](../figures/profiles.png)
+
+_`figures/profiles.png`: Dolan–Moré performance profile + a data profile over the multi-seed instance set at τ=1e-6 — the cutoff-robust comparison (no single-τ total order). Paired with the single-instance descent shapes in `figures/accelerator_convergence.png` (Newton's quadratic tail vs AQP crossing τ early then stalling)._
+
 10 symmetric-Dirichlet instances (meshes [5, 6] × seeds 0–4). Rigor template (review-r2 #48/#49/#50/#51): **multi-seed spread**, **independent E\*** (Newton to |g|<1e-9, not best-of-compared), **τ-sweep**, and **pairwise** (not total-order) reading. Metric: iterations to `(E−E*)/(E0−E*)<τ`. Run: `python -m bench.run_world1_profiles`.
 
 ### τ = 0.001
