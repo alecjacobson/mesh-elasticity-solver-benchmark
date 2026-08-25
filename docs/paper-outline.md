@@ -74,7 +74,7 @@ which published superiority claims survive confound control.
    - **"Innovations" that don't survive fair, faithful re-measurement.** (i) *Trust-region filtering*
      "beats both clamp and absolute": our round-1 win was an artifact of an expensive global-`eigh`
      operator; the faithful **per-element** blend (+ an SPD-probe schedule) reverses it — TR wins on
-     the ill-conditioned/locking element but is a wash on the well-conditioned one (`world2_filters`).
+     the locking element (where plain filters struggle) but is a wash on the locking-relieved one — the operative axis is volumetric locking, not Hessian conditioning (`world2_filters`).
      (ii) *AQP mesh-independence*: real only to **loose** tolerance — a τ-sweep + CI-gated growth
      exponent shows it *grows* at tight τ (and CI-gating **retracted** our own "AQP scales worse than
      L-BFGS" as not statistically supported) (`mesh_independence`). (iii) *AQP's single-factorization

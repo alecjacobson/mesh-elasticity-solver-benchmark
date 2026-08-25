@@ -147,13 +147,19 @@ def main():
              + (f"But TR is still ~{p2_wall_ratio:.1f}× **slower than clamp in wall-clock** "
                 "(the SPD-probe + clamp-before-absolute escalation adds extra per-iteration assemblies), "
                 if p2_wall_ratio else "")
-             + "and **absolute is best outright**. So on a well-conditioned element the adaptive "
-             "switchboard buys nothing over a fixed filter and costs more per step.",
-             "- **Discretization-dependent verdict.** The switchboard clearly **wins on the "
-             "ill-conditioned/locking P1** element (fewer iterations *and* less wall-clock than both "
-             "filters), but on the well-conditioned P2 it is **at best a wash** (iteration-parity with "
-             "clamp, wall-clock-penalized, beaten by absolute) — the adaptivity helps only when the "
-             "problem is hard. (Round 1's 'TR beats both on P2' was an artifact of a costlier global "
+             + "and **absolute is best outright**. So on the **locking-relieved** P2 element — where "
+             "the plain fixed filters already converge in tens of iterations — the adaptive switchboard "
+             "buys nothing over a fixed filter and costs more per step.",
+             "- **Discretization-dependent verdict, and the axis is LOCKING, not conditioning.** The "
+             "switchboard clearly **wins on the locking P1** element (where the plain filters struggle, "
+             "242 it / maxiter) — fewer iterations *and* less wall-clock than both — but on the "
+             "**locking-relieved P2** (where they already converge fast) it is **at best a wash** "
+             "(iteration-parity with clamp, wall-clock-penalized, beaten by absolute). NB the operative "
+             "variable is **volumetric locking** (a kinematic over-constraint), NOT Hessian "
+             "conditioning: measured, P2's Hessian is in fact *worse*-conditioned than P1's "
+             "(κ≈4e6 vs 6e5 at ν=0.4999, largely because P2 has more DOFs), yet it converges faster — "
+             "for these direct-solve projected-Newton filters, iteration count tracks nonlinearity/"
+             "locking, not κ(H). (Round 1's 'TR beats both on P2' was an artifact of a costlier global "
              "assembled-`eigh` operator, reversed here.) The `trust-region→{clamp,absolute}` edges stay "
              "**qualified/indicative** — a real, regime-dependent finding, not a decisive win.",
              "",
