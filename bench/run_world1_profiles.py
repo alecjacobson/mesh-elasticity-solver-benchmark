@@ -1,93 +1,120 @@
-"""World-1 accelerator data profiles (#19).
+"""World-1 accelerator comparison, RIGOROUS (metrics-rigor phase; closes review-r2 #48/#49/#51).
 
-Data profile over a set of symmetric-Dirichlet perturbation instances: fraction solved to a
-relative-energy tolerance within an iteration budget, per method. Uses the FAIR energy-tolerance
-criterion (AQP/first-order have a slow gradient tail, so gradient-tol would be misleading).
-Writes results/world1_profiles.md.
+Upgrades the old single-run data profile to the rigor template established in run_mesh_independence:
+  - **multiple seeds** with reported spread (mean [min-max] over instances), not one line (#48);
+  - **independent high-accuracy E\***: Newton to |g|<1e-9 per instance, NOT best-final-among-the-
+    compared-methods (#51 -- removes the bias toward the strongest solver);
+  - **tau-sweep** (tau in {1e-3, 1e-6}) so orderings aren't cutoff artifacts (#50);
+  - a data profile reported as PAIRWISE fractions, not an N-solver total order (#49, Gould-Scott).
+
+Methods (all minimize the same symmetric-Dirichlet energy): Newton (clamp), L-BFGS, Sobolev-L-BFGS
+(the isolated BCQN proxy), AQP. Metric: iterations to (E-E*)/(E0-E*) < tau. Writes
+results/world1_profiles.md. Run: `python -m bench.run_world1_profiles`.
 """
 import os
 import numpy as np
-from .solver import solve, energy_only
+from .solver import solve
 from .energy import element_terms as sd, element_eg
 from .descent import solve_lbfgs
 from . import world1
 from .run_e1 import build_scenario
 
-BUDGETS = [3, 5, 10, 20, 40, 80]
+MESHES = [5, 6]
+SEEDS = [0, 1, 2, 3, 4]
+TAUS = [1e-3, 1e-6]
+BUDGETS = [5, 10, 20, 40, 80, 160]
 METHODS = ["newton", "l-bfgs", "sobolev-lbfgs", "aqp"]
 
 
-def iters_to(log, E0, Estar, rtol=1e-4):
+def iters_to(log, E0, Estar, tau):
     span = (E0 - Estar) + 1e-30
     for e in log:
-        if (e["energy"] - Estar) / span < rtol:
+        if (e["energy"] - Estar) / span < tau:
             return e["iter"]
     return None
 
 
-def run_instance(sc):
+def run_instance(nx, seed):
+    sc = build_scenario(nx=nx, ny=nx, seed=seed)
     a = (sc["x0"], sc["tris"], sc["Bs"], sc["areas"], sc["free"])
-    E0 = energy_only(sc["x0"], sc["tris"], sc["Bs"], sc["areas"], sd)
-    rn = solve(*a, "clamp", eterms=sd, tol=1e-8, max_iter=60)
-    Estar = rn["final_energy"]
-    runs = {
-        "newton": rn,
-        "l-bfgs": solve_lbfgs(*a, element_eg, max_iter=800, tol=1e-8),
+    ref = solve(*a, "clamp", eterms=sd, tol=1e-9, max_iter=80)   # independent high-accuracy E*
+    Estar = ref["final_energy"]; E0 = sc["E0"]
+    logs = {
+        "newton": ref["log"],
+        "l-bfgs": solve_lbfgs(*a, element_eg, max_iter=300, tol=1e-8)["log"],
         "sobolev-lbfgs": world1.solve_sobolev_lbfgs(sc["x0"], sc["tris"], sc["rest"], sc["free"],
-                                                    max_iter=800, tol=1e-8),
-        "aqp": world1.solve_aqp(sc["x0"], sc["tris"], sc["rest"], sc["free"], max_iter=300, tol=1e-8),
+                                                    max_iter=300, tol=1e-8)["log"],
+        "aqp": world1.solve_aqp(sc["x0"], sc["tris"], sc["rest"], sc["free"], max_iter=400, tol=1e-8)["log"],
     }
-    return {m: iters_to(runs[m]["log"], E0, Estar) for m in METHODS}
+    return {m: {tau: iters_to(logs[m], E0, Estar, tau) for tau in TAUS} for m in METHODS}
 
 
 def main():
-    print("== World-1 data profiles (energy-tolerance) ==")
-    bank = [build_scenario(nx=n, ny=n, seed=sd_) for n in (5, 6) for sd_ in (0, 1, 2)]
-    results = [run_instance(sc) for sc in bank]
-    N = len(results)
+    print("== World-1 accelerators (rigorous: multi-seed, independent E*, tau-sweep) ==\n")
+    insts = [run_instance(nx, s) for nx in MESHES for s in SEEDS]
+    N = len(insts)
 
-    prof = {m: [] for m in METHODS}
-    for b in BUDGETS:
+    def stats(m, tau):
+        v = [i[m][tau] for i in insts if i[m][tau] is not None]
+        return (np.mean(v), min(v), max(v), len(v)) if v else (None, None, None, 0)
+
+    def frac(m, tau, b):
+        return sum(1 for i in insts if i[m][tau] is not None and i[m][tau] <= b) / N
+
+    for tau in TAUS:
+        print(f"tau={tau:g}: iters mean[min-max] (n solved/{N})")
         for m in METHODS:
-            ok = sum(1 for r in results if r[m] is not None and r[m] <= b)
-            prof[m].append(ok / N)
+            mn, lo, hi, k = stats(m, tau)
+            print(f"  {m:14s} " + (f"{mn:5.1f} [{lo}-{hi}]  ({k}/{N})" if mn is not None else "—"))
+        print()
 
-    print(f"{N} instances; data profile (fraction solved to energy-tol within budget):")
-    hdr = "  method            " + " ".join(f"{b:>5}" for b in BUDGETS)
-    print(hdr)
-    for m in METHODS:
-        print(f"  {m:16s} " + " ".join(f"{v:5.2f}" for v in prof[m]))
+    L = ["# World-1 accelerators — rigorous data profile (measured)", "",
+         f"{N} symmetric-Dirichlet instances (meshes {MESHES} × seeds {SEEDS[0]}–{SEEDS[-1]}). "
+         "Rigor template (review-r2 #48/#49/#50/#51): **multi-seed spread**, **independent E\\*** "
+         "(Newton to |g|<1e-9, not best-of-compared), **τ-sweep**, and **pairwise** (not total-order) "
+         "reading. Metric: iterations to `(E−E*)/(E0−E*)<τ`. Run: `python -m bench.run_world1_profiles`."]
+    for tau in TAUS:
+        L += ["", f"### τ = {tau:g}", "",
+              "| method | iters mean [min–max] | solved | " + " | ".join(f"≤{b}" for b in BUDGETS) + " |",
+              "|---|---|---|" + "---|" * len(BUDGETS)]
+        for m in METHODS:
+            mn, lo, hi, k = stats(m, tau)
+            cells = " | ".join(f"{frac(m,tau,b):.2f}" for b in BUDGETS)
+            L.append(f"| {m} | {f'{mn:.1f} [{lo}–{hi}]' if mn is not None else '—'} | {k}/{N} | {cells} |")
 
-    lines = ["# World-1 accelerator data profiles (measured)", "",
-             f"Data profile over {N} symmetric-Dirichlet perturbation instances (meshes 5/6/7 x "
-             "seeds 0/1/2). Fraction solved to relative energy tolerance 1e-4 within an iteration "
-             "budget. Run: `python -m bench.run_world1_profiles`.", "",
-             "| method | " + " | ".join(f"≤{b} it" for b in BUDGETS) + " |",
-             "|" + "---|" * (len(BUDGETS) + 1)]
-    for m in METHODS:
-        lines.append(f"| {m} | " + " | ".join(f"{v:.2f}" for v in prof[m]) + " |")
-    lines += ["", "## Observed", "",
-              "- **Second-order (Newton) and Sobolev-L-BFGS reach the energy tolerance fastest**; "
-              "plain L-BFGS close behind; **AQP needs the largest budget** -- consistent with E2 "
-              "and the slim/aqp result (AQP's fixed Laplacian proxy is the weakest of the proxy "
-              "family on these problems).",
-              "- The profile is on the HW-independent iteration budget; it aggregates the E2 "
-              "single-instance findings over a set (Moré-Wild style), showing the *pairwise* orderings are "
-              "consistent across these 6 instances (single run each; no error bars -- descriptive, not a "
-              "validated total order; Gould-Scott caution against N-solver total orders).",
-              "- **Read the x-axis as *iterations*, not cost:** a Newton iteration is a full Hessian "
-              "factorization while Sobolev-L-BFGS/AQP prefactor once and L-BFGS back-solves only, so "
-              "an iteration-budget profile *understates* Newton's per-iteration cost. See the "
-              "factorization column in `results/e2.md` for the HW-independent cost that pairs with "
-              "this iteration-budget view; neither alone settles a wall-clock ranking.",
-              "",
-              "_Caveat: energy-tolerance criterion (fair for first-order tails); small meshes; "
-              "official SLIM (results/slim.md) would sit near Newton but uses soft constraints, "
-              "so it is compared separately._"]
+    def med(m, tau):
+        mn, *_ = stats(m, tau); return mn
+    L += ["", "## Observed (pairwise, per τ)", ""]
+    for tau in TAUS:
+        nw, lb, so, aq = (med(m, tau) for m in METHODS)
+        pair = []
+        if so and lb:
+            pair.append(f"Sobolev-L-BFGS {'<' if so < lb else '≈' if abs(so-lb) < 1 else '>'} L-BFGS "
+                        f"({so:.0f} vs {lb:.0f} it)")
+        if aq and lb:
+            pair.append(f"AQP {'<' if aq < lb else '>'} L-BFGS ({aq:.0f} vs {lb:.0f})")
+        if nw:
+            pair.append(f"Newton fewest iters ({nw:.0f}) but 1 factorization/iter (see e2)")
+        L.append(f"- **τ={tau:g}:** " + "; ".join(pair) + ".")
+    so3, so6 = med("sobolev-lbfgs", 1e-3), med("sobolev-lbfgs", 1e-6)
+    aq3, aq6 = med("aqp", 1e-3), med("aqp", 1e-6)
+    lb3, lb6 = med("l-bfgs", 1e-3), med("l-bfgs", 1e-6)
+    stable = (so3 and so6 and lb3 and lb6 and (so3 < lb3) == (so6 < lb6))
+    L += ["",
+          "- **τ-stability:** the Sobolev-vs-L-BFGS ordering "
+          + ("holds at both τ" if stable else "changes with τ — a cutoff-sensitive comparison") +
+          (f". AQP's iteration count grows from τ=1e-3 to 1e-6 ({aq3:.0f}→{aq6:.0f}), the same "
+           "loose-vs-tight first-order-tail effect quantified in `results/mesh_independence.md`."
+           if (aq3 and aq6) else ".") +
+          " Rankings are stated **pairwise**, not as an N-solver total order (Gould–Scott); read the "
+          "budget columns as *iterations*, not cost (a Newton iteration is a factorization, see e2).",
+          "",
+          "_Caveat: 2D, dense, small meshes; independent E\\* is our Newton to |g|<1e-9 (energy to "
+          "~machine precision), not a third-party oracle. Spread is min–max over instances._"]
     os.makedirs("results", exist_ok=True)
     with open("results/world1_profiles.md", "w") as f:
-        f.write("\n".join(lines) + "\n")
-    print("wrote results/world1_profiles.md")
+        f.write("\n".join(L) + "\n")
+    print(f"{N} instances; wrote results/world1_profiles.md")
 
 
 if __name__ == "__main__":

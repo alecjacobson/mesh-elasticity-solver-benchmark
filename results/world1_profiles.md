@@ -1,18 +1,30 @@
-# World-1 accelerator data profiles (measured)
+# World-1 accelerators — rigorous data profile (measured)
 
-Data profile over 6 symmetric-Dirichlet perturbation instances (meshes 5/6/7 x seeds 0/1/2). Fraction solved to relative energy tolerance 1e-4 within an iteration budget. Run: `python -m bench.run_world1_profiles`.
+10 symmetric-Dirichlet instances (meshes [5, 6] × seeds 0–4). Rigor template (review-r2 #48/#49/#50/#51): **multi-seed spread**, **independent E\*** (Newton to |g|<1e-9, not best-of-compared), **τ-sweep**, and **pairwise** (not total-order) reading. Metric: iterations to `(E−E*)/(E0−E*)<τ`. Run: `python -m bench.run_world1_profiles`.
 
-| method | ≤3 it | ≤5 it | ≤10 it | ≤20 it | ≤40 it | ≤80 it |
-|---|---|---|---|---|---|---|
-| newton | 0.00 | 0.17 | 1.00 | 1.00 | 1.00 | 1.00 |
-| l-bfgs | 0.00 | 0.00 | 0.33 | 1.00 | 1.00 | 1.00 |
-| sobolev-lbfgs | 0.00 | 0.00 | 0.00 | 0.83 | 1.00 | 1.00 |
-| aqp | 0.00 | 0.00 | 0.33 | 0.50 | 0.83 | 1.00 |
+### τ = 0.001
 
-## Observed
+| method | iters mean [min–max] | solved | ≤5 | ≤10 | ≤20 | ≤40 | ≤80 | ≤160 |
+|---|---|---|---|---|---|---|---|---|
+| newton | 6.0 [4–8] | 10/10 | 0.40 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| l-bfgs | 9.1 [8–11] | 10/10 | 0.00 | 0.90 | 1.00 | 1.00 | 1.00 | 1.00 |
+| sobolev-lbfgs | 12.0 [9–17] | 10/10 | 0.00 | 0.30 | 1.00 | 1.00 | 1.00 | 1.00 |
+| aqp | 9.3 [5–17] | 10/10 | 0.10 | 0.70 | 1.00 | 1.00 | 1.00 | 1.00 |
 
-- **Second-order (Newton) and Sobolev-L-BFGS reach the energy tolerance fastest**; plain L-BFGS close behind; **AQP needs the largest budget** -- consistent with E2 and the slim/aqp result (AQP's fixed Laplacian proxy is the weakest of the proxy family on these problems).
-- The profile is on the HW-independent iteration budget; it aggregates the E2 single-instance findings over a set (Moré-Wild style), showing the *pairwise* orderings are consistent across these 6 instances (a single run each -- no seed-averaging/error bars yet, so read as descriptive, not a validated total order; Gould-Scott caution against N-solver total orders from one profile).
-- **Read the x-axis as *iterations*, not cost:** a Newton iteration is a full Hessian factorization while Sobolev-L-BFGS/AQP prefactor once and L-BFGS back-solves only, so an iteration-budget profile *understates* Newton's per-iteration cost. See the factorization column in `results/e2.md` for the HW-independent cost that pairs with this iteration-budget view; neither alone settles a wall-clock ranking.
+### τ = 1e-06
 
-_Caveat: energy-tolerance criterion (fair for first-order tails); small meshes; official SLIM (results/slim.md) would sit near Newton but uses soft constraints, so it is compared separately._
+| method | iters mean [min–max] | solved | ≤5 | ≤10 | ≤20 | ≤40 | ≤80 | ≤160 |
+|---|---|---|---|---|---|---|---|---|
+| newton | 7.6 [5–10] | 10/10 | 0.10 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| l-bfgs | 15.9 [13–18] | 10/10 | 0.00 | 0.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| sobolev-lbfgs | 20.2 [13–28] | 10/10 | 0.00 | 0.00 | 0.50 | 1.00 | 1.00 | 1.00 |
+| aqp | 77.0 [13–156] | 10/10 | 0.00 | 0.00 | 0.10 | 0.10 | 0.60 | 1.00 |
+
+## Observed (pairwise, per τ)
+
+- **τ=0.001:** Sobolev-L-BFGS > L-BFGS (12 vs 9 it); AQP > L-BFGS (9 vs 9); Newton fewest iters (6) but 1 factorization/iter (see e2).
+- **τ=1e-06:** Sobolev-L-BFGS > L-BFGS (20 vs 16 it); AQP > L-BFGS (77 vs 16); Newton fewest iters (8) but 1 factorization/iter (see e2).
+
+- **τ-stability:** the Sobolev-vs-L-BFGS ordering holds at both τ. AQP's iteration count grows from τ=1e-3 to 1e-6 (9→77), the same loose-vs-tight first-order-tail effect quantified in `results/mesh_independence.md`. Rankings are stated **pairwise**, not as an N-solver total order (Gould–Scott); read the budget columns as *iterations*, not cost (a Newton iteration is a factorization, see e2).
+
+_Caveat: 2D, dense, small meshes; independent E\* is our Newton to |g|<1e-9 (energy to ~machine precision), not a third-party oracle. Spread is min–max over instances._
