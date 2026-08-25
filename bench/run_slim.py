@@ -170,10 +170,11 @@ def main():
               f"- **The real SLIM-vs-AQP tradeoff is factorizations vs iterations:** SLIM does "
               f"**{rows[0][3]} full factorizations**; AQP does **1** (it prefactors its fixed Laplacian "
               f"once) plus {aqp_it} cheap back-solves; L-BFGS does **0**. On small meshes a factorization "
-              f"is cheap so SLIM's few-factorization route wins; as the mesh grows and factorization "
-              f"dominates, AQP's single-factorization route becomes relatively more attractive -- so the "
-              f"iteration-count win does not by itself settle wall-clock at scale (mesh-independence "
-              f"untested here, #29).",
+              f"is cheap so SLIM's few-factorization route wins. We had speculated AQP's "
+              f"single-factorization route becomes more attractive at scale, but results/scale_cost.md "
+              f"MEASURES the cost structure and REFUTES that at tight tau (AQP's iteration/back-solve "
+              f"count blows up with mesh size, outrunning the few mesh-independent factorizations a "
+              f"Newton-class method needs; the factorize-once win holds only at loose tau).",
               "",
               "_Caveat: energy-tolerance criterion; single 8×8 scenario/seed; SLIM's scale- and "
               "mesh-independence and no-flip headlines are NOT tested here (see #29). Official-code "

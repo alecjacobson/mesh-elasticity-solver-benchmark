@@ -33,6 +33,7 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | MI | AQP mesh-independence — **rigorous, CI-gated** (multi-seed, indep. E*, τ-sweep) | [`mesh_independence.md`](mesh_independence.md) | **τ-DEPENDENT:** AQP mesh-independent at loose τ (p=−0.09, CI incl. 0) but **GROWS at tight τ (p=+0.68, CI [0.57,0.80])** — round-1 'mesh-independent' was a loose-tolerance artifact. Whether it's *worse than L-BFGS* is **not resolved** (CIs overlap, #R1) (#48/#50/#51/#52) |
 | NHeig | NH sweep: FD-vs-complex-step Hessian (clamp/abs decision) | [`nh_eig_check.md`](nh_eig_check.md) | FD eigenvalues match a machine-precision complex-step reference to ~1e-9; the clamp/absolute decision **never flips across ~20k states** — the ν-sweep ranking is a real effect, not FD noise (#32) |
 | **P2s** ⭐ | **definitive absolute-vs-clamp: P2 element + Stable NH (both confounds removed)** | [`p2_stable_nu.md`](p2_stable_nu.md) | with the locking-free element AND the correct energy, **absolute BEATS clamp** near-incompressible (38 vs 48 it at ν=0.4999) — the paper's claim reproduces once both confounds are controlled (review-r3) |
+| SC | factorization-vs-iteration cost at scale | [`scale_cost.md`](scale_cost.md) | measured count structure + sparse-Cholesky model: at tight τ **Newton (mesh-indep., 4 factorizations) is cheapest** while AQP's iters blow up (49→206) → AQP 1.5–2.2× Newton and rising — **refutes** slim.md's 'AQP wins at scale' at tight τ (#3) |
 | SNH | Stable Neo-Hookean absolute-vs-clamp | [`stable_nu.md`](stable_nu.md) | on the **correct** (stable, finite-for-all-J) energy the ν-sweep shows the same locking confound; and in the **inverted-init** regime absolute is designed for (barrier NH is +∞ there) absolute-vs-clamp is a **near-null** — within 1–2 iters, no decisive win (#31) |
 
 ## What these already demonstrate for the benchmark's thesis
@@ -72,6 +73,7 @@ python -m bench.run_world1_profiles # World-1 profiles -> world1_profiles.md
 python -m bench.run_anderson     # Anderson vs local-global -> anderson.md
 python -m bench.run_stable_nu    # Stable Neo-Hookean absolute-vs-clamp -> stable_nu.md
 python -m bench.run_p2_stable_nu # P2 + stable NH (both controls) -> p2_stable_nu.md
+python -m bench.run_scale_cost   # factorization-vs-iteration cost at scale -> scale_cost.md
 python -m bench.run_pitfalls     # affine-invariance + rate -> pitfalls.md
 python -m bench.run_mesh_independence # AQP mesh-independence -> mesh_independence.md
 python -m bench.run_nh_eig_check  # NH FD-vs-complex-step eig check -> nh_eig_check.md
