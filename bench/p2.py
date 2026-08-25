@@ -8,7 +8,7 @@ Self-contained (own mesh, isoparametric assembly, and Newton solve) so it doesn'
 verified P1 path. Conformance-gated: `python -m bench.p2` runs a finite-difference gradient check.
 """
 import numpy as np
-from .filters import project_element
+from .filters import project_element, project_element_blend
 
 # 3-point quadrature on the reference triangle (area 1/2), exact to degree 2.
 _QP = np.array([[1 / 6, 1 / 6], [2 / 3, 1 / 6], [1 / 6, 2 / 3]])
@@ -101,7 +101,7 @@ def _edofs(e):
     return d
 
 
-def assemble_p2(x, elems, quad, eterms, filt):
+def assemble_p2(x, elems, quad, eterms, filt, tr_w=0.5):
     nv = x.size // 2
     g = np.zeros(2 * nv); H = np.zeros((2 * nv, 2 * nv)); E = 0.0
     for t, e in enumerate(elems):
@@ -112,6 +112,8 @@ def assemble_p2(x, elems, quad, eterms, filt):
         E += Ee
         if filt in ("clamp", "absolute", "project-on-demand"):
             He = project_element(He, filt)
+        elif filt == "trust-region":          # per-element three-state blend at the global step-w
+            He = project_element_blend(He, tr_w)
         g[dofs] += ge; H[np.ix_(dofs, dofs)] += He
     return E, g, H
 
@@ -129,11 +131,14 @@ def energy_p2(x, elems, quad, eterms):
 def solve_p2(x0, elems, quad, free, eterms, filt, max_iter=400, tol=1e-6, c=1e-4):
     import time
     x = x0.copy(); it_done = 0; status = "maxiter"; t0 = time.perf_counter()
-    tr_rho = 1.0                                        # trust-region model-fit ratio
+    tr_rho = 1.0; tr_w = 0.5                             # trust-region model-fit ratio + blend weight
     for it in range(max_iter):
-        eff = (("clamp" if abs(tr_rho - 1.0) <= 0.01 else "absolute")
-               if filt == "trust-region" else filt)
-        E, g, H = assemble_p2(x, elems, quad, eterms, eff)
+        if filt == "trust-region":                      # three-state per-element blend (review-r2 #44)
+            eff = "trust-region"
+            tr_w = 0.0 if tr_rho >= 0.75 else (1.0 if tr_rho <= 0.0 else 0.5)
+        else:
+            eff = filt
+        E, g, H = assemble_p2(x, elems, quad, eterms, eff, tr_w=tr_w)
         if not np.isfinite(E):
             status = "infeasible"; break
         gf = g[free]; it_done = it
@@ -144,6 +149,10 @@ def solve_p2(x0, elems, quad, free, eterms, filt, max_iter=400, tol=1e-6, c=1e-4
             d = np.linalg.solve(Hff, -gf)
         except np.linalg.LinAlgError:
             d = np.linalg.lstsq(Hff, -gf, rcond=None)[0]
+        if float(gf @ d) >= 0 and filt == "trust-region" and tr_w < 1.0:  # re-assemble at w=1 (SPD)
+            tr_w = 1.0
+            _, _, Ha = assemble_p2(x, elems, quad, eterms, "trust-region", tr_w=1.0)
+            Hff = Ha[np.ix_(free, free)]; d = np.linalg.solve(Hff, -gf)
         gd = float(gf @ d)
         if gd >= 0:
             status = "nondescent"; break

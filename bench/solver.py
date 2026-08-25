@@ -9,7 +9,7 @@ pluggable via `eterms` (callable (x_elem,B,area)->(E,g6,H6x6,detF)); default sym
 import time
 import numpy as np
 from .energy import element_terms as _sd_element_terms
-from .filters import project_element
+from .filters import project_element, project_element_blend
 
 
 def _dofs(tri):
@@ -17,7 +17,7 @@ def _dofs(tri):
                      2 * tri[2], 2 * tri[2] + 1])
 
 
-def assemble(x, tris, Bs, areas, filt, eterms=_sd_element_terms):
+def assemble(x, tris, Bs, areas, filt, eterms=_sd_element_terms, tr_w=0.5):
     nv = x.size // 2
     g = np.zeros(2 * nv)
     H = np.zeros((2 * nv, 2 * nv))
@@ -30,6 +30,8 @@ def assemble(x, tris, Bs, areas, filt, eterms=_sd_element_terms):
         E += Ee
         if filt in ("clamp", "absolute", "project-on-demand"):
             He = project_element(He, filt)
+        elif filt == "trust-region":          # per-element three-state blend at the global step-w
+            He = project_element_blend(He, tr_w)
         g[dofs] += ge
         H[np.ix_(dofs, dofs)] += He
     return E, g, H
@@ -72,28 +74,6 @@ def _spd_project_solve(Hff, gf, eps=1e-9):
     return d, 1
 
 
-def _blend_step(Hff, gf, w, eps=1e-9):
-    """Faithful trust-region eigenvalue blend (Chen et al. 2024): a SINGLE operator
-    lambda_eff = (1-w) lambda + w |lambda| with w in {0, 0.5, 1} unifying the three named states:
-      w=0   -> lambda            (full Newton -- the branch the old two-state switchboard lacked)
-      w=0.5 -> 0 for lambda<0    (clamp-to-zero; floored to eps to stay invertible)
-      w=1   -> |lambda|          (absolute).
-    Floors at eps=1e-9 when w>0 -- the SAME floor the standalone clamp/absolute filters
-    (filters.project_element) use, so the w=0.5/w=1 states are literally those operators (review-r2:
-    the paper's 0.01 regularization is a separate choice; matching the filter floor is what makes the
-    head-to-head an apples-to-apples switchboard test). Leaves raw eigenvalues for full Newton.
-    Returns (d, n_factorizations=1) -- one dense eigendecomposition of the assembled free Hessian,
-    which is MORE expensive per step than the per-element 6x6 projections clamp/absolute do."""
-    wv, V = np.linalg.eigh(Hff)
-    lam = (1.0 - w) * wv + w * np.abs(wv)
-    if w > 0.0:
-        lam = np.maximum(lam, eps)
-    else:
-        lam = np.where(np.abs(lam) < 1e-12, 1e-12, lam)   # guard exact singularities only
-    d = V @ ((V.T @ (-gf)) / lam)
-    return d, 1
-
-
 def _spd_shift_solve(Hff, gf):
     """Levenberg identity-shift; returns (d, tau, n_factorizations)."""
     n = Hff.shape[0]
@@ -125,11 +105,11 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
         # ratio rho. Good fit -> trust the raw Hessian (w=0, full Newton); ok -> clamp (w=0.5);
         # bad/negative -> absolute (w=1). Assemble the RAW Hessian and blend at eigenvalue level.
         if filt == "trust-region":
-            eff = "none"
+            eff = "trust-region"
             tr_w = 0.0 if tr_rho >= 0.75 else (1.0 if tr_rho <= 0.0 else 0.5)
         else:
             eff = filt
-        E, g, H = assemble(x, tris, Bs, areas, eff, eterms); counts["assemblies"] += 1
+        E, g, H = assemble(x, tris, Bs, areas, eff, eterms, tr_w=tr_w); counts["assemblies"] += 1
         if not np.isfinite(E):
             status = "infeasible"; break
         gf = g[free]
@@ -145,11 +125,19 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
             status = "converged"; break
 
         if filt == "trust-region":
-            counts["lin_solves"] += 1
-            d, nf = _blend_step(Hff, gf, tr_w); counts["factorizations"] += nf
-            if float(gf @ d) >= 0.0 and tr_w < 1.0:   # non-descent -> escalate to absolute (SPD)
-                d, nf = _blend_step(Hff, gf, 1.0); counts["factorizations"] += nf
+            # Hff is already per-element-blended at tr_w (assembled above) -- a NORMAL solve, the
+            # SAME per-iteration cost as clamp/absolute (per-element projection + one factorization),
+            # NOT a global assembled eigendecomposition (review-r2 #42/#44 root fix).
+            counts["lin_solves"] += 1; counts["factorizations"] += 1
+            try:
+                d = np.linalg.solve(Hff, -gf)
+            except np.linalg.LinAlgError:
+                d = np.linalg.lstsq(Hff, -gf, rcond=None)[0]
+            if float(gf @ d) >= 0.0 and tr_w < 1.0:   # non-descent -> re-assemble at w=1 (absolute, SPD)
                 tr_w = 1.0
+                _, _, Ha = assemble(x, tris, Bs, areas, "trust-region", eterms, tr_w=1.0)
+                counts["assemblies"] += 1; counts["factorizations"] += 1
+                d = np.linalg.solve(Ha[np.ix_(free, free)], -gf)
         elif filt == "identity-shift":
             d, _, nf = _spd_shift_solve(Hff, gf)
             counts["factorizations"] += nf; counts["lin_solves"] += 1

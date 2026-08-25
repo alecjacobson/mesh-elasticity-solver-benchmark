@@ -85,25 +85,22 @@ def check_stable_neohookean(n=200, h=1e-6, tol=1e-5, seed=4):
     return worst, rest, finite, ok
 
 
-def check_trust_region_blend(n=300, tol=1e-4, seed=5):
-    """Regression grounding for the trust-region switchboard (review-r1 #38, tightened review-r2 #43):
-    the single blended operator lambda_eff=(1-w)lambda+w|lambda| must reproduce the three named states
-    -- w=0 full Newton, and w=0.5/w=1 the ACTUAL standalone filters filters.project_element('clamp'/
-    'absolute') at their real floor (eps=1e-9) -- on indefinite Hessians. Regressing against the real
-    project_element operators (not a hand-clamped copy) is what proves TR's states ARE the filters it
-    is compared to, at the same floor."""
-    from .solver import _blend_step
-    from .filters import project_element
+def check_trust_region_blend(n=300, tol=1e-9, seed=5):
+    """Regression grounding for the PER-ELEMENT trust-region blend (review-r1 #38; per-element root
+    fix review-r2 #42/#44): the operator project_element_blend(H, w) must EQUAL the actual standalone
+    filters -- w=0 raw Newton, w=0.5 = project_element('clamp'), w=1 = project_element('absolute') --
+    at the same eps=1e-9 floor. Comparing the projected MATRICES (well-conditioned) proves TR's states
+    ARE those filter operators at the same per-element cost, so tol is 1e-9."""
+    from .filters import project_element_blend, project_element
     rng = np.random.default_rng(seed)
     wn = wc = wa = 0.0
     for _ in range(n):
-        m = 6; A = rng.standard_normal((m, m)); H = (A + A.T) / 2; g = rng.standard_normal(m)
-        dN = np.linalg.solve(H, -g); d0, _ = _blend_step(H, g, 0.0)
-        wn = max(wn, np.linalg.norm(d0 - dN) / (np.linalg.norm(dN) + 1e-12))
-        dC = np.linalg.solve(project_element(H, "clamp"), -g); d5, _ = _blend_step(H, g, 0.5)
-        wc = max(wc, np.linalg.norm(d5 - dC) / (np.linalg.norm(dC) + 1e-12))
-        dA = np.linalg.solve(project_element(H, "absolute"), -g); d1, _ = _blend_step(H, g, 1.0)
-        wa = max(wa, np.linalg.norm(d1 - dA) / (np.linalg.norm(dA) + 1e-12))
+        m = 6; A = rng.standard_normal((m, m)); H = (A + A.T) / 2
+        wn = max(wn, np.linalg.norm(project_element_blend(H, 0.0) - H) / (np.linalg.norm(H) + 1e-12))
+        C = project_element(H, "clamp")
+        wc = max(wc, np.linalg.norm(project_element_blend(H, 0.5) - C) / (np.linalg.norm(C) + 1e-12))
+        Ab = project_element(H, "absolute")
+        wa = max(wa, np.linalg.norm(project_element_blend(H, 1.0) - Ab) / (np.linalg.norm(Ab) + 1e-12))
     ok = wn < tol and wc < tol and wa < tol
     return wn, wc, wa, ok
 

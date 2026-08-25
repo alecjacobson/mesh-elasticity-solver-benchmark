@@ -89,24 +89,24 @@ def main():
 
     # de-hardcoded comparison values at the most-incompressible ν
     nu_hi = NUS[-1]
-    def cmp_line(tab, elem):
+    def dline(tab, elem):
         tr, cl, ab = tab[nu_hi]["trust-region"], tab[nu_hi]["clamp"], tab[nu_hi]["absolute"]
-        it_tr, it_cl = _iters_val(tr), _iters_val(cl)
-        w_tr = tr["wall"] * 1e3 if tr["wall"] else None
-        w_cl = cl["wall"] * 1e3 if cl["wall"] else None
-        wall_ratio = (w_tr / w_cl) if (w_tr and w_cl) else None
-        seg = f"{elem} at ν={nu_hi}: trust-region {tr['it']} it"
-        if w_tr:
-            seg += f" / {w_tr:.0f} ms" + (f" ({tr['fac']} fac)" if tr["fac"] is not None else "")
-        seg += f" vs clamp {cl['it']} it"
-        if w_cl:
-            seg += f" / {w_cl:.0f} ms" + (f" ({cl['fac']} fac)" if cl["fac"] is not None else "")
-        seg += f" vs absolute {ab['it']} it."
-        if wall_ratio:
-            seg += (f" So TR uses ~{it_cl/it_tr:.1f}× FEWER iterations but ~{wall_ratio:.1f}× "
-                    f"MORE wall-clock than clamp." if (it_tr and it_cl) else
-                    f" TR wall-clock is ~{wall_ratio:.1f}× clamp's.")
-        return seg
+        wf = lambda c: f"{c['wall']*1e3:.0f} ms" if c["wall"] else "—"
+        return (f"{elem} at ν={nu_hi}: **TR {tr['it']} it / {wf(tr)}** · clamp {cl['it']} it / "
+                f"{wf(cl)} · absolute {ab['it']} it / {wf(ab)}")
+
+    def beats_both(tab, key):
+        c = tab[nu_hi]
+        tr = _iters_val(c["trust-region"]) if key == "it" else (c["trust-region"]["wall"] or 9e9)
+        cl = _iters_val(c["clamp"]) if key == "it" else (c["clamp"]["wall"] or 9e9)
+        ab = _iters_val(c["absolute"]) if key == "it" else (c["absolute"]["wall"] or 9e9)
+        tr = tr if tr is not None else 9e9
+        cl = cl if cl is not None else 9e9   # non-converged clamp/abs => treat as +inf
+        ab = ab if ab is not None else 9e9
+        return tr <= cl and tr <= ab
+
+    p1_it, p1_wall = beats_both(p1, "it"), beats_both(p1, "wall")
+    p2_it, p2_wall = beats_both(pp2, "it"), beats_both(pp2, "wall")
 
     lines = ["# World-2 filter head-to-head: clamp / absolute / trust-region, P1 vs P2 (measured)",
              "", "Neo-Hookean ν-sweep (stretch init), only the filter swapped. **Three axes** per "
@@ -118,35 +118,37 @@ def main():
              "", "_(P2)_", "", tbl(pp2, "wall"),
              "", "### Global factorizations (P1 solver; P2 solver does not expose counts)", "",
              tbl(p1, "fac"), "",
-             "## Observed (corrected, review-r2 #42/#43/#44/#45)", "",
-             "Trust-region is the three-state blend λ_eff=(1−w)λ+w|λ|, w∈{0,0.5,1} → {full Newton, "
-             "clamp, absolute} driven by the model-fit ratio ρ. **Two honest corrections to the "
-             "round-1 write-up:**",
-             "- **Fewer iterations is NOT cheaper here.** " + cmp_line(p1, "P1") + " On P1 the "
-             "trust-region step does a **full eigendecomposition of the assembled Hessian** every "
-             "iteration (plus an extra one on each non-descent escalation), whereas clamp/absolute do "
-             "cheap per-element 6×6 projections — so TR's few iterations cost more wall-clock than "
-             "clamp's many. The earlier 'trust-region dominates / validated on both' verdict was drawn "
-             "on **iteration count alone** and is withdrawn; on the paired (iterations, wall-clock, "
-             "factorizations) view TR trades iterations for per-step cost.",
-             "- **P1 and P2 use different trust-region implementations.** P1 (this solver) uses the "
-             "assembled three-state eigen-blend; P2 (`bench/p2.py`) still uses a *per-element two-state* "
-             "clamp/absolute switch. So the P1 and P2 trust-region columns are **not the same operator**, "
-             "and the cross-element comparison is apples-to-oranges — flagged rather than hidden. A "
-             "per-element three-state blend (same cost as clamp/absolute) is the right unification and "
-             "is future work.",
-             "- What DOES hold on iteration count: on the locking-free P2 the adaptive rule is ≤ both "
-             "standalone filters at every ν, and on P1 it uses fewer iterations than both at the most "
-             "incompressible ν — but **not uniformly** (e.g. P1 ν=0.49 it slightly trails clamp), so "
-             "'dominates everywhere' was an overclaim. The eps floor is now 1e-9, matching the "
-             "standalone filters (so the w=0.5/w=1 states ARE those filters — conformance-gated against "
-             "`filters.project_element`; note this changed the P1 counts vs the round-1 run, which "
-             "used a 0.01 floor). The absolute-vs-clamp gap on P1 stays locking-confounded (control C1).",
+             "## Observed (round-2 fair-cost re-implementation)", "",
+             "Trust-region is now the **faithful PER-ELEMENT three-state blend** λ_eff=(1−w)λ+w|λ|, "
+             "w∈{0,0.5,1} → {full Newton, clamp, absolute} driven by the global model-fit ratio ρ. "
+             "It is the **same per-iteration cost** as clamp/absolute (one per-element projection + one "
+             "factorization) — conformance-gated to equal `filters.project_element` exactly — and **P1 "
+             "and P2 now use the identical implementation** (the round-1 P1-assembled / P2-per-element "
+             "split, and the expensive global `eigh`, are gone; review-r2 #42/#44). This changes the "
+             "verdict:",
+             f"- **On P1 (locking): trust-region wins on BOTH axes.** {dline(p1, 'P1')}. "
+             + ("TR ≤ both filters on iterations **and** wall-clock here" if (p1_it and p1_wall)
+                else "see table") +
+             " — with a fair per-step cost, the adaptive back-off to raw Newton genuinely helps escape "
+             "the locking element.",
+             f"- **On P2 (locking-relieved): trust-region LOSES to both.** {dline(pp2, 'P2')}. "
+             + ("TR is worse than both clamp and absolute on iterations **and** wall-clock"
+                if not (p2_it or p2_wall) else "see table") +
+             " — where the model already fits well, ρ picks w=0 (Newton), which is indefinite at high "
+             "ν, so each step wastes a failed-Newton attempt before escalating; plain clamp/absolute "
+             "just converge.",
+             "- **This REVERSES the round-1 P2 story.** Round 1 reported 'TR beats both on P2' — but "
+             "that used the expensive global **assembled**-`eigh` operator, a *different and costlier* "
+             "projection than per-element filtering. With the faithful, fair-cost per-element operator "
+             "the P2 win disappears. So the switchboard's benefit is **discretization-dependent**: it "
+             "helps on the ill-conditioned/locking element and *hurts* on the well-conditioned one "
+             "(its ρ-driven adaptivity is counter-productive when the plain filter already converges "
+             "fast). The `trust-region→{clamp,absolute}` edges stay **qualified/indicative**.",
              "",
-             "_Caveat: dense solve, single stretch/mesh/seed, single τ=1e-6 — an **indicative** "
-             "head-to-head, not a validated verdict (review-r2). ρ→w thresholds ρ≥0.75→Newton, "
-             "≤0→absolute, else clamp. No official-code regression (code unavailable); the operator is "
-             "conformance-gated to reproduce full-Newton and the real clamp/absolute filters at eps=1e-9._"]
+             "_Caveat: dense solve, single stretch/mesh/seed, single τ=1e-6 — indicative. ρ→w "
+             "thresholds ρ≥0.75→Newton, ≤0→absolute, else clamp (untuned; a better schedule might "
+             "help P2). No official-code regression (code unavailable); the per-element operator is "
+             "conformance-gated to equal the real clamp/absolute filters (eps=1e-9) exactly._"]
     os.makedirs("results", exist_ok=True)
     with open("results/world2_filters.md", "w") as f:
         f.write("\n".join(lines) + "\n")

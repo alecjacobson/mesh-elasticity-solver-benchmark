@@ -26,6 +26,20 @@ GLOBAL = ("identity-shift", "global-pdn", "trust-region")  # trust-region: adapt
 ALL = PER_ELEMENT + GLOBAL
 
 
+def project_element_blend(H, w, eps=1e-9):
+    """Per-element trust-region blend lambda_eff = (1-w)lambda + w|lambda|, w in {0,0.5,1} ->
+    {raw Newton, clamp, absolute}, floored at eps (the standalone filters' floor) when w>0. This is
+    ONE 6x6 (or per-element) eigendecomposition -- the SAME per-iteration cost as clamp/absolute --
+    so the trust-region switchboard is a fair per-step comparison, not a global assembled eigh
+    (review-r2 #42/#44). The adaptive w is a GLOBAL per-step choice (from the model-fit ratio) but
+    the projection is applied per element, matching how eigenvalue filtering actually works."""
+    if w == 0.0:
+        return H
+    lam, V = np.linalg.eigh(H)
+    lam = np.maximum((1.0 - w) * lam + w * np.abs(lam), eps)
+    return (V * lam) @ V.T
+
+
 def project_element(H, kind, eps=1e-9):
     if kind == "none":
         return H
