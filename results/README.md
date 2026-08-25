@@ -32,6 +32,7 @@ loop and already reproduce several of the design's predicted effects. Caveats ar
 | PoP | Pitfalls: affine-invariance + rate | [`pitfalls.md`](pitfalls.md) | **definitive:** unfiltered Newton affine-invariant (3e-13); clamp/absolute/global-PDN all break it (60.8/0.21/60.8) — projection depends on coordinates, a claim iteration-count can't test (#39) |
 | MI | AQP mesh-independence — **rigorous** (multi-seed, indep. E*, τ-sweep) | [`mesh_independence.md`](mesh_independence.md) | **τ-DEPENDENT (the τ-sweep is decisive):** AQP mesh-independent at loose τ=1e-3 (p=−0.06) but **GROWS at tight τ=1e-6 (p=+0.62, worse than L-BFGS)** — round-1 'mesh-independent' was a loose-tolerance artifact (#48/#50/#51/#52) |
 | NHeig | NH sweep: FD-vs-complex-step Hessian (clamp/abs decision) | [`nh_eig_check.md`](nh_eig_check.md) | FD eigenvalues match a machine-precision complex-step reference to ~1e-9; the clamp/absolute decision **never flips across ~20k states** — the ν-sweep ranking is a real effect, not FD noise (#32) |
+| **P2s** ⭐ | **definitive absolute-vs-clamp: P2 element + Stable NH (both confounds removed)** | [`p2_stable_nu.md`](p2_stable_nu.md) | with the locking-free element AND the correct energy, **absolute BEATS clamp** near-incompressible (38 vs 48 it at ν=0.4999) — the paper's claim reproduces once both confounds are controlled (review-r3) |
 | SNH | Stable Neo-Hookean absolute-vs-clamp | [`stable_nu.md`](stable_nu.md) | on the **correct** (stable, finite-for-all-J) energy the ν-sweep shows the same locking confound; and in the **inverted-init** regime absolute is designed for (barrier NH is +∞ there) absolute-vs-clamp is a **near-null** — within 1–2 iters, no decisive win (#31) |
 
 ## What these already demonstrate for the benchmark's thesis
@@ -70,6 +71,7 @@ python -m bench.run_slim         # SLIM vs AQP (official) -> slim.md
 python -m bench.run_world1_profiles # World-1 profiles -> world1_profiles.md
 python -m bench.run_anderson     # Anderson vs local-global -> anderson.md
 python -m bench.run_stable_nu    # Stable Neo-Hookean absolute-vs-clamp -> stable_nu.md
+python -m bench.run_p2_stable_nu # P2 + stable NH (both controls) -> p2_stable_nu.md
 python -m bench.run_pitfalls     # affine-invariance + rate -> pitfalls.md
 python -m bench.run_mesh_independence # AQP mesh-independence -> mesh_independence.md
 python -m bench.run_nh_eig_check  # NH FD-vs-complex-step eig check -> nh_eig_check.md

@@ -8,18 +8,20 @@
 **Status:** 🚧 **Design complete (P0); prototype harness running with measured results (P1).**
 Full *survey design*, *annotated corpus*, *taxonomy*, *metric*/*protocol* specs, *harness
 architecture*, and a *superiority-claims graph* (81 nodes, 160 edges) — plus a runnable
-conformance-gated [`bench/`](bench/) harness covering **all six taxonomy axes** and **23 measured experiments** ([`results/`](results/)). See [Status & roadmap](#status--roadmap).
+conformance-gated [`bench/`](bench/) harness covering **all six taxonomy axes** and **24 measured experiments** ([`results/`](results/)). See [Status & roadmap](#status--roadmap).
 
 > **🔑 Worked example — the benchmark disentangling a live claim (2D, indicative).** A recent
 > SIGGRAPH paper claims *absolute* eigenvalue filtering beats *clamping* near incompressibility.
 > On standard P1 constant-strain elements our harness finds the **opposite** (absolute is slower
-> and *fails* at ν=0.4999). But that is consistent with a **volumetric-locking artifact of the
-> element**: on a locking-relieved **P2** element, from the same init, absolute **matches and
-> beats** clamp — *consistent with the paper's claim once locking is removed*. The benchmark
-> separated a plausible solver effect from a discretization confound — [see
-> `results/p2_nu.md`](results/p2_nu.md). This is exactly the entanglement the project exists to
-> untangle, demonstrated end-to-end. *(Scope: 2D, a single stretch scenario/seed, small dense
-> meshes — indicative, not a general proof; the crossed-mesh probe is even non-monotone in ν.)*
+> and *fails* at ν=0.4999) — but that's a **volumetric-locking artifact of the element**. The
+> honest test has to remove **two** confounds at once: use a locking-relieved element **and** the
+> energy the paper is actually built on. With **both** removed — P2 element **+** Stable
+> Neo-Hookean — absolute **beats** clamp near incompressibility (**38 vs 48 it at ν=0.4999**,
+> [`results/p2_stable_nu.md`](results/p2_stable_nu.md)): the claim reproduces once the discretization
+> and energy confounds are controlled. Getting there took three rounds of adversarial review to
+> catch that the earlier "P2 win" was on the *wrong* energy. *(Scope: 2D, single stretch/seed/τ; P2
+> only relieves locking — a fully locking-free Taylor–Hood element is the pending gold-standard
+> control, so this is indicative, not a general proof.)*
 
 ---
 
@@ -139,7 +141,7 @@ Tracked in [GitHub issues](../../issues). Phases follow `docs/design.md` §11.
 | phase | what | state |
 |---|---|---|
 | **P0 — design & curation** | taxonomy, corpus, metrics, harness architecture, protocol freeze, experiment specs, claims graph | ✅ **complete** (this repo) |
-| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the decomposition experiments | 🟢 **substantially done** — [`bench/`](bench/) covers **all six axes** (energies: sym-Dirichlet, Neo-Hookean 2D/**3D-tet**; directions: Newton, trust-region, L-BFGS, **AQP**, **Sobolev-L-BFGS**, **local-global**, **Anderson**, GD, Adam; **7 filters** incl. trust-region; line-search; 4 linear solvers incl. sparse + Jacobi-PCG; **P2** + **3D-tet** elements) with **23 measured experiments** and **official-code regression vs libigl SLIM**. Claims graph hardened: **2 validated, 21 qualified** (+22 World-3 edges marked `unmeasured` — v1 measures no contact). |
+| **P1 — harness + 1b** | build the component framework; port official code + conformance tests; run the decomposition experiments | 🟢 **substantially done** — [`bench/`](bench/) covers **all six axes** (energies: sym-Dirichlet, Neo-Hookean 2D/**3D-tet**; directions: Newton, trust-region, L-BFGS, **AQP**, **Sobolev-L-BFGS**, **local-global**, **Anderson**, GD, Adam; **7 filters** incl. trust-region; line-search; 4 linear solvers incl. sparse + Jacobi-PCG; **P2** + **3D-tet** elements) with **24 measured experiments** and an **official-code energy cross-check vs libigl SLIM** (sym-Dirichlet, one mesh — not a ported-component regression). Claims graph hardened: **2 validated, 21 qualified** (+22 World-3 edges marked `unmeasured` — v1 measures no contact). |
 | **P2 — 1a + feasibility** | distortion accelerators + injectivity suites; BCQN triple-split (E3); full performance profiles | ⬜ |
 | **P3 — paper + release** | write the STAR; release harness as living-benchmark seed (closed/open divisions, hidden tier) | ⬜ |
 | **v2 — contact + learned** | Track-2 contact via the scenario layer; learned-accelerator companion track | ⬜ |

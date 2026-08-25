@@ -92,7 +92,7 @@ def main():
             pair.append(f"Sobolev-L-BFGS {'<' if so < lb else '≈' if abs(so-lb) < 1 else '>'} L-BFGS "
                         f"({so:.0f} vs {lb:.0f} it)")
         if aq and lb:
-            pair.append(f"AQP {'<' if aq < lb else '>'} L-BFGS ({aq:.0f} vs {lb:.0f})")
+            pair.append(f"AQP {'<' if aq < lb-1 else '≈' if abs(aq-lb)<=1 else '>'} L-BFGS ({aq:.0f} vs {lb:.0f})")
         if nw:
             pair.append(f"Newton fewest iters ({nw:.0f}) but 1 factorization/iter (see e2)")
         L.append(f"- **τ={tau:g}:** " + "; ".join(pair) + ".")

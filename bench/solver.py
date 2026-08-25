@@ -133,11 +133,16 @@ def solve(x0, tris, Bs, areas, free, filt, eterms=_sd_element_terms,
                 d = np.linalg.solve(Hff, -gf)
             except np.linalg.LinAlgError:
                 d = np.linalg.lstsq(Hff, -gf, rcond=None)[0]
-            if float(gf @ d) >= 0.0 and tr_w < 1.0:   # non-descent -> re-assemble at w=1 (absolute, SPD)
-                tr_w = 1.0
-                _, _, Ha = assemble(x, tris, Bs, areas, "trust-region", eterms, tr_w=1.0)
+            # non-descent -> escalate UP the SPD ladder w -> 0.5 (clamp) -> 1.0 (absolute), trying the
+            # CHEAPER clamp state before absolute (review-r3: don't jump Newton->absolute skipping clamp)
+            for w_next in (wn for wn in (0.5, 1.0) if wn > tr_w):
+                if float(gf @ d) < 0.0:
+                    break
+                tr_w = w_next
+                _, _, Ha = assemble(x, tris, Bs, areas, "trust-region", eterms, tr_w=tr_w)
                 counts["assemblies"] += 1; counts["factorizations"] += 1
-                d = np.linalg.solve(Ha[np.ix_(free, free)], -gf)
+                Hff = Ha[np.ix_(free, free)]
+                d = np.linalg.solve(Hff, -gf)
         elif filt == "identity-shift":
             d, _, nf = _spd_shift_solve(Hff, gf)
             counts["factorizations"] += nf; counts["lin_solves"] += 1

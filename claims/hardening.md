@@ -24,7 +24,7 @@ Where each edge can be settled — so we know what v1 delivers vs what waits.
   success*, not by a shared convergence metric; and GPU-vs-CPU speed headlines are marked
   permanently `qualified` (hardware-confounded) unless re-run on matched hardware.
 
-## Already hardened (independent evidence, pre-benchmark) — 16 `qualified` edges
+## Already hardened (independent evidence, pre-benchmark) — 21 `qualified` edges (10 shown below)
 
 These carry `status: qualified` in `claims.yaml` today, on evidence that exists **without** our
 benchmark:
@@ -110,7 +110,7 @@ the locking-free + more-filters runs.
 |---|---|---|---|
 | anderson-geometry → local-global | convergence | **validated (2D)** | Anderson 12 it vs local-global 23 it on a non-trivial sheared-target ARAP, mesh-independent, same min; wall-clock speedup < iter speedup (anderson) |
 | slim → aqp | speed | **validated (HW-independent)** | official libigl SLIM 5 it vs AQP 19 (boundary drift 4e-16 clears the soft/hard confound). Wall-clock C++/Python-confounded → counts carry it; real tradeoff 5 factorizations vs AQP's 1 (slim) |
-| absolute-filtering → clamp-filtering | convergence | **qualified (indicative, 2D)** | P1 "refutation" consistent with locking; on locking-relieved P2 absolute matches/beats clamp (p2_nu). Crossed-mesh probe non-monotone; single 2D scenario |
+| absolute-filtering → clamp-filtering | convergence | **qualified (indicative, 2D)** | P1 "refutation" is a locking artifact; with BOTH confounds removed (P2 element + **stable** NH energy) absolute BEATS clamp near-incompressible (38 vs 48 it at ν=0.4999, p2_stable_nu). Earlier P2 win was on the *barrier* energy; inverted regime is a separate near-null. Single 2D scenario; P2 only relieves |
 | trust-region-filtering → clamp-filtering | convergence | **qualified (discretization-dependent)** | FAIR per-element impl (same cost as filters, review-r2 #42/#44): on locking **P1 TR beats clamp on BOTH iterations AND wall-clock** (114 it/7.3s vs 242 it/10.7s) — adaptive Newton back-off escapes locking; but on locking-free **P2 TR LOSES to clamp on both** (94 it/21s vs 53 it/9s). Round-1 'TR beats both on P2' was an assembled-eigh artifact, REVERSED. Single scenario/τ (world2_filters) |
 | trust-region-filtering → absolute-filtering | convergence | **qualified (discretization-dependent)** | fair per-element impl: TR beats absolute on locking P1 (absolute maxiters) but LOSES on locking-free P2 (94 vs 41 it); see paired trust-region→clamp row (world2_filters, #42/#44) |
 | aqp → l-bfgs | speed | **qualified (unreproduced)** | AQP loses to a well-implemented L-BFGS; ×200 was a MATLAB-baseline confound (e2). Not tested from a Tutte-far init (AQP's regime) — see #29 |

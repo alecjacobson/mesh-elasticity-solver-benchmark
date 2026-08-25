@@ -17,13 +17,13 @@ dimension. Each edge is *hardened* from `self-claimed` toward `validated` / `qua
 
 **Benchmark-hardened so far** (`assessed_by: benchmark`; see [`hardening.md`](hardening.md)):
 - `anderson-geometry → local-global` — **validated** (Anderson 12 it vs local-global 23 it on a non-trivial sheared-target ARAP, mesh-independent, same minimum; reproducible `python -m bench.run_anderson`, `results/anderson.md`; wall-clock reported alongside — a smaller speedup than the iteration ratio).
-- `absolute-filtering → clamp-filtering` — **qualified/settled**: P1 "refutation" is a locking artifact; on the P2 element absolute matches/beats clamp (`results/p2_nu.md`).
+- `absolute-filtering → clamp-filtering` — **qualified**: the P1 "refutation" is a volumetric-locking artifact; with **both** confounds removed (P2 element **+** stable NH energy) absolute **beats** clamp near incompressibility (38 vs 48 it at ν=0.4999, `results/p2_stable_nu.md`). Not "settled" — 2D, single scenario, P2 only relieves (a fully locking-free element is pending).
 - `trust-region-filtering → {clamp, absolute}` — **qualified (discretization-dependent)**: with a **faithful per-element** blend at the *same cost* as the filters, TR beats clamp on **both** iterations and wall-clock on the **locking P1** element (114 it/7.3s vs 242 it/10.7s) but **loses to both on the locking-free P2** (94 it/21s vs 53 it/9s). The round-1 "beats both on P2" was an artifact of a costlier global-`eigh` operator and is **reversed**; the switchboard's benefit is discretization-dependent (`results/world2_filters.md`).
 - `slim → aqp` — **validated (HW-independent)**: official libigl SLIM 5 it vs AQP 19 (soft-constraint drift 4e-16 clears the confound); wall-clock is C++/Python-confounded so counts carry it (`results/slim.md`).
 - `pitfalls-projection → clamp-filtering` — **affine-invariance sub-claim validated**: unfiltered Newton is affine-covariant to 3e-13 under coordinate rescaling; clamp/absolute/global-PDN all break it (60.8/0.21/60.8) — a claim iteration-count can't test (`results/pitfalls.md`).
 - `aqp → l-bfgs` — **qualified/unreproduced**: AQP loses to a well-implemented L-BFGS; the ×200 was a MATLAB-baseline confound (`results/e2.md`).
 - `sobolev-lbfgs → l-bfgs` — **qualified**: the *isolated* Sobolev-preconditioning component (D0=L⁻¹, one of BCQN's three) helps only in the ill-conditioned regime (34 vs 55 it), not the well-conditioned one (`results/e2.md`). `bcqn → l-bfgs` itself is **reverted to self-claimed** — the full blended method (barrier-aware line-search filter + blend + criterion) and its E3 factorial are unimplemented, so the measured win belongs to the component, not to BCQN.
-- Dimensions: speed 55 · convergence 36 · robustness 35 · quality 13 · generality 10 · scalability 9 · simplicity 1.
+- Dimensions: speed 55 · convergence 37 · robustness 35 · quality 13 · generality 10 · scalability 9 · simplicity 1 (= 160).
 - Most-targeted baselines: `full-newton` (13), `ipc` (11), `xpbd` (10), `slim` (9), `clamp-filtering` (7), `l-bfgs` (7).
 
 ## Legend
@@ -48,7 +48,7 @@ flowchart LR
     abs["absolute (2024)"]
     tr["trust-region (2024)"]
     pit["Pitfalls of Projection (2023)"]
-    ppn["Prog. Projected Newton (2025)"]
+    ppn["Prog. Projected Newton (2026)"]
     blend["eigenvalue blending (2025)"]
     ae["analytic eigensystems (2019)"]
 
@@ -220,7 +220,7 @@ superiority. Every such caveat is in the edge `notes`.*
 
 ## Notable qualified / honest-caveat edges
 
-These are the 16 `qualified` edges plus the author-conceded caveats — the seeds for hardening (#5):
+These are the 21 `qualified` edges (10 shown) plus the author-conceded caveats — the seeds for hardening (#5):
 
 | edge | why qualified / honest note |
 |---|---|

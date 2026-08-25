@@ -22,7 +22,7 @@
 
 ## Observed (pairwise, per τ)
 
-- **τ=0.001:** Sobolev-L-BFGS > L-BFGS (12 vs 9 it); AQP > L-BFGS (9 vs 9); Newton fewest iters (6) but 1 factorization/iter (see e2).
+- **τ=0.001:** Sobolev-L-BFGS > L-BFGS (12 vs 9 it); AQP ≈ L-BFGS (9 vs 9, tie); Newton fewest iters (6) but 1 factorization/iter (see e2).
 - **τ=1e-06:** Sobolev-L-BFGS > L-BFGS (20 vs 16 it); AQP > L-BFGS (77 vs 16); Newton fewest iters (8) but 1 factorization/iter (see e2).
 
 - **τ-stability:** the Sobolev-vs-L-BFGS ordering holds at both τ. AQP's iteration count grows from τ=1e-3 to 1e-6 (9→77), the same loose-vs-tight first-order-tail effect quantified in `results/mesh_independence.md`. Rankings are stated **pairwise**, not as an N-solver total order (Gould–Scott); read the budget columns as *iterations*, not cost (a Newton iteration is a factorization, see e2).
