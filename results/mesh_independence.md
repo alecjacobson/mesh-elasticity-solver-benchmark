@@ -1,35 +1,35 @@
 # AQP mesh-independence — rigorous (measured)
 
-Round-2 hardening of the mesh-independence test (#48/#50/#51/#52): a wider sweep with **3 seeds** (mean [min–max] spread), an **independent high-accuracy E\*** (Newton to |g|<1e-9 per instance — *not* best-of-compared, removing the bias toward the strongest solver), and a **τ-sweep** (τ∈{1e-3,1e-6}). Fixed continuous problem (unit square, right edge stretched to x=1.5), refined. Iterations to `(E−E*)/(E0−E*)<τ`. Run: `python -m bench.run_mesh_independence`.
+Round-2/3 hardening of the mesh-independence test (#48/#50/#51/#52; #R1/#R2/#R3): a wider sweep with **3 seeds** (median [min–max] + k/N converged), an **independent high-accuracy E\*** (Newton to |g|<1e-9, *not* best-of-compared), a **τ-sweep** (τ∈{1e-3,1e-6}), and a **growth exponent with a 95% CI** — fit on the median over only the sizes where all seeds converged and no solver hit its (raised) iteration cap, so no censored cell enters the fit. Cap-touched any cell: **False**. Run: `python -m bench.run_mesh_independence`.
 
-The quantitative test is the **growth exponent p** in `iters ∝ DOF^p` (p≈0 → mesh-independent; p>0 → grows with resolution).
+Test: growth exponent p in `iters ∝ DOF^p` (p≈0 → mesh-independent). A verdict is only asserted when the 95% CI clears the flat band or two CIs separate.
 
 ### τ = 0.001
 
-| mesh | free dof | newton (mean [min–max]) | l-bfgs (mean [min–max]) | aqp (mean [min–max]) |
+| mesh | free dof | newton median [min–max] (k/3) | l-bfgs median [min–max] (k/3) | aqp median [min–max] (k/3) |
 |---|---|---|---|---|
-| 6×6 | 70 | 2.7 [2–3] | 15.7 [15–16] | 11.7 [9–14] |
-| 9×9 | 160 | 3.0 [3–3] | 22.7 [22–23] | 15.0 [12–17] |
-| 12×12 | 286 | 3.0 [3–3] | 30.0 [28–32] | 13.7 [11–17] |
-| 15×15 | 448 | 2.7 [2–3] | 38.3 [37–40] | 10.0 [9–11] |
+| 6×6 | 70 | 3 [2–3] (3/3) | 16 [15–16] (3/3) | 12 [9–14] (3/3) |
+| 9×9 | 160 | 3 [3–3] (3/3) | 23 [22–23] (3/3) | 16 [12–17] (3/3) |
+| 12×12 | 286 | 3 [3–3] (3/3) | 30 [28–32] (3/3) | 13 [11–17] (3/3) |
+| 15×15 | 448 | 3 [2–3] (3/3) | 38 [37–40] (3/3) | 10 [9–11] (3/3) |
 
-growth exponent p (iters∝DOF^p): **newton p=+0.01**, **l-bfgs p=+0.48**, **aqp p=-0.06**
+growth exponent p (iters∝DOF^p, ±95% CI): **newton p=+0.00±0.00** (R²=1.00), **l-bfgs p=+0.46±0.03** (R²=1.00), **aqp p=-0.09±0.32** (R²=0.14)
 
 ### τ = 1e-06
 
-| mesh | free dof | newton (mean [min–max]) | l-bfgs (mean [min–max]) | aqp (mean [min–max]) |
+| mesh | free dof | newton median [min–max] (k/3) | l-bfgs median [min–max] (k/3) | aqp median [min–max] (k/3) |
 |---|---|---|---|---|
-| 6×6 | 70 | 4.0 [4–4] | 29.3 [28–31] | 48.7 [43–54] |
-| 9×9 | 160 | 4.0 [4–4] | 37.3 [35–41] | 89.3 [82–100] |
-| 12×12 | 286 | 4.3 [4–5] | 49.0 [48–50] | 133.7 [105–154] |
-| 15×15 | 448 | 3.7 [3–4] | 69.3 [67–73] | 148.5 [131–166] |
+| 6×6 | 70 | 4 [4–4] (3/3) | 29 [28–31] (3/3) | 49 [43–54] (3/3) |
+| 9×9 | 160 | 4 [4–4] (3/3) | 36 [35–41] (3/3) | 86 [82–100] (3/3) |
+| 12×12 | 286 | 4 [4–5] (3/3) | 49 [48–50] (3/3) | 142 [105–154] (3/3) |
+| 15×15 | 448 | 4 [3–4] (3/3) | 68 [67–73] (3/3) | 166 [131–217] (3/3) |
 
-growth exponent p (iters∝DOF^p): **newton p=-0.02**, **l-bfgs p=+0.45**, **aqp p=+0.62**
+growth exponent p (iters∝DOF^p, ±95% CI): **newton p=+0.00±0.00** (R²=1.00), **l-bfgs p=+0.45±0.15** (R²=0.95), **aqp p=+0.68±0.11** (R²=0.99)
 
-## Observed
+## Observed (CI-gated)
 
-- **AQP's mesh-independence is TOLERANCE-DEPENDENT — the τ-sweep is decisive (review-r2 #50).** At the loose tolerance τ=0.001 AQP's growth exponent is ≈0 (**p=-0.06, mesh-INDEPENDENT**, matching its design claim), but at the tight τ=1e-06 it **GROWS (p=+0.62)** — steeper than L-BFGS (p=+0.45); in absolute terms AQP goes 49→148 iters over the 6.4× DOF increase while L-BFGS goes 29→69. So AQP's Laplacian proxy gives excellent **mesh-independent *initial* progress** but its first-order **asymptotic tail is NOT mesh-independent** (it lengthens with resolution, and to tight tolerance AQP scales *worse* than L-BFGS).
-- **This resolves the round-1 over-claim honestly:** 'AQP is mesh-independent' was a **loose-tolerance artifact**. The τ-sweep the round-2 review demanded flips the reading — the ordering is exactly the cutoff artifact Gould–Scott/#50 warn about. Correct status: *mesh-independent to loose tolerance only; not to tight.*
+- **AQP's mesh-independence is TOLERANCE-DEPENDENT (the τ-sweep is decisive).** At loose τ=0.001 its growth exponent is consistent with 0 (p=-0.09, 95% CI [-0.41,+0.23] — mesh-independent), but at tight τ=1e-06 the CI clears the flat band (p=+0.68, CI [+0.57,+0.80]) → it **grows**. So AQP's Laplacian proxy gives mesh-independent *initial* progress but its first-order *asymptotic tail is not* mesh-independent. The round-1 'AQP is mesh-independent' reading was a **loose-tolerance artifact**.
+- **Is AQP's tight-τ growth steeper than L-BFGS's?** **Not resolved at this sample size** — AQP p=+0.68 [+0.57,+0.80] and L-BFGS p=+0.45 [+0.30,+0.60] have overlapping 95% CIs, so 'AQP scales worse than L-BFGS' is NOT supported (review-r3 #R1). Both grow; the ordering between them is within noise.
 - Newton is mesh-independent at both τ (p≈0, its known property) but pays a factorization per iteration (see e2) — it is the high-accuracy reference here, not a competitor on cost.
 
 _Caveat: 2D, dense, one stretch magnitude; the independent E\* is our own Newton driven to |g|<1e-9 (a high-accuracy reference — its final energy is E\* to ~machine precision — not a third-party oracle like TinyAD/PETSc, which remains the gold standard). Spread is min–max over 3 seeds._
