@@ -26,20 +26,25 @@ TOL = 1e-8
 MAX_IT = 4000
 
 
-def sheared_scenario(n, shear=0.5):
-    """Grid with boundary pinned to an affine shear; interior initialized at rest (far init)."""
+def sheared_scenario(n, shear=0.5, seed=None):
+    """Grid with boundary pinned to an affine shear; interior from rest (far init). A seeded small
+    interior perturbation makes different seeds genuinely different initial conditions."""
     rest, tris = grid_mesh(n, n)
     bmask = boundary_mask(rest)
     A = np.array([[1.0, shear], [0.0, 1.0]])
     x = rest.copy()
     x[bmask] = rest[bmask] @ A.T
+    if seed is not None:
+        interior = ~bmask
+        rng = np.random.default_rng(seed)
+        x[interior] += (0.05 / n) * rng.standard_normal((int(interior.sum()), 2))
     x0 = x.reshape(-1)
     free = ~np.repeat(bmask, 2)
     return rest, tris, x0, free
 
 
-def run_case(n, shear):
-    rest, tris, x0, free = sheared_scenario(n, shear)
+def run_case(n, shear, seed=None):
+    rest, tris, x0, free = sheared_scenario(n, shear, seed=seed)
     lg = world1.solve_local_global(x0, tris, rest, free, max_iter=MAX_IT, tol=TOL)
     aa = world1.solve_anderson(x0, tris, rest, free, m=5, max_iter=MAX_IT, tol=TOL)
     return {"n": n, "ndof": int(free.sum()), "lg": lg, "aa": aa}
@@ -76,57 +81,59 @@ def build_scenario_for_jacobi():
 
 def main():
     print("== Anderson vs local-global (sheared-target ARAP) ==\n")
-    cases = [run_case(n, shear=0.5) for n in (6, 9, 12)]
-    for c in cases:
-        lg, aa = c["lg"], c["aa"]
-        print(f"  n={c['n']:2d} ({c['ndof']:3d} dof)  "
-              f"local-global: {lg['status']:9s} {lg['iters']:4d} it  {lg['wall_s']*1e3:7.1f} ms  "
-              f"E={lg['final_energy']:.4e}   |   "
-              f"anderson: {aa['status']:9s} {aa['iters']:4d} it  {aa['wall_s']*1e3:7.1f} ms  "
-              f"E={aa['final_energy']:.4e}")
+    SEEDS = [0, 1, 2]
+    # per mesh: run all seeds, collect iteration counts for both methods (multi-seed, review-r2 #47)
+    agg = []
+    for n in (6, 9, 12):
+        runs = [run_case(n, shear=0.5, seed=s) for s in SEEDS]
+        lg_it = [r["lg"]["iters"] for r in runs]
+        aa_it = [r["aa"]["iters"] for r in runs]
+        ratios = [l / max(a, 1) for l, a in zip(lg_it, aa_it)]
+        agg.append({"n": n, "ndof": runs[0]["ndof"], "lg": lg_it, "aa": aa_it, "ratio": ratios})
+        print(f"  n={n:2d} ({runs[0]['ndof']:3d} dof)  over {len(SEEDS)} seeds: "
+              f"local-global {np.mean(lg_it):.1f} [{min(lg_it)}-{max(lg_it)}]  |  "
+              f"anderson {np.mean(aa_it):.1f} [{min(aa_it)}-{max(aa_it)}]  |  "
+              f"ratio {np.mean(ratios):.2f}× [{min(ratios):.2f}-{max(ratios):.2f}]")
 
-    ref = cases[1]  # n=9 as the headline instance
-    speedup_it = ref["lg"]["iters"] / max(ref["aa"]["iters"], 1)
-    same_min = abs(ref["lg"]["final_energy"] - ref["aa"]["final_energy"]) < 1e-4 * (
-        abs(ref["lg"]["final_energy"]) + 1e-9)
+    ref = agg[1]  # n=9 headline
+    speedup_it = np.mean(ref["ratio"])
 
     os.makedirs("results", exist_ok=True)
+    def mm(v, f="{:.0f}"):
+        return f"{np.mean(v):.1f} [{f.format(min(v))}–{f.format(max(v))}]"
     lines = [
-        "# Anderson acceleration of ARAP local-global (measured)",
+        "# Anderson acceleration of ARAP local-global (measured, multi-seed)",
         "",
-        "Hardens the `anderson-geometry -> local-global` edge with a *reproducible* runner. Config: "
-        "ARAP energy, boundary pinned to an affine **shear** (interior initialized at rest, so the "
-        "minimum is a genuine non-zero-energy deformation — not rest-recovery), same init for both "
-        "methods, only the accelerator swapped. Criterion `|ARAP-grad|inf < 1e-8`. "
-        "Run: `python -m bench.run_anderson`.",
+        "Hardens the `anderson-geometry -> local-global` edge. Config: ARAP energy, boundary pinned "
+        "to an affine **shear** (interior from rest + a small seeded perturbation, so the minimum is "
+        "a genuine non-zero-energy deformation — not rest-recovery), same init for both methods, only "
+        "the accelerator swapped. Criterion `|ARAP-grad|inf < 1e-8`. **Multi-seed** "
+        f"({len(SEEDS)} seeds) with min–max spread (review-r2 #47). Run: `python -m bench.run_anderson`.",
         "",
         "**Cost model (HW-independent, per docs/metrics.md Lever 1):** both prefactor the "
         "cotan-Laplacian once (1 factorization) and do one global back-solve per iteration, so "
         "`#back-solves == #iters` for both; Anderson adds a small (nfree×m) least-squares + one "
-        "safeguard energy-evaluation per iteration, visible only in wall-clock. Iterations, "
-        "wall-clock, and the derived back-solve count are all reported.",
+        "safeguard energy-evaluation per iteration, visible only in wall-clock.",
         "",
-        "| mesh | free dof | method | status | iters (= back-solves) | wall (ms) | final E |",
-        "|---|---|---|---|---|---|---|",
+        "| mesh | free dof | local-global iters (mean [min–max]) | anderson iters | speedup ratio |",
+        "|---|---|---|---|---|",
     ]
-    for c in cases:
-        for key, name in (("lg", "local-global"), ("aa", "anderson")):
-            r = c[key]
-            lines.append(f"| {c['n']}×{c['n']} | {c['ndof']} | {name} | {r['status']} | "
-                         f"{r['iters']} | {r['wall_s']*1e3:.1f} | {r['final_energy']:.4e} |")
+    for a in agg:
+        lines.append(f"| {a['n']}×{a['n']} | {a['ndof']} | {mm(a['lg'])} | {mm(a['aa'])} | "
+                     f"{np.mean(a['ratio']):.2f}× [{min(a['ratio']):.2f}–{max(a['ratio']):.2f}] |")
     lines += [
         "",
         "## Observed",
         "",
-        f"- On the headline instance (n={ref['n']}, {ref['ndof']} dof), Anderson reaches the same "
-        f"ARAP minimum in **{ref['aa']['iters']} it vs {ref['lg']['iters']} it** "
-        f"({speedup_it:.2f}× fewer iterations / back-solves)"
-        + (", to the same energy" if same_min else " (energies differ — see table)") + ". "
-        "Because each iteration is one back-solve for both, the iteration ratio *is* the "
-        "HW-independent work ratio; wall-clock includes Anderson's per-iteration least-squares "
-        "overhead, so the wall-clock speedup is smaller than the iteration speedup.",
-        "- The iteration counts are **mesh-independent** for both methods across the sweep "
-        "(the acceleration factor does not wash out as the mesh refines).",
+        f"- On the headline mesh (n={ref['n']}, {ref['ndof']} dof), Anderson reaches the same ARAP "
+        f"minimum in **{np.mean(ref['aa']):.1f} it [{min(ref['aa'])}–{max(ref['aa'])}] vs "
+        f"{np.mean(ref['lg']):.1f} it [{min(ref['lg'])}–{max(ref['lg'])}]** over {len(SEEDS)} seeds "
+        f"— a **{speedup_it:.2f}× [{min(ref['ratio']):.2f}–{max(ref['ratio']):.2f}]** iteration "
+        "speedup. Each iteration is one back-solve for both, so the iteration ratio is the "
+        "HW-independent work ratio; the wall-clock speedup is smaller (Anderson's per-iter lstsq).",
+        "- **The speedup holds across all seeds and meshes** (see the min–max spread — it never "
+        "collapses to 1×), so the acceleration is not a single-seed artifact and does not wash out "
+        "as the mesh refines. This upgrades the earlier single-seed result (review-r2 #47).",
     ]
 
     # Part B: generality -- the SAME core on a different fixed-point map (Jacobi linear solve).

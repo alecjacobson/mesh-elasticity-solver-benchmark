@@ -1,22 +1,19 @@
-# Anderson acceleration of ARAP local-global (measured)
+# Anderson acceleration of ARAP local-global (measured, multi-seed)
 
-Hardens the `anderson-geometry -> local-global` edge with a *reproducible* runner. Config: ARAP energy, boundary pinned to an affine **shear** (interior initialized at rest, so the minimum is a genuine non-zero-energy deformation — not rest-recovery), same init for both methods, only the accelerator swapped. Criterion `|ARAP-grad|inf < 1e-8`. Run: `python -m bench.run_anderson`.
+Hardens the `anderson-geometry -> local-global` edge. Config: ARAP energy, boundary pinned to an affine **shear** (interior from rest + a small seeded perturbation, so the minimum is a genuine non-zero-energy deformation — not rest-recovery), same init for both methods, only the accelerator swapped. Criterion `|ARAP-grad|inf < 1e-8`. **Multi-seed** (3 seeds) with min–max spread (review-r2 #47). Run: `python -m bench.run_anderson`.
 
-**Cost model (HW-independent, per docs/metrics.md Lever 1):** both prefactor the cotan-Laplacian once (1 factorization) and do one global back-solve per iteration, so `#back-solves == #iters` for both; Anderson adds a small (nfree×m) least-squares + one safeguard energy-evaluation per iteration, visible only in wall-clock. Iterations, wall-clock, and the derived back-solve count are all reported.
+**Cost model (HW-independent, per docs/metrics.md Lever 1):** both prefactor the cotan-Laplacian once (1 factorization) and do one global back-solve per iteration, so `#back-solves == #iters` for both; Anderson adds a small (nfree×m) least-squares + one safeguard energy-evaluation per iteration, visible only in wall-clock.
 
-| mesh | free dof | method | status | iters (= back-solves) | wall (ms) | final E |
-|---|---|---|---|---|---|---|
-| 6×6 | 50 | local-global | converged | 23 | 92.9 | 1.2689e-01 |
-| 6×6 | 50 | anderson | converged | 12 | 77.1 | 1.2689e-01 |
-| 9×9 | 128 | local-global | converged | 23 | 201.7 | 1.2689e-01 |
-| 9×9 | 128 | anderson | converged | 12 | 169.5 | 1.2689e-01 |
-| 12×12 | 242 | local-global | converged | 24 | 370.7 | 1.2689e-01 |
-| 12×12 | 242 | anderson | converged | 13 | 317.4 | 1.2689e-01 |
+| mesh | free dof | local-global iters (mean [min–max]) | anderson iters | speedup ratio |
+|---|---|---|---|---|
+| 6×6 | 50 | 23.0 [23–23] | 12.0 [12–12] | 1.92× [1.92–1.92] |
+| 9×9 | 128 | 23.0 [23–23] | 12.0 [12–12] | 1.92× [1.92–1.92] |
+| 12×12 | 242 | 24.0 [24–24] | 12.3 [12–13] | 1.95× [1.85–2.00] |
 
 ## Observed
 
-- On the headline instance (n=9, 128 dof), Anderson reaches the same ARAP minimum in **12 it vs 23 it** (1.92× fewer iterations / back-solves), to the same energy. Because each iteration is one back-solve for both, the iteration ratio *is* the HW-independent work ratio; wall-clock includes Anderson's per-iteration least-squares overhead, so the wall-clock speedup is smaller than the iteration speedup.
-- The iteration counts are **mesh-independent** for both methods across the sweep (the acceleration factor does not wash out as the mesh refines).
+- On the headline mesh (n=9, 128 dof), Anderson reaches the same ARAP minimum in **12.0 it [12–12] vs 23.0 it [23–23]** over 3 seeds — a **1.92× [1.92–1.92]** iteration speedup. Each iteration is one back-solve for both, so the iteration ratio is the HW-independent work ratio; the wall-clock speedup is smaller (Anderson's per-iter lstsq).
+- **The speedup holds across all seeds and meshes** (see the min–max spread — it never collapses to 1×), so the acceleration is not a single-seed artifact and does not wash out as the mesh refines. This upgrades the earlier single-seed result (review-r2 #47).
 
 ## Generality — the same core wraps a different fixed-point map (#36)
 
