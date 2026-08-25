@@ -54,33 +54,52 @@ which published superiority claims survive confound control.
    no per-problem tuning). (Sources: `harness.md`, `metrics.md`, `protocol.md`.)
 
 8. **Results — the decomposition experiments.** **This section is the paper's reason to exist.**
-   Prototype-harness (`bench/`, `results/`) measurements already in hand (each with the
-   claims-graph edge it touches):
-   - **Filter isolation + the ν-claim (2D, indicative)** — on P1 constant-strain elements absolute
-     filtering under-performs clamp and fails at ν=0.4999; on a locking-relieved **P2** element
-     absolute matches/beats clamp — the P1 result is consistent with a **volumetric-locking
-     artifact**; the Stabler-Neo-Hookean claim looks *sound* once locking is removed (2D, single
-     scenario; the crossed-mesh probe is non-monotone in ν) (`results/p2_nu.md`,
-     `results/locking.md`). *The benchmark separating a real solver effect from a discretization
-     confound is the paper's headline.*
-   - **First- vs second-order** — Newton wins iterations but **L-BFGS wins wall-clock** (skips
-     Hessian); full-batch **Adam plateaus** (honesty control) (`results/e4.md`).
-   - **Criterion sensitivity** — 3 different "fastest" filters across 4 criteria (`results/e5.md`).
-   - **Linear-solver axis** — same outer iterations; wall-clock ranks solvers *oppositely* across
-     scenarios while mat-vec counts stay consistent; unpreconditioned CG mat-vecs grow ~√DOFs,
-     Jacobi-PCG reduces it (`results/ls.md`, `results/scaling.md`).
-   - **Filtering ≈ trust region** — classical Steihaug-CG (no filter) converges across the whole
-     ν-sweep, incl. where absolute fails — supporting the lineage claim (`results/tr.md`).
-   - **Regime & axis interaction** — inertia makes filtering optional in dynamics
-     (`results/1b_dynamic.md`); a strong filter makes the line-search axis inert
-     (`results/linesearch.md`). *Full-scale reruns (official-code ports, 3D, E2/E3 seed splits)
-     are the remaining work; the prototype already demonstrates every headline effect.*
+   Harness (`bench/`, `results/`, 26 measured experiments, conformance-gated) measurements in hand.
+   Each headline was hardened through **three rounds of adversarial peer review** (one reviewer per
+   referenced paper, protective of its own claims), which repeatedly caught over-reach in *our own*
+   prior conclusions — the benchmark's confound-untangling applied reflexively to itself:
+   - **The ν-claim (the headline), settled across FOUR independent locking treatments.** The
+     absolute-filtering paper claims absolute > clamp near incompressibility; on P1 constant-strain
+     elements we find the *opposite* (absolute fails at ν=0.4999) — but that is a **volumetric-locking
+     artifact**. Round 3 caught that the "P2 fixes it" result was on the *wrong* (classical barrier)
+     energy; the definitive test needs **both** confounds removed. With the locking-relieved element
+     **and** the correct Stable-Neo-Hookean energy, absolute **beats** clamp and its advantage
+     *grows* toward the incompressible limit (48/38 at ν=0.4999 → 113/71 at 0.49999, `p2_stable_nu`).
+     A locking artifact would *collapse* at the limit; instead it strengthens. **Four independent
+     locking treatments now concur** — P1 crossed-mesh, standard P2, stable-NH P2, and a validated
+     **selective-reduced-integration P2** (`sri_nu.md`, on which absolute crushes clamp 23 vs 250) —
+     so the P1 "refutation" is robustly a discretization confound, not a filter property. *This is
+     the paper's headline: a decade-old superiority claim that reverses, then re-validates, only once
+     two entangled confounds (element + energy) are separately controlled.*
+   - **"Innovations" that don't survive fair, faithful re-measurement.** (i) *Trust-region filtering*
+     "beats both clamp and absolute": our round-1 win was an artifact of an expensive global-`eigh`
+     operator; the faithful **per-element** blend (+ an SPD-probe schedule) reverses it — TR wins on
+     the ill-conditioned/locking element but is a wash on the well-conditioned one (`world2_filters`).
+     (ii) *AQP mesh-independence*: real only to **loose** tolerance — a τ-sweep + CI-gated growth
+     exponent shows it *grows* at tight τ (and CI-gating **retracted** our own "AQP scales worse than
+     L-BFGS" as not statistically supported) (`mesh_independence`). (iii) *AQP's single-factorization
+     wins at scale*: **refuted at tight τ** — measured factorization/back-solve counts + a
+     sparse-Cholesky model show AQP's iteration blow-up makes it 1.5–2.2× Newton and rising
+     (`scale_cost`). (iv) *AQP > L-BFGS ×200*: a MATLAB-baseline confound (`e2`).
+   - **Confounds the benchmark quantifies.** First-vs-second-order (Newton wins iterations,
+     **L-BFGS wins wall-clock**; Adam plateaus — honesty control, `e4`); criterion sensitivity (3
+     "fastest" filters across 4 criteria, `e5`); C++/Python wall-clock confound (SLIM's compiled
+     speed is not algorithmic — HW-independent *counts* carry every verdict, `slim`); Pitfalls of
+     Projection (projection breaks **affine invariance** — Newton covariant to 3e-13, every filter
+     O(1), `pitfalls`); filtering ≈ trust-region / modified-Newton lineage (`tr`); regime interaction
+     (inertia makes filtering optional, `1b_dynamic`; a strong filter makes line-search inert,
+     `linesearch`).
 
-9. **What survived.** The hardened claims graph (`claims/hardening.md`) as the summary
-   contribution: which decade-old superiority claims are `validated` (e.g. absolute≥clamp on a
-   proper element), `qualified` (regime/discretization-conditional), or `refuted`. Reflection on
-   how much published advantage was confound-borne — with the ν-claim as the worked example of a
-   result that *reverses* once a discretization confound is controlled.
+9. **What survived — and the review loop as method.** The hardened claims graph
+   (`claims/hardening.md`): **2 validated (2D)**, **21 qualified**, **115 self-claimed**, **22
+   unmeasured** (contact, deferred to v2). The summary contribution is not just *which* decade-old
+   claims survive, but a demonstrated **methodology for honest attribution**: three adversarial
+   review rounds (52 issues, 51 resolved) each caught real over-reach in the *previous* round's
+   measurements — an operator-cost artifact, a loose-tolerance artifact, a wrong-energy flagship, an
+   statistically-unsupported ordering — and forced retractions. The lesson for the field: superiority claims are
+   entangled with element choice, energy, tolerance, baseline quality, and hardware, and a single
+   confound rarely acts alone (the ν-claim needed *two* removed at once). Reflection on how much
+   published advantage is confound-borne, and a call to report claims with the honest status ladder.
 
 10. **Open problems & the living benchmark.** Contact track (v2); learned-accelerator companion
     track; the hidden-tier governance; what the community should standardize.
@@ -104,6 +123,6 @@ surrogates/PINNs are excluded from the core) stated once, tied to the scope ledg
 ## Status / mapping to issues
 
 Each section maps to a doc already in the repo; drafting = lifting + tightening those into prose.
-§2–7 writable now; **§8–9 now have prototype data** (`bench/` + `results/`, 21 experiments incl.
+§2–7 writable now; **§8–9 now have prototype data** (`bench/` + `results/`, 26 experiments incl.
 the ν-claim disentangled (indicative, 2D) via the P2 element). Remaining for a full paper: official-code-regression
 ports, 3D, E2/E3 seed-method splits, and larger-scale reruns.
