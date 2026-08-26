@@ -54,7 +54,7 @@ which published superiority claims survive confound control.
    no per-problem tuning). (Sources: `harness.md`, `metrics.md`, `protocol.md`.)
 
 8. **Results — the decomposition experiments.** **This section is the paper's reason to exist.**
-   Harness (`bench/`, `results/`, 26 measured experiments, conformance-gated) measurements in hand.
+   Harness (`bench/`, `results/`, 30 measured experiments, conformance-gated) measurements in hand.
    Each headline was hardened through **three rounds of adversarial peer review** (one reviewer per
    referenced paper, protective of its own claims), which repeatedly caught over-reach in *our own*
    prior conclusions — the benchmark's confound-untangling applied reflexively to itself:
@@ -81,6 +81,26 @@ which published superiority claims survive confound control.
      wins at scale*: **refuted at tight τ** — measured factorization/back-solve counts + a
      sparse-Cholesky model show AQP's iteration blow-up makes it 1.5–2.2× Newton and rising
      (`scale_cost`). (iv) *AQP > L-BFGS ×200*: a MATLAB-baseline confound (`e2`).
+   - **Bundled methods are entangled, not additive (World-1).** *BCQN* claims "fastest + most robust"
+     from three changes at once; the full **2³ factorial** (E3, one unified L-BFGS path over
+     line-search × direction × criterion) shows they **interact**: the blended-Sobolev *direction* is
+     the factor most able to cut iterations (largest when ill-conditioned), but the barrier
+     *line-search* **cancels** it — its inversion cap binds on Sobolev's large early steps (~12
+     caps/solve, reversing a typical-stratum 26→37) — and the *criterion* only re-times the stop. So
+     the bundle is not a sum of independent wins (`e3`). *(An adversarial review of our own factorial
+     caught that pooling the arms hid this interaction — logged, then exposed.)*
+   - **Injectivity is a capability axis, not a speed contest (World-1).** A **barrier** distortion
+     energy (symmetric Dirichlet, +∞ at J≤0) has **0% feasible-start** from a folded map — it needs a
+     Tutte-style inversion-free initialization and can never *find* injectivity, only polish it —
+     while **barrier-free** energies untangle 100%: the classical area-penalty (TLC's ancestor) and
+     Stable NH (8–9 it, a far better basin). This is the axis that separates the injectivity cohort
+     (TLC, foldover-free, progressive embedding) from distortion-barrier minimizers (`injectivity`).
+   - **The clamp-vs-absolute question reduces to one analytic scalar.** In the validated analytic
+     eigensystem, the 2D symmetric-Dirichlet element Hessian's **only** sign-indefinite mode is the
+     *twist* λ_t=(g(σ₁)+g(σ₂))/(σ₁+σ₂) (negative over ~38% of σ-space, all compression, zero at the
+     isometry); stretch and flip are always positive. So clamp (→ε), absolute (→|λ_t|), Newton (→λ_t)
+     and Composite Majorization (majorizes it) differ **only here** — the entire ν→½ filter verdict is
+     one scalar per element, active only under compression (`twist_analysis`).
    - **Confounds the benchmark quantifies.** First-vs-second-order (Newton wins iterations,
      **L-BFGS wins wall-clock**; Adam plateaus — honesty control, `e4`); criterion sensitivity (3
      "fastest" filters across 4 criteria, `e5`); C++/Python wall-clock confound (SLIM's compiled
@@ -91,7 +111,7 @@ which published superiority claims survive confound control.
      `linesearch`).
 
 9. **What survived — and the review loop as method.** The hardened claims graph
-   (`claims/hardening.md`): **2 validated (2D)**, **21 qualified**, **115 self-claimed**, **22
+   (`claims/hardening.md`): **2 validated (2D)**, **23 qualified**, **113 self-claimed**, **22
    unmeasured** (contact, deferred to v2). The summary contribution is not just *which* decade-old
    claims survive, but a demonstrated **methodology for honest attribution**: three adversarial
    review rounds (52 issues, 51 resolved) each caught real over-reach in the *previous* round's
