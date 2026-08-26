@@ -278,6 +278,153 @@ def fig_accelerator_convergence():
     viz.save(fig, "accelerator_convergence")
 
 
+# ---------------------------------------------------------------- World-1: distortion setups
+def _tri_symdir(V, F_tris, rest):
+    """Per-triangle symmetric-Dirichlet density ψ = ‖F‖²(1+1/J²) (min 4 at the identity)."""
+    from .energy import psi as sd_psi
+    out = []
+    for f in F_tris:
+        Xr, Xc = rest[f], V[f]
+        er = np.array([Xr[1] - Xr[0], Xr[2] - Xr[0]]).T
+        ec = np.array([Xc[1] - Xc[0], Xc[2] - Xc[0]]).T
+        Fm = ec @ np.linalg.inv(er)
+        out.append(sd_psi(Fm))
+    return np.array(out)
+
+
+def fig_distortion_setups():
+    """The World-1 distortion task, visual: a distorted (inversion-free) initialization minimized by
+    two solvers of the SAME symmetric-Dirichlet energy — AQP and projected Newton — each coloured by
+    per-triangle distortion. Both drive the mesh to the low-distortion minimizer (fair: one energy)."""
+    from .solver import solve
+    from .energy import element_terms as sd
+    from . import world1
+    from .run_e1 import build_scenario
+    sc = build_scenario(nx=14, ny=14, amp_frac=0.7, seed=2)   # strong but inversion-free distortion
+    rest, tris, free = sc["rest"], sc["tris"], sc["free"]
+    a = (sc["x0"], sc["tris"], sc["Bs"], sc["areas"], sc["free"])
+    newt = solve(*a, "clamp", eterms=sd, tol=1e-7, max_iter=200)
+    aqp = world1.solve_aqp(sc["x0"], tris, rest, free, max_iter=1500, tol=1e-7)
+    aqp_tag = f"AQP ({aqp['iters']} it{'' if aqp['status'] == 'converged' else ', max_iter'})"
+    setups = [("distorted init", sc["x0"]), (aqp_tag, aqp["x"]),
+              (f"proj. Newton ({newt['iters']} it)", newt["x"])]
+    dens = {name: _tri_symdir(x.reshape(-1, 2), tris, rest) for name, x in setups}
+    vmax = float(np.percentile(dens["distorted init"], 98)); vmin = 4.0
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.7))
+    tpc = None
+    for ax, (name, x) in zip(axes, setups):
+        d = dens[name]
+        tpc = viz.trimesh(ax, x.reshape(-1, 2), tris, values=d, cmap="magma_r", vmin=vmin, vmax=vmax,
+                          title=f"{name}\nmax {d.max():.1f} · mean {d.mean():.2f}")
+    cb = fig.colorbar(tpc, ax=axes, fraction=0.025, pad=0.02)
+    cb.set_label("symmetric-Dirichlet density (4 = undistorted)")
+    fig.suptitle("World-1 distortion optimization — a distorted setup minimized by AQP and projected "
+                 "Newton (same energy; colour = per-triangle distortion)", y=1.04, fontweight="bold", fontsize=10)
+    viz.save(fig, "distortion_setups")
+    print(f"  distortion_setups: init max {dens['distorted init'].max():.1f} / mean "
+          f"{dens['distorted init'].mean():.2f} → AQP mean {dens[setups[1][0]].mean():.2f}, "
+          f"Newton mean {dens[setups[2][0]].mean():.2f}")
+
+
+# ---------------------------------------------------------------- World-1: inverted-init recovery
+def fig_inverted_recovery():
+    """Stable Neo-Hookean recovering from an INVERTED initialization: a folded map (many J<0
+    elements) is unfolded to an inversion-free minimizer, with flipped triangles highlighted over
+    iterations. This is the regime stable NH exists for (classical NH is +∞ at J≤0)."""
+    from .mesh import grid_mesh, rest_quantities, boundary_mask
+    from .solver import solve
+    from . import energy_stable_neohookean as snh
+    N = 12
+    rest, tris = grid_mesh(N, N); Bs, areas = rest_quantities(rest, tris)
+    bmask = boundary_mask(rest); free = ~np.repeat(bmask, 2)
+    # folded init: reflect the right part of the interior about c → guaranteed inversions
+    c = 0.55
+    x0 = rest.copy()
+    intr = ~bmask
+    xr = rest[:, 0]
+    fold = intr & (xr > c)
+    x0[fold, 0] = c - 0.7 * (xr[fold] - c)         # reflect+compress → overlap → J<0
+    et, _, _, _ = snh.make(mu=1.0, lam=snh.lam_from_nu(0.45))
+    r = solve(x0.reshape(-1), tris, Bs, areas, free, "clamp", eterms=et, tol=1e-7,
+              max_iter=300, log_x=True)
+    logx = [e for e in r["log"] if "x" in e]
+
+    def nflip(V):
+        return int(np.sum(viz.face_detF_2d(V, tris, rest) <= 0))
+    n0 = nflip(x0)
+    # pick 4 snapshots: init, then where flip-count crosses ~2/3, ~1/3, and converged
+    idxs = [0]
+    targets = [n0 * 2 // 3, n0 // 3, 0]
+    for t in targets:
+        for k, e in enumerate(logx):
+            if nflip(e["x"].reshape(-1, 2)) <= t:
+                idxs.append(k); break
+    idxs = sorted(set(idxs))[:4]
+    while len(idxs) < 4:
+        idxs.append(len(logx) - 1)
+
+    fig, axes = plt.subplots(1, len(idxs), figsize=(3.0 * len(idxs), 3.2))
+    for ax, k in zip(axes, idxs):
+        V = logx[k]["x"].reshape(-1, 2); J = viz.face_detF_2d(V, tris, rest)
+        # inversion-free elements in grey; inverted (J<=0) in solid red
+        viz.trimesh(ax, V, tris[J > 0], values=None, edge="#bbbbbb", lw=0.4)
+        if np.any(J <= 0):
+            viz.trimesh(ax, V, tris[J <= 0], values=np.zeros((J <= 0).sum()), cmap="Reds",
+                        vmin=0, vmax=1, edge="#900", lw=0.5)
+        ax.set_title(f"iter {logx[k]['iter']}\n{int(np.sum(J <= 0))} inverted", fontsize=9.5)
+    fig.suptitle(f"Stable Neo-Hookean unfolds an inverted init ({n0} flipped → 0) — the regime "
+                 "classical NH can't enter (ψ=+∞ at J≤0)", y=1.03, fontweight="bold", fontsize=10)
+    viz.save(fig, "inverted_recovery")
+    print(f"  inverted_recovery: {n0} flipped at init → {nflip(r['x'].reshape(-1,2))} at end "
+          f"({r['status']}, {r['iters']} it)")
+
+
+# ---------------------------------------------------------------- World-2: Pitfalls of Projection
+def fig_pitfalls():
+    """The two claims an iteration-count comparison can't reach (Pitfalls of Projection): eigenvalue
+    projection (left) breaks affine-invariance of the Newton step, and (right) can degrade the
+    asymptotic convergence rate. Both measured directly."""
+    from .run_pitfalls import affine_probe
+    from .solver import solve
+    from .energy import element_terms as sd
+    from .run_e1 import build_scenario
+    aff, n, neg = affine_probe()
+    order = ["none", "clamp", "absolute", "global-pdn"]
+    cmap = {"none": viz.COL["newton"], "clamp": viz.COL["clamp"], "absolute": viz.COL["absolute"],
+            "global-pdn": "#7f7f7f"}
+
+    fig, (axl, axr) = plt.subplots(1, 2, figsize=(11.5, 4.3))
+    vals = [max(aff[k], 1e-16) for k in order]
+    bars = axl.bar(order, vals, color=[cmap[k] for k in order])
+    axl.set_yscale("log"); axl.axhline(1e-8, color="#aaa", ls="--", lw=0.8)
+    axl.text(3.4, 1.3e-8, "invariant ↓", fontsize=8, color="#777", ha="right")
+    for b, k in zip(bars, order):
+        axl.text(b.get_x() + b.get_width() / 2, b.get_height() * 1.4,
+                 "invariant" if aff[k] < 1e-8 else "NOT", ha="center", fontsize=8,
+                 color="#2ca02c" if aff[k] < 1e-8 else "#d62728")
+    axl.set_ylabel("affine covariance residual  ‖S·d_y − d_x‖ / ‖d_x‖", fontsize=9)
+    axl.set_title(f"Affine invariance at an indefinite point\n({neg}/{n} negative eigenvalues) — DEFINITIVE",
+                  fontsize=9.5)
+    axl.tick_params(axis="x", rotation=12)
+
+    # asymptotic rate: gradient-norm tail vs iteration near the solution basin
+    sc = build_scenario(nx=6, ny=6, amp_frac=0.2, seed=3)
+    a = (sc["x0"], sc["tris"], sc["Bs"], sc["areas"], sc["free"])
+    for filt in ("none", "clamp", "global-pdn"):
+        r = solve(*a, filt, eterms=sd, max_iter=200, tol=1e-11)
+        g = np.array([e["grad_inf"] for e in r["log"] if e["grad_inf"] > 0])
+        axr.semilogy(range(len(g)), g, color=cmap[filt], ls=viz.LS.get(filt, "-"), lw=2.2,
+                     label=f"{filt} ({r['iters']} it → {r['status']})")
+    axr.set_xlabel("iteration"); axr.set_ylabel("‖grad‖∞")
+    axr.set_title("Asymptotic rate in a benign basin\n(clamp = PDN here — rates COINCIDE)", fontsize=9.5)
+    axr.legend(fontsize=8.5, loc="lower left")
+    fig.suptitle("Pitfalls of Projection — what iteration-count comparisons miss. Filtering "
+                 "definitively breaks affine-invariance (left); rate degradation is regime-dependent "
+                 "(here it doesn't, right)", y=1.04, fontweight="bold", fontsize=9.3)
+    viz.save(fig, "pitfalls")
+    print(f"  pitfalls: affine residuals " + ", ".join(f"{k}={aff[k]:.1e}" for k in order))
+
+
 # ---------------------------------------------------------------- Metrics: histograms
 def fig_histograms():
     """Two distributions the point-estimates hide: (a) unfiltered Newton's failure RATE vs clamp
@@ -427,6 +574,42 @@ def fig_scale_cost():
     print("  DOF:", [int(d) for d in dofs], " AQP/Newton:", [round(v, 2) for v in (C[:, 1] / base)])
 
 
+# ---------------------------------------------------------------- Survey: lineage map
+def fig_lineage():
+    """The survey's core thesis, visual: many SIGGRAPH 'innovations' are adaptations of named
+    classical technique (docs/design.md §12.2). Classical ancestor (left) → graphics method (right,
+    coloured by world). Cite as adaptations, not inventions."""
+    # (classical ancestor, graphics adaptation, world) — curated from docs/design.md §12.2
+    LIN = [
+        ("Modified Cholesky\n(Gill–Murray 1974; N&W §3.4)", "Eigenvalue clamp / per-element PSD proj.\nTeran'05→Analytic'19→Absolute'24→TR'24", 2),
+        ("Nesterov acceleration\n(1983)", "Accelerated Quadratic Proxy\n(Kovalsky 2016)", 1),
+        ("Anderson mixing (1965)\n= multisecant quasi-Newton", "Anderson-accelerated geometry / PD\n(Peng 2018)", 1),
+        ("ADMM (Boyd 2011)\n+ Gauss–Newton", "Projective Dynamics / local–global\n(Bouaziz 2014)", 2),
+        ("L-BFGS", "PD-as-quasi-Newton\n(Liu 2017)", 2),
+        ("Primal interior-point\n(Fiacco–McCormick 1968)", "IPC barrier contact\n(Li 2020)", 3),
+        ("Natural-gradient / metric descent\n(Amari 1998)", "Sobolev proxies\n(AQP · AKVF · BCQN · SLIM)", 1),
+        ("F-bar / mixed u–p / Simo\nthree-field", "Near-incompressible handling\n(stable NH, locking-free)", 2),
+    ]
+    fig, ax = plt.subplots(figsize=(12, 7.2))
+    n = len(LIN); ys = np.linspace(n - 1, 0, n)
+    for (anc, gfx, w), y in zip(LIN, ys):
+        ax.annotate(anc, xy=(0.02, y), fontsize=8.6, ha="left", va="center",
+                    bbox=dict(boxstyle="round,pad=0.35", fc="#eeeeee", ec="#999"))
+        ax.annotate(gfx, xy=(0.98, y), fontsize=8.6, ha="right", va="center",
+                    bbox=dict(boxstyle="round,pad=0.35", fc=viz.WORLD_COL[w], ec="#444", alpha=0.85))
+        ax.annotate("", xy=(0.62, y), xytext=(0.38, y),
+                    arrowprops=dict(arrowstyle="-|>", color="#666", lw=1.6))
+    ax.text(0.02, n - 0.35, "CLASSICAL ANCESTOR", fontsize=9, fontweight="bold", color="#555", ha="left")
+    ax.text(0.98, n - 0.35, "GRAPHICS ADAPTATION", fontsize=9, fontweight="bold", color="#555", ha="right")
+    ax.set_xlim(-0.02, 1.02); ax.set_ylim(-0.6, n - 0.1); ax.axis("off")
+    from matplotlib.patches import Patch
+    leg = [Patch(fc=viz.WORLD_COL[w], ec="#444", label=WORLD_NAME[w], alpha=0.85) for w in (1, 2, 3)]
+    ax.legend(handles=leg, loc="lower center", ncol=3, fontsize=8.5, frameon=False, bbox_to_anchor=(0.5, -0.06))
+    ax.set_title("Lineage map — SIGGRAPH mesh-elasticity 'innovations' are adaptations of named "
+                 "classical technique (§12.2)", fontweight="bold", fontsize=11, pad=12)
+    viz.save(fig, "lineage")
+
+
 # ---------------------------------------------------------------- 3D: polyscope headless tet render
 def fig_tet3d():
     """Genuine-3D example via polyscope headless (EGL): a P1-tet box stretched at near-incompressible
@@ -479,7 +662,9 @@ FIGS = {"locking": fig_locking, "filter_convergence": fig_filter_convergence,
         "mesh_independence": fig_mesh_independence,
         "accelerator_convergence": fig_accelerator_convergence,
         "scale_cost": fig_scale_cost, "profiles": fig_profiles,
-        "histograms": fig_histograms}
+        "histograms": fig_histograms, "pitfalls": fig_pitfalls,
+        "inverted_recovery": fig_inverted_recovery,
+        "distortion_setups": fig_distortion_setups, "lineage": fig_lineage}
 
 
 def main(names=None):

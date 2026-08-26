@@ -1,5 +1,9 @@
 # Pitfalls of Projection — affine invariance + asymptotic rate (measured)
 
+![pitfalls](../figures/pitfalls.png)
+
+_`figures/pitfalls.png`: (left) affine covariance residual at an indefinite point — unfiltered Newton ~1e-13 (invariant), clamp/absolute/global-PDN all O(1) (**definitively** not invariant); (right) the gradient tail in a benign basin, where clamp = PDN and the rates coincide — rate degradation is regime-dependent, not universal._
+
 Tests the Pitfalls-of-Projection thesis on its **actual** claims, which an iteration-count-to-tolerance comparison cannot reach (review-r1 #39): eigenvalue projection (a) breaks **affine invariance** of the Newton step and (b) can degrade the **asymptotic rate**. Run: `python -m bench.run_pitfalls`.
 
 ## Part 1 — affine invariance (definitive)

@@ -1,5 +1,9 @@
 # Stable Neo-Hookean — absolute vs clamp (measured)
 
+![inverted recovery](../figures/inverted_recovery.png)
+
+_`figures/inverted_recovery.png`: stable NH's defining capability — recovering from an **inverted** initialization (a folded map, 88 flipped elements, red) to an inversion-free minimizer over a handful of iterations. This is the regime classical log-barrier NH cannot even enter (ψ=+∞ at J≤0)._
+
 Re-runs the ν-claim on **Stable Neo-Hookean** (Smith-Kim-de Goes 2018), the energy the absolute-filtering work is actually built on — finite and smooth for **all** J including inverted (J≤0), unlike the classical log-barrier NH used in `results/e1_nu.md` (+∞ for J≤0). Gradient conformance-gated per ν. Run: `python -m bench.run_stable_nu`.
 
 ## A. Near-incompressible ν-sweep (stretch scenario, P1)

@@ -14,13 +14,16 @@ only "qualified" in `claims/claims.yaml`, the figure's caption says so.
 |---|---|
 | ![corpus](corpus_breadth.png) `corpus_breadth` | Papers-per-year stacked by world + node totals — the corpus spans ~2003–2026 and **both** worlds, so no single paper or corner dominates. |
 | ![ledger](claims_ledger.png) `claims_ledger` | The epistemic scoreboard: every extracted superiority-edge by status (self-claimed / unmeasured / qualified / validated). Most claims are the papers' own word; this benchmark *qualifies* rather than overturns. |
-| ![network](claims_network.png) `claims_network` | The superiority-claims graph: nodes = methods (coloured by world), directed edges = "A claims to beat B" (coloured by evidentiary status). Hubs labelled. |
+| ![network](claims_network.png) `claims_network` | The superiority-claims graph: nodes = methods (world-layered columns), directed edges = "A claims to beat B" (coloured by evidentiary status). Only 2 edges are independently validated. |
+| ![lineage](lineage.png) `lineage` | **The survey's core thesis.** Classical ancestor (left) → SIGGRAPH adaptation (right, world-coloured): eigenvalue-clamp ⇐ modified Cholesky, AQP ⇐ Nesterov, IPC ⇐ interior-point, … Cite as adaptations, not inventions (docs/design.md §12.2). |
 
 ## World-1 (distortion optimization)
 
 | figure | shows |
 |---|---|
 | ![accel](accelerator_convergence.png) `accelerator_convergence` | Normalized energy-gap vs iteration for Newton / L-BFGS / Sobolev-L-BFGS / AQP on a perturbed grid (single seed, labelled). Newton's quadratic plunge vs the first-order tails; **AQP clears τ=1e-6 early then stalls** — the loose-vs-tight-τ story. |
+| ![distortion](distortion_setups.png) `distortion_setups` | The distortion task, visual: a distorted (inversion-free) init minimized by AQP and projected Newton — **same** symmetric-Dirichlet energy — coloured by per-triangle distortion (both reach the undistorted floor; AQP's iteration count dwarfs Newton's). |
+| ![inverted](inverted_recovery.png) `inverted_recovery` | **Stable Neo-Hookean unfolds an inverted init**: a folded map (88 flipped elements) recovered to inversion-free over iterations, flipped triangles in red. The regime classical NH can't enter (ψ=+∞ at J≤0). |
 
 ## World-2 (simulation / eigenvalue filtering)
 
@@ -29,6 +32,7 @@ only "qualified" in `claims/claims.yaml`, the figure's caption says so.
 | ![locking](locking_p1_p2_sri.png) `locking_p1_p2_sri` | **The headline confound, visual.** Near-incompressible Neo-Hookean stretch coloured by J=det F (true range, centred at 1): **P1** buckles into spurious modes (volumetric locking, 130 it); **P2** / **SRI-P2** deform smoothly (26/66 it). The signature is the buckled geometry + iteration count, not a J excursion (P1's J range is no wider than P2's). This is *why* the absolute-vs-clamp verdict flips between elements. |
 | ![filter](filter_convergence_p1_p2.png) `filter_convergence` | Per-iteration energy gap for clamp / absolute / trust-region on locking **P1** vs relieved **P2**. Absolute drags a long plateau tail on P1 (314 it), trust-region backs off to Newton (69 it); on P2 all three finish in ~22 it and absolute is marginally best. |
 | ![tet3d](tet3d_stretch_J.png) `tet3d` | **Polyscope headless / EGL** render of a P1-tet box stretched at near-incompressible ν, coloured by per-tet J=det F — the 2D locking story confirmed in genuine 3D (Poisson necking visible). |
+| ![pitfalls](pitfalls.png) `pitfalls` | **Pitfalls of Projection**, what iteration counts miss: eigenvalue projection *definitively* breaks affine-invariance of the Newton step (left: unfiltered ~1e-13, every filter O(1)); asymptotic-rate degradation is regime-dependent (right: rates coincide in a benign basin). |
 
 ## Metrics rigor
 

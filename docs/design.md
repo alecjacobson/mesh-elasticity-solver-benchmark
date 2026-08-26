@@ -340,6 +340,11 @@ its own heading, not shoehorned into the metric-descent spine.
 ### 12.2 Lineage map — graphics "innovations" ← named classical ancestors
 The single most valuable survey contribution: many recent SIGGRAPH results are adaptations of
 established technique. Cite as adaptations, not inventions.
+
+![lineage map](../figures/lineage.png)
+
+_Rendered as [`figures/lineage.png`](../figures/lineage.png) (`python -m bench.run_figures lineage`)._
+
 - Eigenvalue clamping / per-element PSD projection (Teran 2005 → Analytic Eigensystems 2019 →
   Absolute 2024 → Trust-Region 2024) ⇐ **modified Cholesky (Gill–Murray 1974, Schnabel–Eskow
   1990) / N&W §3.4 eigenvalue modification**; engineering sibling = **modified/damped/trust-region
