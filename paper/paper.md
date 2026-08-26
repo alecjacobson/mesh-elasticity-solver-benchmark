@@ -1,0 +1,820 @@
+# Untangling a Decade of Mesh-Elasticity Solvers: A Component-Factored Survey and Benchmark
+
+## Abstract
+
+Over the past decade, computer graphics has produced a steady stream of "faster" and "more robust"
+solvers for mesh-elasticity problems — parametrization and distortion optimization, projected-Newton
+hyperelastic simulation, and contact-coupled dynamics. Yet nearly every such paper is a **component
+swap inside one shared iteration**: minimize a nonlinear elastic energy over vertex positions by some
+form of metric descent `x' = x − α M⁻¹ ∇E(x)`. Papers routinely change two or three components at
+once — the energy, the Hessian filter, the search direction, the line search, the linear solver, the
+convergence criterion — and credit a single one, making the literature's superiority claims difficult
+to trust or reproduce.
+
+This State-of-the-Art Report reorganizes the field around that shared structure and asks, component
+by component, **which published superiority claims survive confound control**. We contribute (i) a
+*unifying view* that casts graphics, classical-optimization, and machine-learning solvers as metric
+descent under different choices of `M`; (ii) a six-axis *taxonomy* over three "worlds" (static
+distortion, hyperelastic simulation, contact dynamics) that share machinery but not comparability;
+(iii) a *lineage map* showing that many graphics "innovations" are adaptations of named classical
+technique (eigenvalue filtering ⇐ modified Cholesky, accelerated quadratic proxy ⇐ Nesterov,
+projective dynamics ⇐ ADMM, IPC ⇐ interior-point); (iv) a machine-readable *superiority-claims graph*
+(81 methods, 160 claimed wins) recording who claims to beat whom with what evidence; and (v) a
+*component-factored benchmark* — a conformance-gated harness in which a configuration is a point in
+component space and each experiment changes exactly one axis.
+
+Applied to the contact-free solver track (2D prototype), the benchmark's decomposition experiments
+overturn, qualify, or contextualize several well-cited claims. Our headline case study — a recent
+near-incompressibility filtering claim — *reverses* on standard constant-strain elements (the
+filter's advantage becomes a failure) and then *re-validates* only once **two entangled confounds,
+the element and the energy, are separately controlled**; four independent locking treatments concur.
+We further find that a flagship quasi-Newton method's three components **entangle rather than add**,
+that a proxy method's celebrated mesh-independence is a **loose-tolerance artifact**, and that the
+entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
+sign-indefinite eigenmode of the element Hessian.
+
+Of the 160 extracted superiority edges, only **2 are independently validated** and **23 qualified**
+by our measurements; the rest remain the papers' own word pending faithful re-measurement. This is
+the honest core: rather than a leaderboard, the benchmark and its **adversarial review loop** — in
+which the harness's confound-untangling is applied reflexively to our *own* conclusions, forcing
+repeated retractions — offer a reproducible *method for honest attribution*. We release the harness,
+claims graph, and figures as the seed of a living benchmark.
+
+**Scope.** The v1 measurements are a 2D prototype: dense solves, small meshes, indicative not
+definitive. Every headline is reported with its regime of validity; the contact track and larger-scale
+studies are future work. The contribution is the attribution *method* and the survey scaffolding, not
+a settled ranking.
+
+---
+
+## Contents
+
+- [1. Introduction](#1-introduction)
+- [2. The Unifying View: Everything Is Metric Descent](#2-the-unifying-view-everything-is-metric-descent)
+- [3. Taxonomy: Six Axes over Three Worlds](#3-taxonomy-six-axes-over-three-worlds)
+- [4. Survey by Axis](#4-survey-by-axis)
+- [5. Lineage Map: Graphics "Innovations" ⇐ Classical Ancestors](#5-lineage-map-graphics-innovations--classical-ancestors)
+- [6. The Superiority-Claims Graph](#6-the-superiorityclaims-graph)
+- [7. Benchmark Design](#7-benchmark-design)
+- [8. Results: The Decomposition Experiments](#8-results-the-decomposition-experiments)
+- [9. What Survived — and the Review Loop as Method](#9-what-survived--and-the-review-loop-as-method)
+- [10. Open Problems and the Living Benchmark](#10-open-problems-and-the-living-benchmark)
+
+---
+
+# 1. Introduction
+
+Simulating and optimizing the deformation of triangle and tetrahedral meshes is a workhorse of
+computer graphics. The same mathematical object recurs across seemingly distinct subfields: given a
+rest mesh and some boundary conditions, find vertex positions `x` that minimize a nonlinear elastic
+energy
+
+```
+E(x) = Σ_e V_e · ψ(F_e(x)),
+```
+
+a sum over elements of a stored-energy density `ψ` of the per-element deformation gradient `F_e`.
+UV parametrization minimizes a *distortion* energy (symmetric Dirichlet, MIPS, ARAP); flesh and cloth
+simulation minimize a *hyperelastic* energy (Neo-Hookean, corotational) plus inertia; and
+contact-rich animation adds barrier and friction terms. Across all of them the computational core is
+the same: iteratively descend a nonconvex energy whose Hessian is indefinite far from the minimum.
+
+**The entanglement problem.** A decade of papers has proposed "faster" or "more robust" solvers for
+this core. Almost universally, a new method is a *component swap* inside one shared iteration — it
+changes the energy, the way the indefinite Hessian is made positive-definite (the *filter*), the
+search direction, the line search, the linear solver, or the convergence criterion. The difficulty is
+that papers typically change **two or three of these components at once and attribute the resulting
+speed-up or robustness to a single one**. A method might blend a new preconditioner *and* a new
+line-search *and* a new stopping criterion, then report an order-of-magnitude win against a baseline
+that shares none of them. The reader cannot tell how much of the advantage is the headline idea, how
+much is the other bundled changes, and how much is a weak or mismatched baseline. Superiority claims
+accumulate that are individually plausible and collectively irreconcilable.
+
+**Two failure poles.** A survey of this literature can fail in two opposite ways. It can be *insular
+and narrow* — comparing only within one clique of graphics papers, inheriting their baselines and
+their confounds, and reproducing rather than testing their claims. Or it can be *broad and unfair* —
+racing methods across problem classes they were never designed for, or against implementations of
+wildly different maturity (a compiled C++ library versus a research prototype), so that hardware and
+engineering masquerade as algorithm. A useful account must be broad enough to place graphics work
+against its classical-optimization and computational-mechanics roots, yet disciplined enough to
+compare only what is comparable, one component at a time.
+
+**This report.** We reorganize the field around its shared structure and ask, component by component,
+which published superiority claims survive confound control. Our contributions are:
+
+- **A unifying view (§2).** Graphics, classical-optimization, and machine-learning solvers are all
+  *metric descent* `x' = x − α M⁻¹ ∇E(x)`, differing only in the metric `M` and its globalization.
+  This makes the swapped components explicit and lets us say precisely, for example, that "Sobolev
+  preconditioning" in graphics and "natural gradient" in machine learning are the same idea under
+  different metrics — with the honest caveats where the analogy breaks.
+
+- **A taxonomy over three worlds (§3).** Six method axes (energy, filter, direction, line search,
+  linear solver, criterion) crossed with problem-class *capability cells*, grouped into three worlds
+  — static distortion, hyperelastic simulation, contact dynamics — that share machinery but not
+  comparability. Comparability is governed by the problem class, not the method.
+
+- **A survey by axis and a lineage map (§4–§5).** We organize the annotated corpus by *component*
+  rather than chronology, and we trace each graphics "innovation" to its named classical ancestor:
+  eigenvalue filtering to modified-Cholesky Hessian modification, the accelerated quadratic proxy to
+  Nesterov acceleration, projective dynamics to ADMM, IPC barriers to primal interior-point methods.
+  Cited as adaptations rather than inventions, this lineage is arguably the report's sharpest single
+  contribution.
+
+- **A superiority-claims graph (§6).** A machine-readable directed graph — 81 methods, 160 claimed
+  wins — recording who claims to beat whom, on what dimension, with what evidentiary status
+  (self-claimed / qualified / validated). It exposes the recurring honesty patterns: fixed-budget
+  versus converged comparisons, hardware confounds, entanglement, and the authors' own regime
+  disclaimers.
+
+- **A component-factored benchmark (§7–§8).** A conformance-gated harness in which a configuration is
+  a *point in component space* and each decomposition experiment changes exactly one axis, holding the
+  rest fixed. Applied to the contact-free solver track, it overturns, qualifies, or contextualizes
+  several well-cited claims (§8).
+
+**The honest core.** Of the 160 extracted superiority edges, only two are independently validated and
+23 qualified by our measurements; the remainder stay the papers' own word pending faithful
+re-measurement. We regard this ledger, and the **adversarial review loop** that produced it — in
+which the benchmark's confound-untangling was turned reflexively on our *own* draft conclusions,
+forcing repeated retractions of our own overreach — as the report's real deliverable: not a
+leaderboard, but a reproducible *method for honest attribution*.
+
+**Scope.** The v1 benchmark measurements are a 2D prototype (dense solves, small meshes, few seeds);
+they are *indicative, not definitive*, and every headline below is reported with its regime of
+validity. The contact "world," larger-scale studies, and faithful ports of a handful of methods that
+require their source papers are explicitly deferred. What is offered now is the attribution method,
+the taxonomy/lineage/claims scaffolding, and a released harness that seeds a living benchmark.
+
+---
+
+# 2. The Unifying View: Everything Is Metric Descent
+
+The starting point for honest comparison is a single observation: nearly every solver in this
+literature — graphics, classical optimization, and machine learning alike — is an instance of
+**metric descent**,
+
+```
+x' = x − α · M⁻¹ ∇E(x),
+```
+
+an iterate that moves along the gradient of the elastic energy `E`, preconditioned by a metric `M`
+and globalized by a step length `α` (a line search) and, when `M` is only positive-semidefinite, a
+regularization. The methods differ almost entirely in their *choice of, or modification to*, `M`, and
+in how they enforce descent. Reading the field through this lens makes the swapped components explicit
+and turns "method A versus method B" into "which axis differs, and by how much."
+
+## 2.1 The metric table
+
+| metric `M` | method | world |
+|---|---|---|
+| `I` (identity) | gradient descent; with momentum, Nesterov / heavy-ball | World-0 baseline |
+| `∇²E` (energy Hessian) | Newton; projected Newton once the Hessian is filtered to SPD | all |
+| Laplacian / H¹ (Sobolev) | **AQP**, **BCQN**'s proxy — a fixed graph-Laplacian preconditioner | World-1 |
+| Killing operator | **AKVF** — an isometry-aware Riemannian metric | World-1 |
+| reweighted energy Hessian | **SLIM** — iteratively-reweighted Gauss–Newton | World-1 |
+| Fisher information | natural gradient (Amari) | ML |
+| a fixed factorized proxy | projective dynamics / local–global (ADMM under a quadratic proxy) | World-2 |
+
+The payoff is a precise cross-field statement: **"Sobolev preconditioning" in graphics and "natural
+gradient" in machine learning are the same idea under different metrics** — both replace the Euclidean
+inner product on the update with one adapted to the problem's geometry. The accelerated quadratic
+proxy is Nesterov acceleration applied over a Laplacian metric; SLIM is a reweighted Gauss–Newton; the
+eigenvalue *filters* of World-2 (§4.3) are precisely the choice of how to turn an indefinite `∇²E`
+into a usable `M`.
+
+## 2.2 Honest boundaries of the analogy
+
+A unifying view earns its keep only if it states where it breaks. Two caveats:
+
+- **The Fisher/natural-gradient analogy is partial.** For mesh elasticity the unknowns are *positions*,
+  not the parameters of an output distribution, so there is no likelihood and the Fisher metric is
+  undefined in the strict sense. Where a "natural gradient" is invoked (e.g. in physics-informed
+  learning with an energy loss), it collapses to Gauss–Newton on the residual — which is a legitimate
+  member of the table, but not the information-geometric object of Amari's original.
+
+- **Not everything is a single global step.** The template `x' = x − α M⁻¹ ∇E(x)` covers methods that
+  take one *global* update per iteration. It does **not** cover **block-coordinate / Gauss–Seidel**
+  sweeps — Vertex Block Descent, JGS2, PBNG — whose update solves per-vertex (or per-block) local
+  problems in a coloring-dependent order. Their effective operator is triangular and sweep-dependent,
+  not `M⁻¹` for any fixed `M`. These belong to a separate "relaxation / coordinate-descent" family;
+  we scope the unifying claim to global-step methods and treat the relaxation family as a sibling
+  branch rather than forcing it into the mold.
+
+With these boundaries stated, the metric-descent view organizes the rest of the report: the taxonomy
+(§3) enumerates the axes on which `M` and the globalization are chosen; the survey (§4) catalogs the
+choices; the lineage map (§5) names their classical origins; and the benchmark (§7–§8) changes one
+choice at a time.
+
+---
+
+# 3. Taxonomy: Six Axes over Three Worlds
+
+If methods are metric-descent iterations that differ by component, the natural organizing structure is
+the **product of component axes with problem-class capability cells**. We use six method axes and
+three problem "worlds."
+
+## 3.1 The six method axes
+
+Every configuration in the benchmark is a choice on each of:
+
+1. **Energy** `ψ` — symmetric Dirichlet / MIPS (distortion); Neo-Hookean, corotational, Stable
+   Neo-Hookean (hyperelastic); barrier + friction (contact). The energy fixes what "distortion" means
+   and whether the potential is finite through element inversion.
+2. **Hessian filter** — how the indefinite `∇²E` is made SPD: none (raw Newton), eigenvalue *clamp*
+   (`max(λ,ε)`), *absolute* (`max(|λ|,ε)`), trust-region-style blends, or none-with-a-globalization.
+3. **Search direction** — Newton, quasi-Newton (L-BFGS), Sobolev-preconditioned (AQP), reweighted
+   Gauss–Newton (SLIM), local–global, Anderson-accelerated, or first-order (GD, Adam).
+4. **Line search / feasibility** — backtracking Armijo, exact, or **injectivity-barrier-aware /
+   CCD-filtered** (the step is capped at the largest inversion-free length).
+5. **Linear solver** — dense or sparse direct factorization, conjugate gradient, or a
+   preconditioned Krylov method, plus the inner tolerance.
+6. **Convergence criterion** — gradient ∞-norm, a mesh-invariant *characteristic* gradient norm,
+   Newton decrement, energy-relative, or a backward-error residual.
+
+The central methodological point of the report is that a paper's headline typically moves *several* of
+these axes at once, and the benchmark's job is to move exactly one.
+
+## 3.2 The three worlds
+
+Comparability is governed by the *problem class*, not the method. We group problems into three worlds
+that share the projected-Newton machinery but not the metrics that make a fair race:
+
+- **World 1 — static distortion / parametrization.** No inertia, no contact. Symmetric-Dirichlet UV
+  maps, ARAP, MIPS. Methods: AQP, SLIM, BCQN, Composite Majorization, TLC, GOSS, Anderson-PD.
+- **World 2 — quasistatic / dynamic hyperelasticity.** Inertia, no contact. The eigenvalue-filtering
+  cohort (clamp, absolute, trust-region), projected Newton, L-BFGS, ADMM / projective dynamics,
+  Vertex Block Descent.
+- **World 3 — contact-coupled dynamics.** Barriers, continuous collision detection, friction. IPC,
+  ABD, GIPC, OGC.
+
+Worlds 1 and 2 share the entire projected-Newton skeleton, so a method from one can often be *run* in
+the other — but the comparison is only fair within a world, because the energies, conditioning, and
+success criteria differ. World 3 additionally introduces **four parameters that belong to no solver**
+— barrier stiffness `d̂`, CCD tolerance, friction regularizer `ε_v`, and time step `Δt` — which
+confound any cross-method comparison unless held fixed by protocol. This report's benchmark measures
+Worlds 1–2 (the contact-free solver track); World 3 is surveyed but deferred to v2.
+
+## 3.3 Orthogonality and the fairness gate
+
+The axes are *nearly* orthogonal but interact, and the benchmark must respect that. A strong Hessian
+filter, for example, can make the line-search axis inert (§8); the barrier-aware line search interacts
+with the search direction (§8). We therefore do not claim the axes are independent; we claim they are
+*separately controllable*, and we report interactions where the factorial exposes them rather than
+averaging them away.
+
+The **fairness gate** is a conformance suite (§7): a configuration is admissible into the benchmark
+only if its element derivatives pass a finite-difference check, its filter reproduces the reference
+projection, and — for ported official code — it reproduces the source implementation's energy on a
+shared instance. This prevents a mis-implemented component from masquerading as an algorithmic
+difference.
+
+---
+
+# 4. Survey by Axis
+
+We organize the corpus by *component* rather than chronology. Each subsection covers the graphics
+methods on one axis together with their World-0 (classical-optimization) baselines — the honest
+reference against which a graphics "innovation" should be measured. The full annotated corpus (~180
+entries across Worlds 0–3) is in the supplementary `corpus.md`; here we give the load-bearing methods.
+
+## 4.1 Energy
+
+The energy fixes the geometry of the problem and, crucially, its behavior *through inversion*.
+Distortion energies (symmetric Dirichlet `‖F‖² + ‖F⁻¹‖²`, MIPS) are **barriers**: infinite at a
+degenerate or inverted element, so a solver cannot cross a fold. Classical hyperelastic Neo-Hookean
+(`μ/2(‖F‖²−d) − μ log J + λ/2 log²J`) is likewise a log-barrier at `J ≤ 0`. **Stable Neo-Hookean**
+(Smith–de Goes–Kim) removes the log barrier so the potential is finite for all `J`, enabling recovery
+from inverted initializations — a capability, not a speed, distinction (§8.4). The choice of energy is
+frequently entangled with the solver comparison; our headline case study (§8.1) turns on separating
+the two.
+
+## 4.2 Search direction
+
+This is the axis with the most graphics activity and the clearest metric-descent reading (§2):
+
+- **Newton / projected Newton** — the second-order baseline; `M = ∇²E` filtered to SPD.
+- **L-BFGS** — the quasi-Newton World-0 baseline; a well-implemented L-BFGS is the fair reference
+  that several graphics accelerators are, in fact, measured against too weakly.
+- **Accelerated Quadratic Proxy (AQP)** — Nesterov acceleration over a fixed Laplacian metric; claims
+  mesh-independent iteration counts and large speed-ups.
+- **SLIM** — iteratively-reweighted Gauss–Newton; a second-order-like descent that reaches the
+  symmetric-Dirichlet minimum in very few iterations.
+- **BCQN** — a *blend* of a Sobolev/L-BFGS proxy with a barrier-aware line search and a
+  characteristic-gradient criterion (the archetypal entangled method, §8.3).
+- **Composite Majorization** — a convex-majorizer Hessian that is SPD by construction rather than by
+  eigenvalue clamping.
+- **Anderson acceleration** — a multisecant quasi-Newton wrapper applied to a fixed-point iteration
+  (e.g. ARAP local–global).
+
+## 4.3 Hessian filter (World-2)
+
+Far from the minimum, `∇²E` is indefinite and Newton's step is not a descent direction. The *filter*
+axis decides how to fix this per element. Given the analytic eigensystem of an isotropic energy
+(Smith–de Goes–Kim), the element Hessian has closed-form eigenpairs — two *stretching* modes, a
+*flip* mode, and a *twist* mode. **Clamping** replaces each eigenvalue `λ` with `max(λ,ε)`;
+**absolute** filtering uses `max(|λ|,ε)`; **trust-region** blends. As we show in §8.5, only the twist
+mode is ever sign-indefinite, so the filters differ *only there* — the entire World-2 filter debate is
+one scalar per element.
+
+## 4.4 Line search / feasibility
+
+Classical backtracking Armijo is the World-0 baseline. The graphics addition is the
+**injectivity-barrier-aware** line search: cap the step at the largest length that keeps every element
+inversion-free (a per-element signed-area root, the CCD-for-inversion of SLIM/BCQN/IPC). For the
+*feasibility* sub-problem — recovering an injective map from a folded one — this axis is decisive: a
+barrier energy needs a feasible start, while barrier-free untangling energies (the classical one-sided
+area penalty and its descendants TLC, foldover-free, progressive embedding) can cross folds (§8.4).
+
+## 4.5 Linear solver
+
+Dense direct, sparse Cholesky, and preconditioned conjugate gradient, with an inner tolerance. This
+axis is where **hardware masquerades as algorithm**: an unpreconditioned CG's matrix-vector count
+grows with mesh conditioning, and wall-clock ranks two solvers oppositely across scenarios while the
+hardware-independent count stays consistent — so the count, not the clock, must carry the verdict.
+
+## 4.6 Convergence criterion
+
+Gradient ∞-norm, mesh-invariant characteristic gradient norm, Newton decrement, energy-relative, and
+backward-error residuals. This is the *silent* confound behind many published speed claims: the
+"fastest" method can change with the criterion, because a criterion sets *when* you stop, not the
+descent trajectory (§8.6). BCQN's characteristic-gradient criterion is one instance; the benchmark
+treats the criterion as a first-class, swappable axis and re-times every result under more than one.
+
+---
+
+# 5. Lineage Map: Graphics "Innovations" ⇐ Classical Ancestors
+
+The single most valuable survey contribution is also the simplest to state: **many recent
+mesh-elasticity "innovations" are adaptations of named classical technique, and should be cited as
+adaptations rather than inventions.** Making the lineage explicit is not a demotion of the graphics
+work — the adaptations are often genuinely clever (per-element locality, analytic eigensystems, a
+50-line untangler) — but it reframes the *contribution* honestly and points a reader to the
+better-understood classical analysis.
+
+![Lineage map](../figures/lineage.png)
+
+*Figure 5.1. Each graphics adaptation (right, colored by world) descends from a named classical
+ancestor (left). Generated by `python -m bench.run_figures lineage` from `docs/design.md` §12.2.*
+
+The principal descents:
+
+- **Eigenvalue clamping / per-element PSD projection** (Teran 2005 → Analytic Eigensystems 2019 →
+  absolute filtering 2024 → trust-region filtering 2024) ⇐ **modified Cholesky** (Gill–Murray 1974;
+  Schnabel–Eskow 1990) and the eigenvalue-modification of Nocedal–Wright §3.4; the engineering sibling
+  is modified/damped/trust-region Newton with Abaqus-style artificial viscous stabilization. Graphics'
+  genuine contribution is *per-element locality* plus *analytic* eigensystems, not the idea of making
+  an indefinite Hessian SPD.
+
+- **Accelerated Quadratic Proxy** (Kovalsky 2016) ⇐ **Nesterov acceleration** (1983) over a Laplacian
+  proxy.
+
+- **Anderson-accelerated geometry / projective dynamics** (Peng 2018) ⇐ **Anderson mixing** (1965),
+  itself a multisecant quasi-Newton method.
+
+- **Projective dynamics / local–global** (Bouaziz 2014) ⇐ **ADMM** (Douglas–Rachford; Boyd 2011)
+  plus Gauss–Newton; the "PD-as-quasi-Newton" reading (Liu 2017) ⇐ **L-BFGS**; the relaxation lineage
+  ⇐ dynamic relaxation (Day 1965).
+
+- **IPC barrier contact** (Li 2020) ⇐ **primal interior-point methods** (Fiacco–McCormick 1968);
+  contact-set and friction handling ⇐ augmented-Lagrangian / mortar / active-set contact mechanics.
+
+- **Sobolev / proxy preconditioners** (AQP, AKVF, BCQN, SLIM) ⇐ **natural-gradient / metric descent**
+  (Amari 1998; Neuberger); AKVF is the explicit Riemannian instance.
+
+- **Near-incompressible handling** (Stable Neo-Hookean and relatives) ⇐ **F-bar / mixed u–p / Simo
+  three-field** formulations from computational mechanics.
+
+- **Injectivity / untangling** (TLC, foldover-free, progressive embedding, simplex assembly) ⇐ the
+  classical **one-sided area / maximize-minimum-area penalty** (Freitag–Plassmann 2000; Escobar 2003;
+  Toulorge 2013) — barrier-free energies that are finite through inversion. The graphics methods share
+  this untangling core but add stronger basins and injectivity guarantees.
+
+The lineage does more than assign credit. Each descent names a body of classical analysis — global
+convergence of modified Newton, the affine-invariance of the Newton step, the conditioning theory of
+interior-point barriers — that predicts, and in several cases *explains*, the behavior the benchmark
+measures in §8. When a graphics filter "wins," the lineage tells us which classical result to consult
+for *why*, and when a claim is fragile, the lineage often already anticipated the fragility.
+
+---
+
+# 6. The Superiority-Claims Graph
+
+To reason about the literature's claims systematically rather than anecdotally, we extract them into a
+machine-readable directed graph. Each **node** is a method; each **edge** `A → B` is a claim that `A`
+beats `B` on a stated **dimension** (speed, convergence, robustness, quality, scalability), annotated
+with the paper's own evidence, the source, and an **evidentiary status**. The v1 graph has **81 nodes
+and 160 claimed-win edges**, consolidated from a per-paper extraction over the corpus (`claims/`).
+
+## 6.1 The status ladder
+
+Every edge starts `self-claimed` — the paper's own assertion — and is only promoted with cited
+evidence:
+
+- **self-claimed** — the paper says so; we have not tested it.
+- **unmeasured** — extracted but out of the v1 measurement scope (e.g. contact-world edges: v1
+  measures no contact).
+- **qualified** — the paper itself states a regime limit, *or* the claim rests on a released benchmark
+  pending independent re-run, *or* it is an independent (not self-serving) study, *or* our benchmark
+  reproduces it only under stated conditions.
+- **validated** — independently confirmed by our measurements (or a regression against official code).
+
+![Claims ledger](../figures/claims_ledger.png)
+
+*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 115 are the papers' own
+word, 22 are unmeasured (contact), 23 are qualified, and only 2 are independently validated. The
+benchmark **qualifies** far more than it overturns — and overturns nothing outright.*
+
+## 6.2 The honesty patterns
+
+Reading the graph as a whole surfaces the recurring ways superiority claims mislead — the patterns the
+benchmark is built to test:
+
+- **Fixed-budget versus converged.** A method declared "faster" at a fixed iteration budget may simply
+  stop earlier under a criterion that flatters it; to convergence, the ranking can invert (§8.6).
+- **Hardware confounds.** A compiled-C++ method compared against a research prototype wins on
+  wall-clock for reasons that are not algorithmic; only hardware-independent counts (iterations,
+  factorizations, matrix-vector products) are portable (§8.6).
+- **Baseline quality.** An order-of-magnitude speed-up against a deliberately weak baseline (a MATLAB
+  reference implementation, an un-preconditioned first-order method) says little about the method
+  versus a *well-implemented* baseline (§8.2).
+- **Entanglement.** A bundled method credits its headline component for a win that its other bundled
+  changes, or an interaction between them, actually produce (§8.3).
+- **Author disclaimers.** Many papers already state a regime limit (2D only, a particular energy, a
+  mesh class) that later citations drop; the graph preserves these, and they account for a large
+  fraction of the `qualified` edges.
+
+## 6.3 What the graph is for
+
+The claims graph is not a scoreboard to be topped; it is a *to-do list for honest attribution*. Each
+`self-claimed` edge is a hypothesis the benchmark can, in principle, promote or qualify by a
+single-axis decomposition experiment. The distribution of statuses — overwhelmingly self-claimed, a
+handful validated — is itself the report's central empirical finding about the state of the field:
+the community's superiority claims are, as of this snapshot, largely untested against confound
+control. §7 describes the instrument that tests them; §8 reports what it found.
+
+---
+
+# 7. Benchmark Design
+
+The benchmark's job is to promote or qualify a superiority claim by changing exactly one component
+axis while holding the rest fixed. Three design commitments make this possible: a component-factored
+harness, a conformance admissibility gate, and a metric discipline that separates algorithm from
+hardware.
+
+## 7.1 A configuration is a point in component space
+
+The harness (`bench/`) is factored along the six axes of §3.1: energy, filter, direction, line search,
+linear solver, and criterion are independent, swappable *slots*. A configuration is a choice on each
+slot — a point in component space — and a **decomposition experiment is a single-axis diff** between
+two configurations. This is what lets us attribute a measured difference to one component rather than
+to an entangled bundle. Where a paper's method is a bundle (BCQN, §8.3), we implement each of its
+components as a slot and run the full factorial, so the bundle's win can be decomposed into
+main-effects and interactions rather than asserted.
+
+## 7.2 The conformance admissibility gate
+
+A component is admissible into the benchmark only if it passes a **conformance suite** — the fairness
+gate of §3.3. In the v1 harness this is eight gates, all passing: element gradient and Hessian versus
+finite differences (~1e-9); the assembled global gradient versus finite differences; the
+symmetric-Dirichlet energy versus its canonical form; the Stable-Neo-Hookean gradient, rest-stress,
+and finite-through-inversion property; the trust-region blend reproducing Newton/clamp/absolute
+exactly; the selective-reduced-integration element's gradient and rest-stress; the barrier line
+search's step landing exactly on the inversion boundary; and the untangling penalty's gradient. A
+component that fails its gate cannot enter a comparison — this is what prevents a mis-implemented
+method from producing a spurious "algorithmic" difference. For methods with released reference code,
+we additionally require an **official-code-first** regression: the port must reproduce the source
+implementation's energy on a shared instance (as done against libigl's SLIM).
+
+## 7.3 Metric discipline: hardware-independent first
+
+The report's most-repeated methodological rule is that **wall-clock is not an algorithmic quantity**.
+Every result is reported on a *hardware-independent* count — iterations, global factorizations,
+back-solves, or matrix-vector products — and only *paired* with wall-clock where the comparison is
+implementation-fair. This matters because:
+
+- A compiled library and a Python prototype differ in wall-clock by orders of magnitude for reasons
+  that are not the algorithm; the iteration and factorization counts are portable and carry the
+  verdict (§8.6, the SLIM comparison).
+- The *cost structure* differs by method: a projected-Newton iteration is a factorization; an AQP
+  iteration is one prefactored back-solve; an L-BFGS iteration is none. "Fewest iterations" therefore
+  does not mean "cheapest," and a factorization-weighted cost model can invert an iteration-count
+  ranking (§8.2, scale-cost).
+
+Robustness is reported as a **performance profile** (Dolan–Moré) and **data profile** (Moré–Wild)
+over a problem set, with pairwise win-fractions per the Gould–Scott caveat that an N-solver profile is
+not a total order — never as a single speed number.
+
+## 7.4 The frozen protocol
+
+The v1 protocol fixes, per world: an energy and a convergence criterion (characteristic gradient norm
+for the distortion track, gradient/Newton-decrement for the filter track); a problem set stratified
+into *easy / typical / adversarial / ill-conditioned*; controls that hold the confounding axes fixed
+(the element and the energy, whose entanglement is the subject of §8.1); an **independent reference
+solution** `E*` computed by Newton to a tight gradient tolerance — *not* the best final energy among
+the compared methods, which would bias toward the strongest solver; an **equal tuning budget** with no
+per-problem parameter tuning; and a hidden/rotating tier for the living benchmark (§10). The corpus
+that populates these strata spans roughly two decades and all three worlds (Figure 7.1), so the
+benchmark is not concentrated in one paper or one corner of the field.
+
+![Corpus breadth](../figures/corpus_breadth.png)
+
+*Figure 7.1. Corpus breadth: papers per year by world, and node totals. The survey spans ~2003–2026
+and all three worlds (World-1-heavy).*
+
+---
+
+# 8. Results: The Decomposition Experiments
+
+This section is the report's reason to exist. Each result below is a single-axis decomposition on the
+2D contact-free track, produced by the conformance-gated harness and regenerable from `bench/`; every
+number cites a `results/*.md` file. The headlines are *indicative* — 2D, dense solves, small meshes,
+few seeds — and each is stated with its regime of validity. What survives is less a set of rankings
+than a set of *lessons about attribution*.
+
+## 8.1 The headline: a near-incompressibility filtering claim, reversed then re-validated
+
+A recent, well-cited result claims that **absolute** eigenvalue filtering beats **clamping** near
+incompressibility. On standard P1 constant-strain elements our harness finds the *opposite*: as
+Poisson's ratio `ν → ½`, absolute filtering under-performs clamp and, at `ν = 0.4999`, fails to
+converge at all. Taken at face value this refutes the claim. It does not — the reversal is a
+**volumetric-locking artifact of the element**, not a property of the filter.
+
+![Volumetric locking](../figures/locking_p1_p2_sri.png)
+
+*Figure 8.1. The confound, made visual. A near-incompressible Neo-Hookean stretch colored by `J = det
+F`. The P1 constant-strain element cannot represent the near-isochoric deformation and buckles into
+spurious modes (volumetric locking), taking 130 iterations; a locking-relieved P2 element and a
+selective-reduced-integration element deform smoothly and converge in 26 and 66. (`results/world2_filters.md`.)*
+
+Untangling the claim requires removing **two entangled confounds at once**: the *element* (which
+governs locking) and the *energy* (the paper's method is built on a specific one). Removing only the
+element is not enough — an intermediate round of our own review caught that a "P2 fixes it" result was
+measured on the *wrong* (classical-barrier) energy. With **both** confounds controlled — a
+locking-relieved P2 element **and** the Stable Neo-Hookean energy the method actually targets —
+absolute filtering *beats* clamp near incompressibility, and its advantage **grows toward the
+incompressible limit**: 38 versus 48 iterations at `ν = 0.4999`, widening to 71 versus 113 at `ν =
+0.49999` (`results/p2_stable_nu.md`). A locking artifact would *collapse* at the limit; instead it
+strengthens, which is the signature of a real effect.
+
+Four independent locking treatments now concur that the P1 "refutation" is a discretization confound
+rather than a filter property: a lower-locking crossed mesh (`results/locking.md`), a standard P2
+element (`results/p2_nu.md`), the Stable-Neo-Hookean P2 combination above, and a *validated*
+selective-reduced-integration element on which absolute crushes clamp **23 versus 250 iterations** at
+`ν = 0.4999` (`results/sri_nu.md`). The effect also generalizes to 3D tetrahedra, where P1 locking is
+if anything worse (`results/3d_nu.md`).
+
+**The lesson.** A decade-old superiority claim that *reverses* and then *re-validates* only once two
+entangled confounds — element and energy — are separately controlled. Neither confound acts alone;
+this is the report's clearest demonstration that single-axis control is not optional. *(Scope: 2D,
+single stretch/seed/τ; a fully locking-free Taylor–Hood element is the pending gold-standard control,
+so this is indicative, not a general proof.)*
+
+## 8.2 Innovations that do not survive fair, faithful re-measurement
+
+Several well-cited advantages shrink or invert once the baseline is fair and the bundled changes are
+held fixed:
+
+- **Trust-region filtering "beats both clamp and absolute."** Our own round-1 measurement reproduced
+  this — but it was an artifact of an expensive *global* eigendecomposition operator. The faithful
+  *per-element* blend (with a principled SPD-probe schedule) reverses it: trust-region wins on the
+  locking element, where the plain filters struggle, but is a wash on the locking-relieved element.
+  The operative axis is *volumetric locking*, not Hessian conditioning — measured, the P2 Hessian is
+  in fact *worse*-conditioned than P1's, yet converges faster (`results/world2_filters.md`).
+
+- **AQP's mesh-independence is a loose-tolerance artifact.** AQP's celebrated mesh-independent
+  iteration count holds only to *loose* tolerance. A τ-sweep with a CI-gated growth exponent (iters
+  ∝ DOF^p) shows p = −0.09 (CI includes 0, mesh-independent) at τ = 1e-3 but **p = +0.68 (clearly
+  growing)** at τ = 1e-6 (`results/mesh_independence.md`, Figure 8.2). The Laplacian proxy gives
+  mesh-independent *initial* progress but a first-order *tail* that is not. Honesty cuts both ways:
+  the same CI-gating forced us to *retract* our own follow-on claim that "AQP scales worse than
+  L-BFGS," which the overlapping confidence intervals do not support.
+
+![Mesh independence](../figures/mesh_independence.png)
+
+*Figure 8.2. AQP's mesh-independence is tolerance-dependent — a flat growth exponent at loose τ, a
+clearly growing one at tight τ, with min–max bands and CI-gated exponents.*
+
+- **AQP's single-factorization "wins at scale" — refuted at tight tolerance.** Measured factorization
+  and back-solve counts plus a sparse-Cholesky cost model show AQP's iteration count blowing up
+  (49 → 206 over the size range) at tight τ, making it 1.5–2.2× the cost of mesh-independent Newton
+  and rising (`results/scale_cost.md`).
+
+- **AQP "×200 faster than L-BFGS" — a baseline-quality confound.** The celebrated factor was measured
+  against a MATLAB reference L-BFGS; against a *well-implemented* L-BFGS, AQP does not win on raw
+  iteration count in either a well- or ill-conditioned regime (`results/e2.md`). AQP's genuine,
+  separable claim is cheap mesh-independent *initial* progress, not raw iterations versus a strong
+  baseline.
+
+- **What *does* validate: SLIM > AQP.** To a fair relative-energy tolerance, official libigl SLIM
+  reaches the symmetric-Dirichlet minimum in **5 iterations versus AQP's 19** — one of only two
+  independently validated edges. The soft-versus-hard-constraint confound was checked and cleared;
+  the wall-clock is C++/Python-confounded, so the *counts* carry the verdict, and the real trade-off
+  is SLIM's 5 factorizations against AQP's single one (`results/slim.md`).
+
+## 8.3 Bundled methods entangle rather than add
+
+BCQN claims "fastest and most robust" from three simultaneous changes — a blended Sobolev/L-BFGS
+proxy, a barrier-aware line search, and a characteristic-gradient criterion. The full 2³ factorial
+(one unified solver over all three axes) shows the components **interact rather than sum**. The
+Sobolev *direction* is the only factor that moves the iteration count, and only in its regime: it is
+a wash pooled but beats L-BFGS on all six ill-conditioned problems. The barrier *line search* does not
+add iteration speed and can *cancel* the direction — its inversion cap binds on the Sobolev
+direction's large early steps (about 12 caps per solve), so the same comparison that reads L-BFGS 34 →
+Sobolev 26 under backtracking becomes L-BFGS 33 → **Sobolev 37** under the barrier arm. The *criterion*
+only re-times the stop (`results/e3.md`, Figure 8.3). A pooled main-effects table would have hidden
+this interaction; an adversarial review of our own factorial caught exactly that, and we report the
+per-cell effect instead.
+
+![E3 factorial](../figures/e3_factorial.png)
+
+*Figure 8.3. The BCQN direction factor is regime-gated — the Sobolev proxy's iteration reduction grows
+with ill-conditioning and vanishes elsewhere — and interacts with the line-search factor.*
+
+**The lesson.** BCQN's bundle is one strong (regime-gated) factor plus two minor ones that interact,
+not three co-equal contributions. On this barrier energy, the barrier-aware line search is moreover
+partly *redundant* with the energy's own `+∞`-at-inversion barrier.
+
+## 8.4 Injectivity is a capability axis, not a speed contest
+
+The World-1 injectivity methods (TLC, foldover-free, progressive embedding) are barrier-free untangling
+energies — the classical maximize-minimum-area lineage of §5. The benchmark's feasibility suite makes
+the capability distinction concrete: a **barrier** distortion energy is a definitional non-starter from
+a folded map (its energy is `+∞` there; given a *feasible* start it converges normally, but it can
+only *polish* an injective map, never *find* one from folds), while **barrier-free** energies untangle
+folded initializations 100% of the time — the classical area penalty and Stable Neo-Hookean both
+recover, the latter in far fewer iterations owing to a better elastic basin (`results/injectivity.md`,
+Figure 8.4).
+
+![Injectivity](../figures/injectivity.png)
+
+*Figure 8.4. A folded initialization (108 inverted elements, red) untangled to all-valid by two
+barrier-free energies; the barrier symmetric-Dirichlet energy is `+∞` at folds and cannot start.*
+
+On a *hard* non-convex boundary — a wavy warp whose injective target is guaranteed by exact discrete
+area preservation — both barrier-free energies still succeed, but the raw area penalty needs far more
+first-order steps to first-crossing than the elastic energy needs Newton steps; we report this as
+suggestive of a shallower basin rather than a clean ratio, since the two use different algorithms and
+their iteration counts are not work-comparable. This is exactly the capability axis — untangle from
+folds — that separates the injectivity cohort from distortion-barrier minimizers; a faithful port of
+each cohort member (TLC's lifted content, etc.) to rank *within* the cohort is deferred, as it requires
+each source paper.
+
+## 8.5 The clamp-versus-absolute question is one analytic scalar
+
+Built on the *validated* analytic eigensystem (which matches a finite-difference Hessian to ~1e-10),
+we establish the structural fact under the entire World-2 filter debate: the 2D symmetric-Dirichlet
+element Hessian's **only sign-indefinite eigenmode is the twist**, `λ_t = (g(σ₁)+g(σ₂))/(σ₁+σ₂)`. Over
+250,000 samples of the singular-value plane, the two stretching modes and the flip mode are *never*
+negative; the twist is negative over 37.8% of the plane, all of it under compression, and exactly zero
+at the isometry (`results/twist_analysis.md`, Figure 8.5). Therefore every projected-Newton filter is
+*identical except on the twist*: clamp sends it to ε, absolute to `|λ_t|`, raw Newton keeps it
+(indefinite), and Composite Majorization majorizes it. The entire `ν → ½` filter verdict of §8.1 is
+**one scalar per element**, active only under compression — precisely the regime a near-incompressible
+material enters as it necks.
+
+![Twist phase](../figures/twist_phase.png)
+
+*Figure 8.5. The twist eigenvalue over the singular-value plane (left; blue = negative = indefinite,
+all under compression) and the clamp↔absolute gap `|λ_t|` (right) — the only place, and the only
+amount, by which the filter choice matters.*
+
+## 8.6 Confounds the benchmark quantifies
+
+Finally, the harness measures several confounds directly:
+
+- **Filtering is necessary.** Unfiltered full Newton non-descent-stalls: it solves only 30/40
+  symmetric-Dirichlet and 5/12 Neo-Hookean instances, while the eigenvalue filters reach 100%
+  (`results/profiles.md`) — the concrete reason the filter axis exists.
+- **First- versus second-order inverts under wall-clock.** Newton wins on iterations (~10) but
+  **L-BFGS wins on wall-clock** (~50 iterations, each skipping a Hessian factorization); Adam plateaus
+  above tight tolerances — the honesty control (`results/e4.md`).
+- **Criterion sensitivity.** The same three filter runs, re-scored under four convergence criteria,
+  produce **three different "fastest" filters** — the ranking is a criterion artifact
+  (`results/e5.md`).
+- **Projection breaks affine invariance.** Unfiltered Newton's step is affine-covariant to ~1e-13;
+  every eigenvalue projection breaks it (an O(1) covariance residual) — the Pitfalls-of-Projection
+  thesis, shown directly and untestable by an iteration-count comparison (`results/pitfalls.md`).
+- **The full 1a accelerator profile.** Over 18 problems on a shared reference, Newton dominates the
+  performance profile on iteration count; AQP's first-order tail lengthens at tight τ; the Sobolev
+  proxy is a pooled wash but wins within the ill-conditioned stratum — a regime structure the pooled
+  profile hides and the per-stratum pairwise surfaces (`results/1a_profiles.md`).
+
+Every one of these is a place where a single, unstated component choice — a filter, a criterion, an
+implementation language, a Hessian modification — governs a published "advantage."
+
+---
+
+# 9. What Survived — and the Review Loop as Method
+
+## 9.1 The hardened ledger
+
+After the decomposition experiments, the superiority-claims graph stands at **2 validated, 23
+qualified, 113 self-claimed, and 22 unmeasured** edges (`claims/hardening.md`). The two validated
+edges are SLIM over AQP on iteration count (§8.2) and the analytic eigensystem's equivalence to
+numerical eigendecomposition; the qualified edges are dominated by claims the *paper itself* limited
+to a regime (2D, a specific energy, a mesh class) that later citations dropped, plus claims our
+benchmark reproduced only under stated conditions.
+
+The distribution is the finding. The benchmark **qualifies far more than it overturns, and overturns
+nothing outright** — even the headline `ν`-claim ends up *re-validated* once its confounds are
+controlled, not refuted. This is the opposite of a debunking exercise. What the ledger records is that
+the field's superiority claims are, as of this snapshot, overwhelmingly *untested against confound
+control* — not wrong, but unearned — and that when they are tested, the honest verdict is usually a
+*qualification of regime* rather than a reversal.
+
+## 9.2 The review loop applied to ourselves
+
+The report's second contribution is methodological, and it emerged from turning the benchmark's own
+discipline on our *own* draft conclusions. We ran an **adversarial review loop**: for each result, a
+reviewer — protective of the paper whose claim was under test, and separately, skeptical of *our*
+measurement — hunted for the confound we had missed. It repeatedly found one, in our own work:
+
+- The first "trust-region beats both filters" result was **our** artifact of a costly global
+  eigendecomposition operator; the faithful per-element implementation reversed it (§8.2).
+- The first "P2 element fixes the `ν`-claim" result was measured by **us** on the *wrong* energy; the
+  honest test needed the element *and* the energy controlled together (§8.1).
+- The first "AQP is mesh-independent" reading was **our** loose-tolerance artifact; the τ-sweep flips
+  it (§8.2). The *correction* then overreached — "AQP scales worse than L-BFGS" — and CI-gating forced
+  **us** to retract that too (§8.2).
+- The first BCQN factorial pooled its arms and **hid** a line-search × direction interaction; the
+  reviewer caught the pooling and we reported the per-cell effect (§8.3).
+- The first hard-boundary feasibility result presented a cross-algorithm iteration ratio as a clean
+  "~100× discrimination"; the reviewer flagged the non-comparability and the mis-stated injectivity
+  guarantee, and we downgraded both (§8.4).
+
+Each of these was an over-reach in *our own* prior conclusion, caught by applying the confound-untangling
+the benchmark is built for reflexively. The lesson generalizes beyond any single claim: **superiority
+in this field is entangled with element choice, energy, tolerance, baseline quality, and hardware, and
+a single confound rarely acts alone** — the `ν`-claim needed two removed at once. A benchmark that does
+not audit itself as adversarially as it audits the literature will simply manufacture new confounded
+claims of its own.
+
+## 9.3 The call
+
+We therefore offer the report not as a leaderboard but as a *method*: a taxonomy and unifying view that
+name the components, a lineage map that points each to its classical analysis, a machine-readable
+claims graph that turns the literature's assertions into testable hypotheses, and a conformance-gated,
+single-axis benchmark that promotes or qualifies them — all held to a status ladder that distinguishes
+*the paper's word* from *independently measured*. The natural next step for the community is to report
+solver claims with this honest status, and to contribute faithful component ports and adversarial
+re-measurements to the living benchmark (§10) rather than another confounded speed number.
+
+---
+
+# 10. Open Problems and the Living Benchmark
+
+The v1 measurements are a 2D prototype, and their scope is a feature of the honesty argument, not an
+accident: a smaller, fully-controlled and reflexively-audited set of results is worth more than a
+broad set of confounded ones. The report is therefore also a *plan*, and the harness a *seed*.
+
+## 10.1 Open problems
+
+- **Larger scale and a gold-standard locking-free element.** The `ν`-claim (§8.1) is settled to the
+  precision a locking-*relieved* P2 element allows; a fully locking-free Taylor–Hood or mixed u–p
+  element is the pending gold-standard control, and 3D at scale (where the pure-Python prototype does
+  not reach) is required to turn "indicative" into "definitive."
+- **Faithful ports of a few key methods.** Two methods resisted faithful re-measurement because they
+  require their source paper's specific construction, and we declined to substitute a look-alike:
+  **Composite Majorization** (its convex majorizer of the twist mode of §8.5 — the substrate is in
+  place, the specific bound is not) and the individual **injectivity-cohort** methods (TLC's lifted
+  content, foldover-free's regularizer) needed to rank *within* the cohort of §8.4. These are the
+  clearest invitations for original-author contributions.
+- **The contact world.** World-3 (IPC and relatives) is surveyed but unmeasured; its four
+  solver-external parameters (barrier stiffness, CCD tolerance, friction regularizer, time step) make
+  it a benchmark-design problem in its own right, deferred to v2.
+
+## 10.2 The living benchmark
+
+We release the harness, the claims graph, the annotated corpus, and the deterministic figures as the
+seed of a living benchmark, governed by three principles carried over from the report:
+
+- **Divisions.** A *closed* division fixes the components and races only the axis under test (the
+  single-axis discipline of §7); an *open* division admits any method on a shared problem set and
+  reference; a rotating *hidden tier* of held-out instances guards against overfitting to the public
+  set. Every submission must clear the same conformance gate (§7.2) — no un-conformant component
+  enters a comparison.
+- **Hardware-independent verdicts.** Leaderboard rankings are on portable counts (iterations,
+  factorizations, matrix-vector products), with wall-clock reported only where the comparison is
+  implementation-fair (§7.3). This keeps the benchmark from rewarding engineering over algorithm.
+- **The status ladder as the unit of contribution.** A contribution is not "my method is fastest" but
+  "this edge of the claims graph moves from self-claimed to validated/qualified, by this single-axis
+  experiment, reproducibly." The adversarial-review discipline of §9 is part of the acceptance
+  criterion: a submitted result must survive an attempt to find its confound.
+
+An optional **learned-accelerators** companion track (learned warm-starts, preconditioners, neural
+subspaces) can join on the same convergence criterion and residual axis, kept orthogonal to the
+classical core so it does not contaminate the apples-to-apples comparison.
+
+## 11. Conclusion
+
+A decade of mesh-elasticity solvers is, to a first approximation, a decade of *component swaps inside
+one metric-descent iteration* — and the field's superiority claims are entangled with the components
+each paper changed but did not credit. We have reorganized the literature around that shared structure,
+named each innovation's classical ancestor, encoded the claims as a testable graph, and built a
+conformance-gated benchmark that changes one component at a time. Applied to the contact-free track,
+it re-validates a reversed headline claim only after separating two confounds, exposes a flagship
+method's components as interacting rather than additive, reduces an entire filtering debate to one
+analytic scalar, and — most importantly — audits its *own* conclusions as adversarially as the
+literature's, retracting several of our own over-reaches in the process.
+
+The result is not a ranking but a method for honest attribution, and a living benchmark that asks the
+community to earn its superiority claims one controlled, reflexively-audited experiment at a time.
