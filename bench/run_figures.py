@@ -279,6 +279,40 @@ def fig_accelerator_convergence():
     viz.save(fig, "accelerator_convergence")
 
 
+# ---------------------------------------------------------------- World-1: injectivity / untangling
+def fig_injectivity():
+    """The injectivity capability axis, visual: a folded init untangled by two barrier-free energies
+    (classical area penalty, Stable NH) — while barrier symmetric-Dirichlet cannot even start."""
+    from .run_injectivity import folded_init
+    from .untangle import solve as untangle_solve, signed_areas
+    from .solver import solve as nt_solve
+    from . import energy_stable_neohookean as snh
+    from .mesh import rest_quantities
+    rest, tris, Bs, areas, free, x0 = folded_init(strength=0.9, seed=1)
+    mean_area = float(np.mean(np.abs(signed_areas(rest.reshape(-1, 2), tris))))
+    ru = untangle_solve(x0, tris, free, delta=0.25 * mean_area, max_iter=3000)
+    et, _, _, _ = snh.make(mu=1.0, lam=snh.lam_from_nu(0.45))
+    rs = nt_solve(x0, tris, Bs, areas, free, "clamp", eterms=et, tol=1e-7, max_iter=400)
+
+    panels = [("folded init", x0), (f"untangle penalty ({ru['iters']} it)", ru["x"]),
+              (f"Stable NH ({rs['iters']} it)", rs["x"])]
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.6))
+    for ax, (name, x) in zip(axes, panels):
+        V = x.reshape(-1, 2); a = signed_areas(V, tris)
+        good = tris[a > 0]; bad = tris[a <= 0]
+        viz.trimesh(ax, V, good, values=None, edge="#8fbf8f", lw=0.4)
+        if len(bad):
+            viz.trimesh(ax, V, bad, values=np.zeros(len(bad)), cmap="Reds", vmin=0, vmax=1,
+                        edge="#900", lw=0.5)
+        ax.set_title(f"{name}\n{int((a <= 0).sum())} inverted", fontsize=9.5)
+    fig.suptitle("Injectivity is a capability axis: barrier-free energies untangle a folded map "
+                 "(barrier symmetric-Dirichlet is +∞ here — 0% feasible start)",
+                 y=1.03, fontweight="bold", fontsize=9.6)
+    viz.save(fig, "injectivity")
+    print(f"  injectivity: init {int((signed_areas(x0.reshape(-1,2),tris)<=0).sum())} folds → "
+          f"untangle {ru['iters']} it, stable-NH {rs['iters']} it")
+
+
 # ---------------------------------------------------------------- World-1: distortion setups
 def _tri_symdir(V, F_tris, rest):
     """Per-triangle symmetric-Dirichlet density ψ = ‖F‖²(1+1/J²) (min 4 at the identity)."""
@@ -810,7 +844,7 @@ FIGS = {"locking": fig_locking, "filter_convergence": fig_filter_convergence,
         "inverted_recovery": fig_inverted_recovery,
         "distortion_setups": fig_distortion_setups, "lineage": fig_lineage,
         "tet3d_nu_sweep": fig_tet3d_nu_sweep, "twist_phase": fig_twist_phase,
-        "e3_factorial": fig_e3_factorial}
+        "e3_factorial": fig_e3_factorial, "injectivity": fig_injectivity}
 
 
 def main(names=None):

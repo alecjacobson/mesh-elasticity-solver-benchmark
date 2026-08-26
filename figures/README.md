@@ -25,6 +25,7 @@ only "qualified" in `claims/claims.yaml`, the figure's caption says so.
 | ![distortion](distortion_setups.png) `distortion_setups` | The distortion task, visual: a distorted (inversion-free) init minimized by AQP and projected Newton — **same** symmetric-Dirichlet energy — coloured by per-triangle distortion (both reach the undistorted floor; AQP's iteration count dwarfs Newton's). |
 | ![inverted](inverted_recovery.png) `inverted_recovery` | **Stable Neo-Hookean unfolds an inverted init**: a folded map (88 flipped elements) recovered to inversion-free over iterations, flipped triangles in red. The regime classical NH can't enter (ψ=+∞ at J≤0). |
 | ![e3](e3_factorial.png) `e3_factorial` | **E3 / BCQN triple-split.** The direction factor (blended-Sobolev proxy) is the biggest lever and is regime-gated: iteration reduction grows with ill-conditioning (+32% ill-conditioned vs within-noise on near-inversion). The barrier line-search and characteristic criterion are secondary. See `results/e3.md`. |
+| ![injectivity](injectivity.png) `injectivity` | **Injectivity is a capability axis.** A folded map (108 inverted, red) untangled to all-valid by two barrier-free energies — the classical area penalty (57 it) and Stable NH (9 it) — while barrier symmetric-Dirichlet is +∞ at folds (0% feasible start). See `results/injectivity.md`. |
 
 ## World-2 (simulation / eigenvalue filtering)
 

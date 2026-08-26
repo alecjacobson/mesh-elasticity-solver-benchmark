@@ -116,6 +116,8 @@ def run():
     ok6 = sri_grad < 1e-5 and sri_rest < 1e-8      # SRI-P2 element: analytic grad + rest-stress-free
     from .barrier_ls import _conformance as _bar_conf
     ok7, bar_at, bar_past = _bar_conf()            # barrier line-search: step is the tight inversion bound
+    from .untangle import _conformance as _unt_conf
+    unt_err = _unt_conf(); ok8 = unt_err < 1e-5    # untangling area-penalty gradient vs FD
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
     print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
@@ -126,7 +128,8 @@ def run():
     print(f"[conformance] SRI-P2 grad/rest: {sri_grad:.1e} / {sri_rest:.1e} -> {'PASS' if ok6 else 'FAIL'}")
     print(f"[conformance] barrier-LS step bound: area@α={bar_at:.1e} (≈0), past<0={bar_past:.1e} "
           f"-> {'PASS' if ok7 else 'FAIL'}")
-    ok = ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    print(f"[conformance] untangle-penalty grad vs FD: max rel err {unt_err:.1e} -> {'PASS' if ok8 else 'FAIL'}")
+    ok = ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 
