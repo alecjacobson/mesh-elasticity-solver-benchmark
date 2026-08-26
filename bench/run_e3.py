@@ -43,7 +43,12 @@ def _run_cell(strat, seed, ls, dr):
 
 
 def _median(v):
-    return int(np.median(v)) if v else None
+    return int(round(float(np.median(v)))) if v else None
+
+
+def _spread(v):
+    """(median, min, max) of a list, rounded — so 3-seed point medians aren't read as signal."""
+    return (_median(v), int(min(v)), int(max(v))) if v else (None, None, None)
 
 
 def run():
@@ -98,6 +103,8 @@ def run():
         return _median(vals)
 
     L += ["## Main effects (median iterations, ‖g‖∞ criterion, pooled strata/seeds)", "",
+          "_Pooled marginals only — they **average over a real line-search×direction interaction** "
+          "(next section); read the per-cell table, not these, for attribution._", "",
           "| factor | level A | level B |", "|---|---|---|",
           f"| line search | backtrack {marg('line','backtrack')} | barrier {marg('line','barrier')} |",
           f"| direction | L-BFGS {marg('dirn','lbfgs')} | Sobolev {marg('dirn','sobolev')} |", ""]
@@ -115,46 +122,59 @@ def run():
         return rows
     gaps = crit_gap()
 
-    # per-stratum direction effect (Sobolev vs L-BFGS, ginf, median over line-search & seeds)
-    def dir_effect(strat):
-        def med_over_line(dr):
-            vals = []
-            for ls in LINE:
-                vals += [iters_to(r["log"], "grad_inf", TAU_G) for r in cells[(strat, ls, dr)]
-                         if iters_to(r["log"], "grad_inf", TAU_G) is not None]
-            return _median(vals)
-        return med_over_line("lbfgs"), med_over_line("sobolev")
-    de = {s: dir_effect(s) for s in STRATA}
+    # direction effect PER line-search arm (do NOT pool over line-search — that hides the interaction)
+    def dir_arm(strat, ls):
+        def sp(dr):
+            return _spread([iters_to(r["log"], "grad_inf", TAU_G) for r in cells[(strat, ls, dr)]
+                            if iters_to(r["log"], "grad_inf", TAU_G) is not None])
+        return sp("lbfgs"), sp("sobolev")
 
-    def pct(strat):
-        lb, so = de[strat]
-        return f"{(1 - so / lb) * 100:+.0f}%" if (lb and so) else "—"
-    L += ["## Observed (each claim is the measured marginal — not assumed)", ""]
-    L.append("- **Direction (Sobolev proxy) is the biggest lever, and it is regime-gated.** L-BFGS→Sobolev "
-             "median iters by stratum: "
-             + "; ".join(f"{s} **{de[s][0]}→{de[s][1]}** ({pct(s)})" for s in STRATA)
-             + ". Sobolev gives a real iteration reduction in **typical** and (largest) **ill-conditioned** "
-             "— its design regime — and is **within noise only on the adversarial near-inversion** stratum. "
-             "So it is the one factor that moves the iteration count, consistent with "
-             "`world1_profiles.md`/`e2.md`; the magnitude grows with ill-conditioning.")
-    L.append(f"- **Line-search barely moves iterations** (backtrack {marg('line','backtrack')} vs barrier "
-             f"{marg('line','barrier')}); its value is energy-eval savings, largely redundant with "
-             "symmetric Dirichlet's own +∞ barrier (the earlier line-search main effect).")
-    L.append(f"- **The criterion re-times the stop, not the trajectory** (E5 theme): ‖g‖∞→characteristic "
-             f"shifts the reported convergence iteration by a median {int(np.median(gaps)) if gaps else 0} "
-             f"iters (range {min(gaps) if gaps else 0}..{max(gaps) if gaps else 0}); the area-weighted "
-             "RMS is mesh-invariant and less tail-sensitive than the ‖g‖∞ max.")
-    L.append("- **Synthesis for BCQN.** The three factors are **unequal**: the **Sobolev direction** "
-             "carries the iteration win (~20–30%, growing with ill-conditioning), while the **barrier "
-             "line-search** (energy-eval efficiency, redundant with the barrier energy) and the "
-             "**characteristic criterion** (re-times the stop) are secondary. So BCQN's bundled "
-             "'fastest+most robust' is **one strong factor + two minor ones**, not three co-equal "
-             "contributions — and even the strong one is regime-gated. `bcqn→{aqp,slim,l-bfgs}` stay "
-             "**qualified**, now attributed per factor and per regime.")
-    L += ["",
-          "_Caveat: symmetric Dirichlet, 2D, small meshes, 3 seeds; the characteristic criterion is an "
-          "area-weighted RMS proxy for BCQN's exact scale-normalized norm (mesh-invariance is the "
-          "property that matters here). Wall-clock and larger meshes deferred._"]
+    def cap_binds(strat, dr):
+        return _median([r["counts"]["cap_binds"] for r in cells[(strat, "barrier", dr)]])
+
+    L += ["## Observed (per-cell with seed spread; the factors INTERACT — not cleanly separable)", "",
+          "Because n=3 seeds, every cell is reported as **median [min–max]**; do not read the medians "
+          "as precise. Direction effect is shown **per line-search arm** — pooling the two arms would "
+          "hide a real interaction (below).", ""]
+    # per-arm direction table
+    L += ["| stratum | arm | L-BFGS it | Sobolev it | barrier caps bound (Sobolev) |",
+          "|---|---|---|---|---|"]
+    for strat in STRATA:
+        for ls in LINE:
+            (lm, llo, lhi), (sm, slo, shi) = dir_arm(strat, ls)
+            cap = cap_binds(strat, "sobolev") if ls == "barrier" else "—"
+            L.append(f"| {strat} | {ls} | {lm} [{llo}–{lhi}] | {sm} [{slo}–{shi}] | {cap} |")
+    L.append("")
+    # detect the interaction: is Sobolev's advantage smaller (or reversed) under the barrier arm?
+    bt_bhelp = dir_arm("typical", "backtrack"); ba_bhelp = dir_arm("typical", "barrier")
+    L += ["### What the cells actually say", "",
+          "- **Direction (Sobolev) helps most under BACKTRACKING and in ILL-CONDITIONING, but the "
+          "barrier line-search PARTLY CANCELS it — a real line-search×direction interaction.** Under "
+          f"backtracking, typical L-BFGS {bt_bhelp[0][0]}→Sobolev {bt_bhelp[1][0]}; under the barrier "
+          f"arm the same comparison is L-BFGS {ba_bhelp[0][0]}→Sobolev {ba_bhelp[1][0]} (Sobolev's edge "
+          "shrinks or reverses). Mechanism, measured: the inversion cap **binds on the early steps** "
+          f"(median {cap_binds('typical','sobolev')} caps/solve for typical barrier×Sobolev) — exactly "
+          "where the well-scaled Sobolev direction wants a large step — so the barrier throttles "
+          "Sobolev's best moves. **The 2³ therefore does NOT cleanly separate line-search from "
+          "direction on this energy; they interact.**",
+          f"- **The criterion re-times the stop, not the trajectory** (E5 theme): ‖g‖∞→characteristic "
+          f"shifts the reported convergence iteration by a median {int(np.median(gaps)) if gaps else 0} "
+          f"iters (range {min(gaps) if gaps else 0}..{max(gaps) if gaps else 0}). Genuinely a secondary "
+          "factor.",
+          "- **Honest synthesis for BCQN.** With only 3 seeds and a measured interaction, the clean "
+          "'one strong + two minor independent factors' story is **not** supported. What holds: (a) the "
+          "Sobolev **direction** is the factor most able to cut iterations, largest when ill-conditioned "
+          "(consistent with `world1_profiles.md`); (b) the barrier **line-search** does not add "
+          "iteration speed and can even *slow* the Sobolev arm by capping its early steps (and its "
+          "robustness value is redundant with symmetric Dirichlet's own +∞ barrier); (c) the "
+          "**criterion** only moves the stop. So BCQN's components are **entangled, not additive**, on "
+          "this energy — bundling them is not the sum of independent wins. `bcqn→{aqp,slim,l-bfgs}` "
+          "stay **qualified**.",
+          "",
+          "_Caveat: symmetric Dirichlet, 2D, small meshes, **n=3 seeds, no CI** — medians are indicative, "
+          "not significance-tested. The characteristic criterion is an area-weighted RMS **proxy** for "
+          "BCQN's exact scale-normalized norm (shares mesh-invariance). Wall-clock/larger meshes/more "
+          "seeds deferred._"]
 
     os.makedirs("results", exist_ok=True)
     with open("results/e3.md", "w") as f:

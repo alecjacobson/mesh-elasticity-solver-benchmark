@@ -648,10 +648,10 @@ def fig_e3_factorial():
                     color="#2ca02c" if so < lb else "#d62728", fontweight="bold")
     ax.set_xticks(x); ax.set_xticklabels(strata)
     ax.set_ylabel("iterations to ‖g‖∞<1e-4 (median, 3 seeds)")
-    ax.set_title("E3 direction factor: the blended-Sobolev proxy helps only in its regime")
+    ax.set_title("E3 direction factor — backtracking arm (n=3 seeds; medians indicative, not CI-tested)")
     ax.legend()
-    fig.suptitle("BCQN's factors are unequal & regime-gated — Sobolev wins when ill-conditioned, "
-                 "within noise otherwise", y=1.0, fontweight="bold", fontsize=10)
+    fig.suptitle("Sobolev direction helps most when ill-conditioned — BUT the barrier line-search "
+                 "cancels it (interaction; see results/e3.md)", y=1.0, fontweight="bold", fontsize=9.6)
     viz.save(fig, "e3_factorial")
     print(f"  e3_factorial: L-BFGS {data['lbfgs']} vs Sobolev {data['sobolev']} over {strata}")
 

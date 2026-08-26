@@ -4,8 +4,9 @@ One code path parametrized by BCQN's three components so every cell shares ident
 the toggled factor differs:
   - direction  H0 ∈ {"lbfgs" = γI ,  "sobolev" = cotan-Laplacian⁻¹}   (the blended-Sobolev proxy)
   - line_search ∈ {"backtrack" , "barrier"}                            (barrier = inversion-free cap)
-  - criterion   evaluated POST-HOC from the log: ‖g‖∞  and  the area-weighted RMS gradient
-                (a mesh/scale-invariant "characteristic gradient" — the BCQN-style criterion).
+  - criterion   evaluated POST-HOC from the log: ‖g‖∞  and  an area-weighted RMS gradient
+                (a mesh/scale-invariant PROXY for BCQN's characteristic-scale-normalized norm — it
+                shares the mesh-invariance property, but is NOT BCQN's exact per-solve scalar).
 
 Each solve logs BOTH gradient norms every iteration, so the criterion factor is applied by
 re-reading the log (as in E5): iters-to-target for each criterion, no re-solve. Minimizes symmetric
@@ -33,7 +34,10 @@ def vertex_areas(rest, tris):
 
 
 def char_gradnorm(g_full, free_dof, av):
-    """Area-weighted RMS gradient over free vertices: sqrt(Σ a_v ‖g_v‖² / Σ a_v). Mesh-invariant."""
+    """Area-weighted RMS gradient over free vertices: sqrt(Σ a_v ‖g_v‖² / Σ a_v). Mesh-invariant.
+
+    Assumes each vertex is pinned in BOTH coords or neither (x-DOF mask == vertex-free mask)."""
+    assert np.array_equal(free_dof[0::2], free_dof[1::2]), "char norm needs whole-vertex pinning"
     G = g_full.reshape(-1, 2)
     vfree = free_dof[0::2]
     w = av[vfree]
@@ -63,7 +67,7 @@ def solve_unified(x0, tris, rest, Bs, areas, free, direction="lbfgs", line_searc
 
     x = x0.copy(); S, Y, rho = [], [], []
     log = []; t0 = time.perf_counter(); status = "maxiter"
-    counts = {"grad_evals": 0, "energy_evals": 0}
+    counts = {"grad_evals": 0, "energy_evals": 0, "cap_binds": 0}
     g_prev = xf_prev = None
     for it in range(max_iter):
         E, g = assemble_eg(x, tris, Bs, areas, element_eg); counts["grad_evals"] += 1
@@ -93,7 +97,10 @@ def solve_unified(x0, tris, rest, Bs, areas, free, direction="lbfgs", line_searc
         # line search
         if line_search == "barrier":
             d_full = np.zeros(x.size); d_full[fidx] = d
-            alpha = min(1.0, max_step_to_inversion(x, d_full, tris))
+            a_max = max_step_to_inversion(x, d_full, tris)
+            alpha = min(1.0, a_max)
+            if a_max < 1.0:                      # the inversion cap throttled a would-be full step
+                counts["cap_binds"] += 1
         else:
             alpha = 1.0
         xf0 = x[fidx].copy()
