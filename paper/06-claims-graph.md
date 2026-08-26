@@ -21,9 +21,10 @@ evidence:
 
 ![Claims ledger](../figures/claims_ledger.png)
 
-*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 115 are the papers' own
-word, 22 are unmeasured (contact), 23 are qualified, and only 2 are independently validated. The
-benchmark **qualifies** far more than it overturns — and overturns nothing outright.*
+*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 113 are the papers' own
+word (`self-claimed`), 22 are unmeasured (contact), 23 are qualified, and only 2 are independently
+validated. The benchmark **qualifies** far more than it overturns — and refutes no published edge
+outright.*
 
 ## 6.2 The honesty patterns
 

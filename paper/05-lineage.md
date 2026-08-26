@@ -1,6 +1,6 @@
 # 5. Lineage Map: Graphics "Innovations" ⇐ Classical Ancestors
 
-The single most valuable survey contribution is also the simplest to state: **many recent
+One of the report's most useful contributions is also the simplest to state: **many recent
 mesh-elasticity "innovations" are adaptations of named classical technique, and should be cited as
 adaptations rather than inventions.** Making the lineage explicit is not a demotion of the graphics
 work — the adaptations are often genuinely clever (per-element locality, analytic eigensystems, a
@@ -31,8 +31,10 @@ The principal descents:
   plus Gauss–Newton; the "PD-as-quasi-Newton" reading (Liu 2017) ⇐ **L-BFGS**; the relaxation lineage
   ⇐ dynamic relaxation (Day 1965).
 
-- **IPC barrier contact** (Li 2020) ⇐ **primal interior-point methods** (Fiacco–McCormick 1968);
-  contact-set and friction handling ⇐ augmented-Lagrangian / mortar / active-set contact mechanics.
+- **IPC barrier contact** (Li 2020) ⇐ **primal interior-point methods** (Fiacco–McCormick 1968),
+  adapted with a continuous-collision-filtered line search (a genuine graphics departure, not a plain
+  reduction); contact-set and friction handling ⇐ augmented-Lagrangian / mortar / active-set contact
+  mechanics.
 
 - **Sobolev / proxy preconditioners** (AQP, AKVF, BCQN, SLIM) ⇐ **natural-gradient / metric descent**
   (Amari 1998; Neuberger); AKVF is the explicit Riemannian instance.

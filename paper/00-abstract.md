@@ -26,8 +26,9 @@ component space and each experiment changes exactly one axis.
 Applied to the contact-free solver track (2D prototype), the benchmark's decomposition experiments
 overturn, qualify, or contextualize several well-cited claims. Our headline case study — a recent
 near-incompressibility filtering claim — *reverses* on standard constant-strain elements (the
-filter's advantage becomes a failure) and then *re-validates* only once **two entangled confounds,
-the element and the energy, are separately controlled**; four independent locking treatments concur.
+filter's advantage becomes a failure — *a volumetric-locking artifact of the element, not a property
+of the filter*) and then *re-validates* only once **two entangled confounds, the element and the
+energy, are separately controlled**; four independent locking treatments concur.
 We further find that a flagship quasi-Newton method's three components **entangle rather than add**,
 that a proxy method's celebrated mesh-independence is a **loose-tolerance artifact**, and that the
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole

@@ -19,7 +19,9 @@ converge at all. Taken at face value this refutes the claim. It does not — the
 *Figure 8.1. The confound, made visual. A near-incompressible Neo-Hookean stretch colored by `J = det
 F`. The P1 constant-strain element cannot represent the near-isochoric deformation and buckles into
 spurious modes (volumetric locking), taking 130 iterations; a locking-relieved P2 element and a
-selective-reduced-integration element deform smoothly and converge in 26 and 66. (`results/world2_filters.md`.)*
+selective-reduced-integration element deform smoothly and converge in 26 and 66 iterations *at this
+figure's ν=0.499 stretch instance* (the ν-sweep table in `results/world2_filters.md` reports the
+per-ν counts separately). (`results/world2_filters.md`.)*
 
 Untangling the claim requires removing **two entangled confounds at once**: the *element* (which
 governs locking) and the *energy* (the paper's method is built on a specific one). Removing only the
@@ -173,6 +175,13 @@ Finally, the harness measures several confounds directly:
   performance profile on iteration count; AQP's first-order tail lengthens at tight τ; the Sobolev
   proxy is a pooled wash but wins within the ill-conditioned stratum — a regime structure the pooled
   profile hides and the per-stratum pairwise surfaces (`results/1a_profiles.md`).
+- **Anderson acceleration validates.** Wrapping ARAP local–global in Anderson mixing reaches the same
+  minimum in **13 versus 24 iterations** (a 1.85× iteration speedup, robust across three seeds and
+  three meshes — it never collapses to 1×), the second of the two independently validated edges. Each
+  iteration is one back-solve for both, so the iteration ratio is the hardware-independent work ratio;
+  the same acceleration core also speeds an unrelated Jacobi fixed-point (a generality check), and the
+  wall-clock speedup is smaller than the iteration speedup owing to Anderson's per-iteration
+  least-squares (`results/anderson.md`).
 
 Every one of these is a place where a single, unstated component choice — a filter, a criterion, an
 implementation language, a Hessian modification — governs a published "advantage."

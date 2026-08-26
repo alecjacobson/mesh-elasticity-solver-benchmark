@@ -53,8 +53,8 @@ which published superiority claims survive confound control. Our contributions a
   rather than chronology, and we trace each graphics "innovation" to its named classical ancestor:
   eigenvalue filtering to modified-Cholesky Hessian modification, the accelerated quadratic proxy to
   Nesterov acceleration, projective dynamics to ADMM, IPC barriers to primal interior-point methods.
-  Cited as adaptations rather than inventions, this lineage is arguably the report's sharpest single
-  contribution.
+  Cited as adaptations rather than inventions, the lineage points each method at the classical analysis
+  that explains — and often anticipates — its measured behavior (§8).
 
 - **A superiority-claims graph (§6).** A machine-readable directed graph — 81 methods, 160 claimed
   wins — recording who claims to beat whom, on what dimension, with what evidentiary status

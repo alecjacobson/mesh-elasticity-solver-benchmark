@@ -26,8 +26,9 @@ component space and each experiment changes exactly one axis.
 Applied to the contact-free solver track (2D prototype), the benchmark's decomposition experiments
 overturn, qualify, or contextualize several well-cited claims. Our headline case study — a recent
 near-incompressibility filtering claim — *reverses* on standard constant-strain elements (the
-filter's advantage becomes a failure) and then *re-validates* only once **two entangled confounds,
-the element and the energy, are separately controlled**; four independent locking treatments concur.
+filter's advantage becomes a failure — *a volumetric-locking artifact of the element, not a property
+of the filter*) and then *re-validates* only once **two entangled confounds, the element and the
+energy, are separately controlled**; four independent locking treatments concur.
 We further find that a flagship quasi-Newton method's three components **entangle rather than add**,
 that a proxy method's celebrated mesh-independence is a **loose-tolerance artifact**, and that the
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
@@ -117,8 +118,8 @@ which published superiority claims survive confound control. Our contributions a
   rather than chronology, and we trace each graphics "innovation" to its named classical ancestor:
   eigenvalue filtering to modified-Cholesky Hessian modification, the accelerated quadratic proxy to
   Nesterov acceleration, projective dynamics to ADMM, IPC barriers to primal interior-point methods.
-  Cited as adaptations rather than inventions, this lineage is arguably the report's sharpest single
-  contribution.
+  Cited as adaptations rather than inventions, the lineage points each method at the classical analysis
+  that explains — and often anticipates — its measured behavior (§8).
 
 - **A superiority-claims graph (§6).** A machine-readable directed graph — 81 methods, 160 claimed
   wins — recording who claims to beat whom, on what dimension, with what evidentiary status
@@ -343,7 +344,7 @@ treats the criterion as a first-class, swappable axis and re-times every result 
 
 # 5. Lineage Map: Graphics "Innovations" ⇐ Classical Ancestors
 
-The single most valuable survey contribution is also the simplest to state: **many recent
+One of the report's most useful contributions is also the simplest to state: **many recent
 mesh-elasticity "innovations" are adaptations of named classical technique, and should be cited as
 adaptations rather than inventions.** Making the lineage explicit is not a demotion of the graphics
 work — the adaptations are often genuinely clever (per-element locality, analytic eigensystems, a
@@ -374,8 +375,10 @@ The principal descents:
   plus Gauss–Newton; the "PD-as-quasi-Newton" reading (Liu 2017) ⇐ **L-BFGS**; the relaxation lineage
   ⇐ dynamic relaxation (Day 1965).
 
-- **IPC barrier contact** (Li 2020) ⇐ **primal interior-point methods** (Fiacco–McCormick 1968);
-  contact-set and friction handling ⇐ augmented-Lagrangian / mortar / active-set contact mechanics.
+- **IPC barrier contact** (Li 2020) ⇐ **primal interior-point methods** (Fiacco–McCormick 1968),
+  adapted with a continuous-collision-filtered line search (a genuine graphics departure, not a plain
+  reduction); contact-set and friction handling ⇐ augmented-Lagrangian / mortar / active-set contact
+  mechanics.
 
 - **Sobolev / proxy preconditioners** (AQP, AKVF, BCQN, SLIM) ⇐ **natural-gradient / metric descent**
   (Amari 1998; Neuberger); AKVF is the explicit Riemannian instance.
@@ -419,9 +422,10 @@ evidence:
 
 ![Claims ledger](../figures/claims_ledger.png)
 
-*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 115 are the papers' own
-word, 22 are unmeasured (contact), 23 are qualified, and only 2 are independently validated. The
-benchmark **qualifies** far more than it overturns — and overturns nothing outright.*
+*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 113 are the papers' own
+word (`self-claimed`), 22 are unmeasured (contact), 23 are qualified, and only 2 are independently
+validated. The benchmark **qualifies** far more than it overturns — and refutes no published edge
+outright.*
 
 ## 6.2 The honesty patterns
 
@@ -543,7 +547,9 @@ converge at all. Taken at face value this refutes the claim. It does not — the
 *Figure 8.1. The confound, made visual. A near-incompressible Neo-Hookean stretch colored by `J = det
 F`. The P1 constant-strain element cannot represent the near-isochoric deformation and buckles into
 spurious modes (volumetric locking), taking 130 iterations; a locking-relieved P2 element and a
-selective-reduced-integration element deform smoothly and converge in 26 and 66. (`results/world2_filters.md`.)*
+selective-reduced-integration element deform smoothly and converge in 26 and 66 iterations *at this
+figure's ν=0.499 stretch instance* (the ν-sweep table in `results/world2_filters.md` reports the
+per-ν counts separately). (`results/world2_filters.md`.)*
 
 Untangling the claim requires removing **two entangled confounds at once**: the *element* (which
 governs locking) and the *energy* (the paper's method is built on a specific one). Removing only the
@@ -697,6 +703,13 @@ Finally, the harness measures several confounds directly:
   performance profile on iteration count; AQP's first-order tail lengthens at tight τ; the Sobolev
   proxy is a pooled wash but wins within the ill-conditioned stratum — a regime structure the pooled
   profile hides and the per-stratum pairwise surfaces (`results/1a_profiles.md`).
+- **Anderson acceleration validates.** Wrapping ARAP local–global in Anderson mixing reaches the same
+  minimum in **13 versus 24 iterations** (a 1.85× iteration speedup, robust across three seeds and
+  three meshes — it never collapses to 1×), the second of the two independently validated edges. Each
+  iteration is one back-solve for both, so the iteration ratio is the hardware-independent work ratio;
+  the same acceleration core also speeds an unrelated Jacobi fixed-point (a generality check), and the
+  wall-clock speedup is smaller than the iteration speedup owing to Anderson's per-iteration
+  least-squares (`results/anderson.md`).
 
 Every one of these is a place where a single, unstated component choice — a filter, a criterion, an
 implementation language, a Hessian modification — governs a published "advantage."
@@ -709,14 +722,20 @@ implementation language, a Hessian modification — governs a published "advanta
 
 After the decomposition experiments, the superiority-claims graph stands at **2 validated, 23
 qualified, 113 self-claimed, and 22 unmeasured** edges (`claims/hardening.md`). The two validated
-edges are SLIM over AQP on iteration count (§8.2) and the analytic eigensystem's equivalence to
-numerical eigendecomposition; the qualified edges are dominated by claims the *paper itself* limited
-to a regime (2D, a specific energy, a mesh class) that later citations dropped, plus claims our
-benchmark reproduced only under stated conditions.
+edges are SLIM over AQP on iteration count (§8.2) and Anderson acceleration over ARAP local–global on
+convergence (§8.6); the qualified edges are dominated by claims the *paper itself* limited to a regime
+(2D, a specific energy, a mesh class) that later citations dropped, plus claims our benchmark
+reproduced only under stated conditions. (Notably, the analytic eigensystem's claim over numerical
+eigendecomposition stays *qualified*, not validated: the projection is provably equivalent, but the
+closed form is not faster than a LAPACK eigensolve on a 4×4 — the advantage lives in avoiding an
+autodiff Hessian assembly, not in a faster eigendecomposition, `results/analytic_eig.md`.)
 
-The distribution is the finding. The benchmark **qualifies far more than it overturns, and overturns
-nothing outright** — even the headline `ν`-claim ends up *re-validated* once its confounds are
-controlled, not refuted. This is the opposite of a debunking exercise. What the ledger records is that
+The distribution is the finding. The benchmark **qualifies far more than it overturns: no published
+claims-graph edge is `refuted`** (the ledger records zero), and even the headline `ν`-claim ends up
+*re-validated* once its confounds are controlled. What does not survive are a few *baseline-confounded
+or self-derived* speed statements — AQP's "×200 versus L-BFGS" (a MATLAB-baseline artifact) and the
+downstream "AQP's single factorization wins at scale" (refuted at tight tolerance, §8.2) — neither of
+which is a first-party superiority edge in the graph. This is the opposite of a debunking exercise. What the ledger records is that
 the field's superiority claims are, as of this snapshot, overwhelmingly *untested against confound
 control* — not wrong, but unearned — and that when they are tested, the honest verdict is usually a
 *qualification of regime* rather than a reversal.

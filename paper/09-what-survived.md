@@ -4,14 +4,20 @@
 
 After the decomposition experiments, the superiority-claims graph stands at **2 validated, 23
 qualified, 113 self-claimed, and 22 unmeasured** edges (`claims/hardening.md`). The two validated
-edges are SLIM over AQP on iteration count (§8.2) and the analytic eigensystem's equivalence to
-numerical eigendecomposition; the qualified edges are dominated by claims the *paper itself* limited
-to a regime (2D, a specific energy, a mesh class) that later citations dropped, plus claims our
-benchmark reproduced only under stated conditions.
+edges are SLIM over AQP on iteration count (§8.2) and Anderson acceleration over ARAP local–global on
+convergence (§8.6); the qualified edges are dominated by claims the *paper itself* limited to a regime
+(2D, a specific energy, a mesh class) that later citations dropped, plus claims our benchmark
+reproduced only under stated conditions. (Notably, the analytic eigensystem's claim over numerical
+eigendecomposition stays *qualified*, not validated: the projection is provably equivalent, but the
+closed form is not faster than a LAPACK eigensolve on a 4×4 — the advantage lives in avoiding an
+autodiff Hessian assembly, not in a faster eigendecomposition, `results/analytic_eig.md`.)
 
-The distribution is the finding. The benchmark **qualifies far more than it overturns, and overturns
-nothing outright** — even the headline `ν`-claim ends up *re-validated* once its confounds are
-controlled, not refuted. This is the opposite of a debunking exercise. What the ledger records is that
+The distribution is the finding. The benchmark **qualifies far more than it overturns: no published
+claims-graph edge is `refuted`** (the ledger records zero), and even the headline `ν`-claim ends up
+*re-validated* once its confounds are controlled. What does not survive are a few *baseline-confounded
+or self-derived* speed statements — AQP's "×200 versus L-BFGS" (a MATLAB-baseline artifact) and the
+downstream "AQP's single factorization wins at scale" (refuted at tight tolerance, §8.2) — neither of
+which is a first-party superiority edge in the graph. This is the opposite of a debunking exercise. What the ledger records is that
 the field's superiority claims are, as of this snapshot, overwhelmingly *untested against confound
 control* — not wrong, but unearned — and that when they are tested, the honest verdict is usually a
 *qualification of regime* rather than a reversal.
