@@ -306,7 +306,7 @@ def fig_injectivity():
                         edge="#900", lw=0.5)
         ax.set_title(f"{name}\n{int((a <= 0).sum())} inverted", fontsize=9.5)
     fig.suptitle("Injectivity is a capability axis: barrier-free energies untangle a folded map "
-                 "(barrier symmetric-Dirichlet is +∞ here — 0% feasible start)",
+                 "(barrier symmetric-Dirichlet is +∞ at folds — cannot start)",
                  y=1.03, fontweight="bold", fontsize=9.6)
     viz.save(fig, "injectivity")
     print(f"  injectivity: init {int((signed_areas(x0.reshape(-1,2),tris)<=0).sum())} folds → "

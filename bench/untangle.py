@@ -57,22 +57,35 @@ def energy_grad(x, tris, delta, w=None):
 
 
 def solve(x0, tris, free, delta, w=None, max_iter=2000, tol=1e-8):
-    """Minimize the untangling energy over free DOFs with scipy L-BFGS-B (barrier-free → robust)."""
+    """Minimize the untangling energy over free DOFs with scipy L-BFGS-B (barrier-free → robust).
+
+    Also tracks `first_injective` — the iteration at which ALL signed areas first become > 0 — a
+    metric COMPARABLE across different untangling energies (unlike final iters-to-gtol, which depends
+    on each energy's own tolerance)."""
     from scipy.optimize import minimize
     x = x0.copy()
     fidx = np.where(free)[0]
+    state = {"it": 0, "first_inj": None}
 
     def fun(xf):
         x[fidx] = xf
         E, g = energy_grad(x, tris, delta, w)
         return E, g[fidx]
 
-    res = minimize(fun, x[fidx], jac=True, method="L-BFGS-B",
+    def cb(xf):
+        state["it"] += 1
+        if state["first_inj"] is None:
+            x[fidx] = xf
+            if signed_areas(x.reshape(-1, 2), tris).min() > 0:
+                state["first_inj"] = state["it"]
+
+    res = minimize(fun, x[fidx], jac=True, method="L-BFGS-B", callback=cb,
                    options={"maxiter": max_iter, "ftol": 1e-16, "gtol": tol})
     x[fidx] = res.x
     a = signed_areas(x.reshape(-1, 2), tris)
     return {"x": x, "min_area": float(a.min()), "n_inverted": int((a <= 0).sum()),
-            "iters": int(res.nit), "success": bool(a.min() > 0), "fun": float(res.fun)}
+            "iters": int(res.nit), "first_injective": state["first_inj"],
+            "success": bool(a.min() > 0), "fun": float(res.fun)}
 
 
 def _conformance(seed=0, h=1e-6):
