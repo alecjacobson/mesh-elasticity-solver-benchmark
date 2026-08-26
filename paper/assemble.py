@@ -9,7 +9,7 @@ import re
 HERE = os.path.dirname(os.path.abspath(__file__))
 ORDER = ["00-abstract", "01-introduction", "02-unifying-view", "03-taxonomy", "04-survey-by-axis",
          "05-lineage", "06-claims-graph", "07-benchmark-design", "08-results", "09-what-survived",
-         "10-living-benchmark"]
+         "10-living-benchmark", "11-references"]
 
 
 def main():
