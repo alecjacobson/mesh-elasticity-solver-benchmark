@@ -29,8 +29,13 @@ N = 12
 
 
 def _warp_wavy(V, A):
-    """φ(x,y) = (x + A·sin(π y), y): Jacobian ≡ 1 (a provable bijection), non-convex boundary for A≳0.3.
-    So φ(grid) is a guaranteed injective solution whose boundary is HARD (Tutte gives no guarantee)."""
+    """φ(x,y) = (x + A·sin(π y), y): a per-row constant x-shift → a NON-CONVEX boundary for A≳0.3.
+
+    φ(grid) is injective for a DISCRETE reason (stronger than the continuum unit-Jacobian, which does
+    not by itself guarantee a triangulation stays unfolded): on the row-aligned grid every triangle has
+    two vertices sharing a y-row, and φ's shift depends ONLY on y, so those two shift identically →
+    each triangle's signed area is preserved EXACTLY, for ANY A (verified: warp min-area == rest
+    min-area ∀A). Hence A tunes boundary non-convexity but NOT the target's feasibility."""
     out = V.copy(); out[:, 0] = V[:, 0] + A * np.sin(np.pi * V[:, 1])
     return out
 
@@ -86,10 +91,11 @@ def run():
             su, sfirst, sit = _stableNH_first_injective(rest, tris, Bs, areas, free, x0)
             res["stable-NH"][sev].append((su, sfirst, sit, nf0))
 
-    # HARD boundary: a wavy (non-convex) warp φ(x,y)=(x+A sin πy, y), Jacobian≡1 → φ(grid) is a
-    # PROVABLY-injective target with a non-convex boundary (Tutte gives no guarantee). Does the suite
-    # discriminate here? stable-NH minimizes ELASTIC energy (may keep folds if lower-energy), whereas
-    # the untangle penalty explicitly targets all-positive areas.
+    # HARD boundary: a wavy (non-convex) warp φ(x,y)=(x+A sin πy, y). φ(grid) is injective for a
+    # DISCRETE reason (per-row constant x-shift on the row-aligned grid preserves triangle areas
+    # exactly, ∀A — see _warp_wavy), so A tunes non-convexity but NOT feasibility: this probes
+    # SPEED-of-first-crossing, not a success/capability gap (which would need a provably-folded
+    # elastic minimizer).
     warpA = 0.5
     hard = {"untangle": [], "stable-NH": []}
     for seed in SEEDS:
@@ -144,15 +150,18 @@ def run():
                  f"[{med('untangle',sev,2)}] | {rate('stable-NH',sev)*100:.0f}% · {med('stable-NH',sev,1)} · "
                  f"[{med('stable-NH',sev,2)}] |")
     L += ["",
-          f"### Hard boundary — a provably-injective **non-convex** target (wavy warp A={warpA}, "
-          f"Jacobian≡1), {len(SEEDS)} seeds", "",
-          "The pinned-square target above is trivially the identity, so success saturates. This case "
-          "pins the boundary to φ(rest) with φ(x,y)=(x+A·sin πy, y) — a **unit-Jacobian bijection**, so "
-          "φ(grid) is a *guaranteed* injective solution, but the boundary is **non-convex** (Tutte gives "
-          "no guarantee) and stable-NH's elastic minimizer need not be injective.", "",
-          "| method | success | first-inj (median) |", "|---|---|---|",
-          f"| untangle | {hrate('untangle')*100:.0f}% | {hmed('untangle',1)} |",
-          f"| stable-NH | {hrate('stable-NH')*100:.0f}% | {hmed('stable-NH',1)} |",
+          f"### Hard boundary — a **non-convex** target (wavy warp A={warpA}), {len(SEEDS)} seeds", "",
+          "This pins the boundary to φ(rest), φ(x,y)=(x+A·sin πy, y). φ(grid) is a guaranteed injective "
+          "solution for a **discrete** reason: on the row-aligned grid every triangle has two vertices "
+          "in the same y-row and φ's x-shift depends only on y, so those two shift identically → each "
+          "triangle's area is preserved EXACTLY for any A (not merely the continuum unit-Jacobian, which "
+          "would not guarantee a triangulation stays unfolded). **Consequence: A tunes boundary "
+          "non-convexity but NOT the target's feasibility** — so this case cannot separate the methods "
+          "on *success* (an injective target always exists); it can only probe *speed of first "
+          "crossing*. stable-NH's elastic minimizer need not equal φ(grid) nor be injective.", "",
+          "| method | success | first-inj (median) | first-inj unit |", "|---|---|---|---|",
+          f"| untangle | {hrate('untangle')*100:.0f}% | {hmed('untangle',1)} | scipy L-BFGS-B outer iters |",
+          f"| stable-NH | {hrate('stable-NH')*100:.0f}% | {hmed('stable-NH',1)} | projected-Newton iters |",
           "",
           "## Observed", "",
           "- **Barrier-free energies untangle; the axis is capability, not speed.** Both reach an "
@@ -172,15 +181,18 @@ def run():
            "beats a generic elastic energy on a hard boundary — the concrete reason methods like TLC / "
            "foldover-free exist beyond 'just run an elastic solve'.")
           if hrate('untangle') != hrate('stable-NH') else
-          ("- **The hard non-convex boundary discriminates on SPEED, not success.** Both still reach "
-           f"injectivity ({hrate('untangle')*100:.0f}%), but iters-to-first-injective **blows apart**: "
-           f"the raw area-penalty needs **{hmed('untangle',1)}** iters vs Stable NH's **{hmed('stable-NH',1)}** "
-           f"(~{max(1,round(hmed('untangle',1)/max(1,hmed('stable-NH',1))))}×) — on the square it was only "
-           f"{med('untangle','severe',1)} vs {med('stable-NH','severe',1)}. The raw penalty's basin degrades "
-           "severely on a non-convex boundary while the elastic energy stays efficient — the concrete "
-           "reason the injectivity cohort (TLC's lifted content, foldover-free's regularization) invests "
-           "in better formulations than 'penalize negative areas'. Success still saturates (an injective "
-           "target exists); a boundary with no injective solution is the feasibility-detection probe."),
+          ("- **The hard non-convex boundary does not separate the methods on SUCCESS** (both "
+           f"{hrate('untangle')*100:.0f}% — by construction, since an injective target provably exists "
+           "for any A). It *does* show the raw area-penalty needs far more first-order steps to first "
+           f"crossing ({hmed('untangle',1)} L-BFGS-B outer iters) than "
+           f"Stable NH does Newton iters ({hmed('stable-NH',1)}), vs only {med('untangle','severe',1)} vs "
+           f"{med('stable-NH','severe',1)} on the easy square. **But these are iteration counts of "
+           "DIFFERENT algorithms (scipy L-BFGS-B vs projected Newton) and are NOT work-comparable** — the "
+           "same non-comparability the 1a suite flags; a Newton iter is a factorization. So this is "
+           "suggestive (the raw penalty's first-order basin is shallow on a non-convex boundary) but NOT "
+           "a clean ratio; a work-comparable ranking needs wall-clock / eval-counts, and a genuine "
+           "*capability* (success) discrimination needs a boundary whose elastic minimizer is provably "
+           "folded — which this unit-Jacobian warp cannot produce (deferred)."),
           "- **Barrier symmetric Dirichlet is a definitional non-starter, stated as such (not scored).** "
           f"At a folded init SD is +∞ by construction (`finite={sd_folded_finite}`), so we do **not** run "
           "it — reporting a per-severity '0%' would be measuring the initialization, not a solver. The "

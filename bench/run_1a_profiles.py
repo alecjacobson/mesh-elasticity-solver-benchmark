@@ -103,7 +103,7 @@ def _perf_profile(problems, tau, alphas):
         best = min([v for v in row.values() if v is not None], default=None)
         for m in METHODS:
             v = row[m]
-            ratios[m].append((v / best) if (v is not None and best) else np.inf)
+            ratios[m].append((v / best) if (v is not None and best is not None) else np.inf)
     for m in METHODS:
         r = np.array(ratios[m])
         rho[m] = [float(np.mean(r <= a)) for a in alphas]
@@ -206,12 +206,14 @@ def run():
           f"ρ(1)≈best; beats every accelerator pairwise). But that is the HW-independent count, not "
           "cost — each Newton iteration is a factorization (`e4`, `scale_cost`), so 'fewest iterations' "
           "is not 'cheapest wall-clock'.",
-          (f"- **At these small meshes every method solves all {N} problems at both τ** — so the axis "
-           f"here is iteration COST, not coverage. AQP is the slowest (median {medi('aqp',1e-3)}→"
-           f"{medi('aqp',1e-6)} it loose→tight, a **{aqp_growth:.1f}×** growth vs Newton's "
-           f"{nwt_growth:.1f}×) and wins only {sp[('aqp','l-bfgs')]*100:.0f}% of pairwise matchups — its "
-           "first-order tail lengthens at tight τ (consistent with `mesh_independence`/"
-           "`accelerator_convergence`); coverage would only *collapse* at larger meshes/budgets.")
+          (f"- **At these caps and meshes every method solves all {N} problems at both τ** — so what "
+           "this suite *resolves* is iteration COST; coverage separation is **not** tested here "
+           "(it would need the near-inversion adversarial stratum — excluded for tractability — or "
+           "larger meshes/budgets, where AQP's tail is known to stall: `mesh_independence`). On the cost "
+           f"axis AQP is slowest (median {medi('aqp',1e-3)}→{medi('aqp',1e-6)} it loose→tight, a "
+           f"**{aqp_growth:.1f}×** growth vs Newton's {nwt_growth:.1f}×) and wins only "
+           f"{sp[('aqp','l-bfgs')]*100:.0f}% of pairwise matchups — the first-order tail lengthening at "
+           "tight τ, visible even where coverage is saturated.")
           if all_solved else
           (f"- **AQP coverage drops from loose to tight τ**: {solved('aqp',1e-3)}/{N} → "
            f"{solved('aqp',1e-6)}/{N} — the first-order tail stalls."),
