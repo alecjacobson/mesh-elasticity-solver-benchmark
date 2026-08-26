@@ -114,6 +114,8 @@ def run():
     from .p2_sri import _conformance as _sri_conf
     sri_grad, sri_rest = _sri_conf()
     ok6 = sri_grad < 1e-5 and sri_rest < 1e-8      # SRI-P2 element: analytic grad + rest-stress-free
+    from .barrier_ls import _conformance as _bar_conf
+    ok7, bar_at, bar_past = _bar_conf()            # barrier line-search: step is the tight inversion bound
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
     print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
@@ -122,7 +124,9 @@ def run():
     print(f"[conformance] TR blend=Newton/clamp/abs: {tn:.1e}/{tc:.1e}/{ta:.1e} "
           f"-> {'PASS' if ok5 else 'FAIL'}")
     print(f"[conformance] SRI-P2 grad/rest: {sri_grad:.1e} / {sri_rest:.1e} -> {'PASS' if ok6 else 'FAIL'}")
-    ok = ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    print(f"[conformance] barrier-LS step bound: area@α={bar_at:.1e} (≈0), past<0={bar_past:.1e} "
+          f"-> {'PASS' if ok7 else 'FAIL'}")
+    ok = ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 
