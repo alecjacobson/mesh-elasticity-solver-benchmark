@@ -569,11 +569,17 @@ selective-reduced-integration element on which absolute crushes clamp **23 versu
 `ν = 0.4999` (`results/sri_nu.md`). The effect also generalizes to 3D tetrahedra, where P1 locking is
 if anything worse (`results/3d_nu.md`).
 
+The re-validation is not a single-seed accident: with a small per-seed perturbation of the stretch
+init, absolute beats clamp on **all five seeds** at both ν = 0.499 and ν = 0.4999 (median 22 vs 30 and
+39 vs 60 iterations), and the gap widens toward the incompressible limit, exactly as a real effect
+should (`results/p2_stable_multiseed.md`).
+
 **The lesson.** A decade-old superiority claim that *reverses* and then *re-validates* only once two
 entangled confounds — element and energy — are separately controlled. Neither confound acts alone;
 this is the report's clearest demonstration that single-axis control is not optional. *(Scope: 2D,
-single stretch/seed/τ; a fully locking-free Taylor–Hood element is the pending gold-standard control,
-so this is indicative, not a general proof.)*
+single stretch magnitude and τ; the seed confound is removed above, but the P2 element is
+locking-*relieved*, not fully locking-free — a Taylor–Hood / mixed u–p element and 3D remain the
+pending gold-standard controls, so this is indicative, not a general proof.)*
 
 ## 8.2 Innovations that do not survive fair, faithful re-measurement
 

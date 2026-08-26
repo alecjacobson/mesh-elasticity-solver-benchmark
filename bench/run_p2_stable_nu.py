@@ -101,10 +101,11 @@ def main():
              if (both_int and abs(a - c) <= 1) else
              "measured above; see the per-ν table."),
           "",
-          "_Caveat: 2D, single stretch/seed, single τ; P2 relieves but a fully locking-free "
-          "(Taylor–Hood P2–P1 / mixed u–p) element is still the gold-standard control (tracked "
-          "separately). This run removes the *energy* confound and the *element-order* confound "
-          "together, which no prior run did._"]
+          "_Caveat: 2D, single stretch magnitude, single τ; the **seed** confound is removed "
+          "separately in `results/p2_stable_multiseed.md` (absolute beats clamp 5/5 seeds at "
+          "ν∈{0.499,0.4999}). P2 relieves but a fully locking-free (Taylor–Hood P2–P1 / mixed u–p) "
+          "element is still the gold-standard control. This run removes the *energy* and "
+          "*element-order* confounds together, which no prior run did._"]
     os.makedirs("results", exist_ok=True)
     with open("results/p2_stable_nu.md", "w") as f:
         f.write("\n".join(L) + "\n")
