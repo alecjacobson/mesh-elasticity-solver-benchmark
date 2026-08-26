@@ -40,10 +40,12 @@ selective-reduced-integration element on which absolute crushes clamp **23 versu
 `ν = 0.4999` (`results/sri_nu.md`). The effect also generalizes to 3D tetrahedra, where P1 locking is
 if anything worse (`results/3d_nu.md`).
 
-The re-validation is not a single-seed accident: with a small per-seed perturbation of the stretch
-init, absolute beats clamp on **all five seeds** at both ν = 0.499 and ν = 0.4999 (median 22 vs 30 and
-39 vs 60 iterations), and the gap widens toward the incompressible limit, exactly as a real effect
-should (`results/p2_stable_multiseed.md`).
+The re-validation is not a single-initialization accident: across **five genuinely different
+deformation problems** — varying the stretch magnitude (1.6×–2.5×) and adding a shear, not merely
+jittering one init — absolute beats clamp on **all five** at both ν = 0.499 and ν = 0.4999 (median 22
+vs 28 and 38 vs 56 iterations, with wide per-config bands reflecting the real diversity), and the gap
+widens toward the incompressible limit, exactly as a real effect should
+(`results/p2_stable_multiseed.md`).
 
 **The lesson.** A decade-old superiority claim that *reverses* and then *re-validates* only once two
 entangled confounds — element and energy — are separately controlled. Neither confound acts alone;

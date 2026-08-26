@@ -569,10 +569,12 @@ selective-reduced-integration element on which absolute crushes clamp **23 versu
 `ν = 0.4999` (`results/sri_nu.md`). The effect also generalizes to 3D tetrahedra, where P1 locking is
 if anything worse (`results/3d_nu.md`).
 
-The re-validation is not a single-seed accident: with a small per-seed perturbation of the stretch
-init, absolute beats clamp on **all five seeds** at both ν = 0.499 and ν = 0.4999 (median 22 vs 30 and
-39 vs 60 iterations), and the gap widens toward the incompressible limit, exactly as a real effect
-should (`results/p2_stable_multiseed.md`).
+The re-validation is not a single-initialization accident: across **five genuinely different
+deformation problems** — varying the stretch magnitude (1.6×–2.5×) and adding a shear, not merely
+jittering one init — absolute beats clamp on **all five** at both ν = 0.499 and ν = 0.4999 (median 22
+vs 28 and 38 vs 56 iterations, with wide per-config bands reflecting the real diversity), and the gap
+widens toward the incompressible limit, exactly as a real effect should
+(`results/p2_stable_multiseed.md`).
 
 **The lesson.** A decade-old superiority claim that *reverses* and then *re-validates* only once two
 entangled confounds — element and energy — are separately controlled. Neither confound acts alone;
@@ -864,7 +866,7 @@ _Derived from `paper/references.bib` (auto-generated from `claims/claims.yaml`) 
 **[anderson-geometry]** Peng, Deng, Zhang, Geng, Qin, Liu. *Anderson Acceleration for Geometry Optimization*. Proc. SIGGRAPH (2018).  
 **[aqp]** Kovalsky, Galun, Lipman. *Accelerated Quadratic Proxy (AQP)*. Proc. SIGGRAPH (2016). doi:10.1145/2897824.2925920  
 **[barrier-aug-lagrangian]** Guo. *Barrier-Augmented Lagrangian for GPU Elastodynamic Contact*. Proc. SIGGRAPH Asia (2024).  
-**[barrier-free-elastodynamics]** Zheng, Luo, Li (CMU / Genesis AI). *Robust and Efficient Penetration-Free Elastodynamics without Barriers*. TOG (2025). doi:10.1145/3811035;  
+**[barrier-free-elastodynamics]** Zheng, Luo, Li (CMU / Genesis AI). *Robust and Efficient Penetration-Free Elastodynamics without Barriers*. TOG (2025). doi:10.1145/3811035  
 **[bcqn]** Zhu, Bridson, Kaufman. *Blended Cured Quasi-Newton (BCQN)*. Proc. SIGGRAPH (2018).  
 **[boyd-2011-admm]** Boyd, Stephen, Parikh, Neal, Chu, Eric, Peleato, Borja, Eckstein, Jonathan. *Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers*. Foundations and Trends in Machine Learning (2011). doi:10.1561/2200000016  
 **[c-ipc]** Li, Kaufman, Jiang. *Codimensional IPC (C-IPC)*. TOG (2021).  
@@ -882,7 +884,7 @@ _Derived from `paper/references.bib` (auto-generated from `claims/claims.yaml`) 
 **[gipc]** Huang. *GIPC: Gauss-Newton IPC Barrier*. TOG (2024).  
 **[goss]** Poya, Ortigosa, Kim. *Geometric Optimisation via Spectral Shifting (GOSS/RAMIPS)*. TOG (2023). doi:10.1145/3585003  
 **[ipc]** Li. *Incremental Potential Contact (IPC)*. TOG (2020). doi:10.1145/3386569.3392425  
-**[jgs2]** Lan, Lu, Yuan, Xu, Su, Wang, Jiang, Yang. *JGS2: Near second-order Jacobi/Gauss-Seidel for GPU Elastodynamics*. TOG / SIGGRAPH 2025 (2025). doi:10.1145/3731182;  
+**[jgs2]** Lan, Lu, Yuan, Xu, Su, Wang, Jiang, Yang. *JGS2: Near second-order Jacobi/Gauss-Seidel for GPU Elastodynamics*. TOG / SIGGRAPH 2025 (2025). doi:10.1145/3731182  
 **[kovalsky-2014]** Kovalsky. *Controlling Singular Values with SDP*. Proc. SGP (2014). doi:10.1145/2601097.2601142  
 **[lbd]** Kovalsky, Aigerman, Basri, Lipman. *Large-Scale Bounded Distortion Mappings*. Proc. SIGGRAPH Asia (2015). doi:10.1145/2816795.2818098  
 **[lim]** Schüller, Kavan, Panozzo, Sorkine-Hornung. *Locally Injective Mappings (LIM)*. Proc. SGP (2013). doi:10.1111/cgf.12179  
@@ -899,7 +901,7 @@ _Derived from `paper/references.bib` (auto-generated from `claims/claims.yaml`) 
 **[primal-xpbd]** Chen, Han, Fedkiw, Teran. *Primal Extended Position Based Dynamics*. MIG (2023). doi:10.1145/3623264.3624437  
 **[progressive-embedding]** Shen, Jiang, Zorin, Panozzo. *Progressive Embedding*. Proc. SIGGRAPH (2019). doi:10.1145/3306346.3323012  
 **[progressive-param]** Liu, Ye, Ni, Fu. *Progressive Parameterizations*. Proc. SIGGRAPH Asia (2018). doi:10.1145/3197517.3201331  
-**[progressively-projected-newton]** Fernández-Fernández, Löschner, Bender. *Progressively Projected Newton (PPN)*. CGF 45(2) / Eurographics 2026 (2026). doi:10.1111/cgf.70386;  
+**[progressively-projected-newton]** Fernández-Fernández, Löschner, Bender. *Progressively Projected Newton (PPN)*. CGF 45(2) / Eurographics 2026 (2026). doi:10.1111/cgf.70386  
 **[project-on-demand-newton]** from Pitfalls of Projection. *Project-on-Demand Newton (PDN)*.  (2023).  
 **[projective-dynamics]** Bouaziz, Sofien, Martin, Sebastian, Liu, Tiantian, Kavan, Ladislav, Pauly, Mark. *Projective Dynamics: Fusing Constraint Projections for Fast Simulation*. Proc. SIGGRAPH (2014).  
 **[quasi-newton-liu2017]** Liu, Bouaziz, Kavan. *Quasi-Newton Methods for Real-Time Hyperelastic Simulation*. TOG (2017).  
@@ -916,7 +918,7 @@ _Derived from `paper/references.bib` (auto-generated from `claims/claims.yaml`) 
 **[stable-neo-hookean]** Smith, de Goes, Kim. *Stable Neo-Hookean Flesh Simulation*. TOG (2018). doi:10.1145/3180491  
 **[stiffgipc]** Huang, Lu, Lin, Komura, Li. *StiffGIPC*. TOG / SIGGRAPH 2025 (2025).  
 **[tlc]** Du, Aigerman, Zhou, Kovalsky, Yan, Kaufman, Ju. *Lifting Simplices to Find Injectivity (TLC)*. Proc. SIGGRAPH (2020). doi:10.1145/3386569.3392484  
-**[trust-region-filtering]** Chen, Liu, Jacobson, Levin, Zheng. *Trust-Region Eigenvalue Filtering for Projected Newton*. Proc. SIGGRAPH Asia (2024). doi:10.1145/3680528.3687650;  
+**[trust-region-filtering]** Chen, Liu, Jacobson, Levin, Zheng. *Trust-Region Eigenvalue Filtering for Projected Newton*. Proc. SIGGRAPH Asia (2024). doi:10.1145/3680528.3687650  
 **[vertex-block-descent]** Chen, Liu, Yang, Yuksel. *Vertex Block Descent (VBD)*. TOG / SIGGRAPH 2024 (2024).  
 **[weber-zorin-2014]** Weber, Zorin. *Locally Injective Parametrization w/ Arbitrary Fixed Boundaries*. Proc. SIGGRAPH (2014). doi:10.1145/2601097.2601227  
 **[zhang-2005]** Zhang, Mischaikow, Turk. *Feature-based surface parameterization and texture mapping*. TOG 24(1) (2005). doi:10.1145/1037957.1037958

@@ -21,7 +21,11 @@ JOURNAL = ("TOG", "CGF", "SIIMS", "TVCG", "Graphical Models")
 
 def _doi(ref):
     m = re.search(r"10\.\d{4,9}/[-._;()/:A-Za-z0-9]+", ref)
-    return m.group(0).rstrip(".") if m else None
+    if not m:
+        return None
+    doi = m.group(0)
+    # the ref field often has "<doi>; arXiv:..." — a trailing ';' (or '.') breaks doi.org resolution
+    return doi.rstrip(".;,")
 
 
 def _arxiv(ref):
