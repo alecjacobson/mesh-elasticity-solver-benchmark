@@ -30,6 +30,14 @@ reference-integrity check in P3.5 verifies this.
 | [`09-what-survived.md`](09-what-survived.md) | 9 What survived + review-loop-as-method | claims/hardening.md |
 | [`10-living-benchmark.md`](10-living-benchmark.md) | 10 Open problems + living benchmark | design.md |
 
+## Build scripts
+
+| script | produces | notes |
+|---|---|---|
+| `python paper/make_bib.py` | `references.bib` + `11-references.md` | derived from `claims/claims.yaml` (citekey = node id); classical ancestors are in the hand-curated `references_classical.bib` |
+| `python paper/assemble.py` | `paper.md` | concatenates the section files + TOC + References |
+| `python paper/to_latex.py` | `paper.tex` | deterministic md→LaTeX **skeleton** — *not compiled here* (no local toolchain); manual finishing = venue class + inline `\cite` wiring + recompile (documented in the .tex header) |
+
 ## Status
 
 Draft in progress (P3). Scope discipline: this is a *v1 snapshot* — 2D prototype measurements,
