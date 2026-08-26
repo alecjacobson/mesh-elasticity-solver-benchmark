@@ -40,6 +40,15 @@ Markdown / YAML** so it renders on GitHub and stays diff-friendly.
 | Claims graph render | `claims/README.md` | Markdown + Mermaid |
 | Diagrams | inline | Mermaid fenced blocks (```` ```mermaid ````) — GitHub renders them |
 
+## Adding a *measured* result (the living benchmark)
+
+Curation aside, a **measured** contribution — moving a claims-graph edge from `self-claimed` toward
+`validated`/`qualified` by a single-axis experiment — follows the living-benchmark protocol in
+[`docs/living-benchmark.md`](docs/living-benchmark.md): implement the component as a slot, **pass the
+conformance gate** (official-code regression where the source exists), run the single-axis experiment
+against an independent `E*`, update the claims edge, and **survive adversarial review**. A component
+with no passing gate is not admissible.
+
 ## Adding a paper
 
 1. Add a one-line tagged entry to the right World section of `docs/corpus.md`.

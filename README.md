@@ -122,6 +122,7 @@ Deterministic, regenerable (`python -m bench.run_figures`); full index + caption
 | [`bench/`](bench/) | Prototype **component-factored harness** (Python/NumPy): energy/filter/direction/line-search/solver/criterion slots, conformance-gated |
 | [`results/`](results/) | **Measured** decomposition-experiment outputs (E1, E1ν, data profiles, E4, E5, 1b dynamic, locking) — see [`results/README.md`](results/README.md) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Conventions for **humans and agents** adding papers, claims, and findings |
+| [`docs/living-benchmark.md`](docs/living-benchmark.md) | **Living-benchmark release seed** — reproducibility (regenerate every result + figure), divisions (closed/open/hidden-tier), and what counts as a measured contribution (edge-move + conformance gate + adversarial review) |
 
 ## The superiority-claims graph
 
