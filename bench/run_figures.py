@@ -575,6 +575,51 @@ def fig_scale_cost():
     print("  DOF:", [int(d) for d in dofs], " AQP/Newton:", [round(v, 2) for v in (C[:, 1] / base)])
 
 
+# ---------------------------------------------------------------- World-2: twist-eigenvalue phase map
+def fig_twist_phase():
+    """The analytic synthesis of the whole clamp-vs-absolute-vs-CM question: in the analytic
+    eigensystem (Smith 2019) the 2D symmetric-Dirichlet element Hessian's ONLY sign-indefinite mode
+    is the TWIST λ_t=(g(σ₁)+g(σ₂))/(σ₁+σ₂). So filters differ *only* here — clamp→ε, absolute→|λ_t|,
+    projected-Newton→λ_t, and Composite Majorization majorizes exactly this mode (#14)."""
+    import matplotlib.colors as mcolors
+    g = lambda s: 2 * s - 2 / s ** 3
+    S = np.linspace(0.35, 2.2, 500)
+    s1, s2 = np.meshgrid(S, S)
+    lt = (g(s1) + g(s2)) / (s1 + s2)
+    fig, (axa, axb) = plt.subplots(1, 2, figsize=(12, 5.0))
+
+    m = float(np.nanmax(np.abs(lt)))
+    norm = mcolors.TwoSlopeNorm(vcenter=0.0, vmin=-min(m, 20), vmax=min(m, 20))
+    pc = axa.pcolormesh(s1, s2, lt, cmap="RdBu_r", norm=norm, shading="auto")
+    axa.contour(s1, s2, lt, levels=[0], colors="k", linewidths=2.0)
+    axa.plot(1, 1, "k*", ms=13, label="identity (isometry), λ_t=0")
+    axa.plot(S, 1.0 / S, "--", color="#444", lw=1.3, label="incompressible σ₁σ₂=1")
+    axa.set_xlabel("σ₁"); axa.set_ylabel("σ₂"); axa.set_aspect("equal")
+    axa.set_title("Twist eigenvalue λ_t over singular values\n(black = λ_t=0; blue = NEGATIVE = indefinite)")
+    axa.legend(loc="upper right", fontsize=8.5)
+    cb = fig.colorbar(pc, ax=axa, fraction=0.046, pad=0.02); cb.set_label("λ_t (twist eigenvalue)")
+
+    # panel B: the clamp↔absolute gap = |λ_t| where λ_t<0 (what absolute adds back over clamp), else 0
+    gap = np.where(lt < 0, -lt, 0.0)
+    pc2 = axb.pcolormesh(s1, s2, gap, cmap="magma_r", shading="auto",
+                         norm=mcolors.LogNorm(vmin=1e-2, vmax=max(float(gap.max()), 1e-1)))
+    axb.contour(s1, s2, lt, levels=[0], colors="w", linewidths=1.5)
+    axb.plot(1, 1, "w*", ms=13); axb.plot(S, 1.0 / S, "--", color="w", lw=1.1)
+    axb.set_xlabel("σ₁"); axb.set_ylabel("σ₂"); axb.set_aspect("equal")
+    axb.set_title("Where the filter CHOICE matters: |λ_t| in the λ_t<0 region\n"
+                  "(clamp→ε · absolute→|λ_t| · Newton→λ_t · CM majorizes here)")
+    cb2 = fig.colorbar(pc2, ax=axb, fraction=0.046, pad=0.02); cb2.set_label("clamp↔absolute gap |λ_t|")
+    axb.text(0.05, 0.95, "λ_t ≥ 0 here\n(all filters agree)", transform=axb.transAxes,
+             va="top", fontsize=8.5, color="#333")
+
+    frac = float(np.mean(lt < 0)) * 100
+    fig.suptitle(f"The twist eigenvalue is the whole clamp-vs-absolute-vs-CM story — the ONLY "
+                 f"indefinite mode (negative over {frac:.0f}% of σ-space, all of it compression σ<1)",
+                 y=1.02, fontweight="bold", fontsize=10)
+    viz.save(fig, "twist_phase")
+    print(f"  twist_phase: λ_t<0 over {frac:.1f}% of σ-space (flip & stretch never negative)")
+
+
 # ---------------------------------------------------------------- Survey: lineage map
 def fig_lineage():
     """The survey's core thesis, visual: many SIGGRAPH 'innovations' are adaptations of named
@@ -717,7 +762,7 @@ FIGS = {"locking": fig_locking, "filter_convergence": fig_filter_convergence,
         "histograms": fig_histograms, "pitfalls": fig_pitfalls,
         "inverted_recovery": fig_inverted_recovery,
         "distortion_setups": fig_distortion_setups, "lineage": fig_lineage,
-        "tet3d_nu_sweep": fig_tet3d_nu_sweep}
+        "tet3d_nu_sweep": fig_tet3d_nu_sweep, "twist_phase": fig_twist_phase}
 
 
 def main(names=None):
