@@ -288,7 +288,7 @@ def fig_injectivity():
     from .solver import solve as nt_solve
     from . import energy_stable_neohookean as snh
     from .mesh import rest_quantities
-    rest, tris, Bs, areas, free, x0 = folded_init(strength=0.9, seed=1)
+    rest, tris, Bs, areas, free, x0, _ = folded_init(strength=0.9, seed=1)
     mean_area = float(np.mean(np.abs(signed_areas(rest.reshape(-1, 2), tris))))
     ru = untangle_solve(x0, tris, free, delta=0.25 * mean_area, max_iter=3000)
     et, _, _, _ = snh.make(mu=1.0, lam=snh.lam_from_nu(0.45))
@@ -609,6 +609,38 @@ def fig_scale_cost():
     print("  DOF:", [int(d) for d in dofs], " AQP/Newton:", [round(v, 2) for v in (C[:, 1] / base)])
 
 
+# ---------------------------------------------------------------- Metrics: full 1a perf profiles
+def fig_perf_profiles_1a():
+    """The full Track-1a distortion-accelerator suite as robustness profiles: Dolan–Moré performance
+    profile + Moré–Wild data profile over the whole cross-stratum problem set, at the tight τ."""
+    from . import run_1a_profiles as p1
+    problems, strata = p1.compute()
+    N = len(problems); tau = p1.TAUS[-1]
+    alphas = np.logspace(0, np.log10(30), 120)
+    rho = p1._perf_profile(problems, tau, alphas)
+    budgets = np.arange(1, 400)
+    kappa = p1._data_profile(problems, tau, budgets)
+
+    fig, (axp, axd) = plt.subplots(1, 2, figsize=(12, 4.6))
+    for m in p1.METHODS:
+        axp.step(alphas, rho[m], where="post", color=viz.COL.get(m, "#333"), ls=viz.LS.get(m, "-"),
+                 lw=2.0, label=m)
+    axp.set_xscale("log"); axp.set_xlabel("α  (within α× the best solver)")
+    axp.set_ylabel("fraction of problems"); axp.set_ylim(-0.02, 1.02)
+    axp.set_title("Performance profile (Dolan–Moré)"); axp.legend(fontsize=8.5, loc="lower right")
+    for m in p1.METHODS:
+        axd.step(budgets, kappa[m], where="post", color=viz.COL.get(m, "#333"), ls=viz.LS.get(m, "-"),
+                 lw=2.0, label=m)
+    axd.set_xlabel("iteration budget"); axd.set_ylabel("fraction of problems solved")
+    axd.set_ylim(-0.02, 1.02); axd.set_xlim(0, 400)
+    axd.set_title("Data profile (Moré–Wild)"); axd.legend(fontsize=8.5, loc="lower right")
+    fig.suptitle(f"Full 1a accelerator suite — {N} problems (easy/typical/ill-conditioned × "
+                 f"2 meshes × 3 seeds), shared E*, τ={tau:g}", y=1.02, fontweight="bold", fontsize=10)
+    viz.save(fig, "perf_profiles_1a")
+    print(f"  perf_profiles_1a: {N} problems; ρ(1) = " +
+          ", ".join(f"{m} {rho[m][0]:.2f}" for m in p1.METHODS))
+
+
 # ---------------------------------------------------------------- World-1: E3 BCQN factorial
 def fig_e3_factorial():
     """E3 headline: the direction factor (blended-Sobolev proxy) is regime-gated, not a universal
@@ -844,7 +876,8 @@ FIGS = {"locking": fig_locking, "filter_convergence": fig_filter_convergence,
         "inverted_recovery": fig_inverted_recovery,
         "distortion_setups": fig_distortion_setups, "lineage": fig_lineage,
         "tet3d_nu_sweep": fig_tet3d_nu_sweep, "twist_phase": fig_twist_phase,
-        "e3_factorial": fig_e3_factorial, "injectivity": fig_injectivity}
+        "e3_factorial": fig_e3_factorial, "injectivity": fig_injectivity,
+        "perf_profiles_1a": fig_perf_profiles_1a}
 
 
 def main(names=None):
