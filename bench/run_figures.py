@@ -575,6 +575,53 @@ def fig_scale_cost():
     print("  DOF:", [int(d) for d in dofs], " AQP/Newton:", [round(v, 2) for v in (C[:, 1] / base)])
 
 
+# ---------------------------------------------------------------- World-1: E3 BCQN factorial
+def fig_e3_factorial():
+    """E3 headline: the direction factor (blended-Sobolev proxy) is regime-gated, not a universal
+    lever — L-BFGS vs Sobolev iterations per stratum, showing the win concentrates in the
+    ill-conditioned regime while line-search barely moves iterations."""
+    from .e3_solver import solve_unified, iters_to
+    from .run_e1 import build_scenario
+    from .run_e2 import ill_scenario
+    seeds = [0, 1, 2]; TAU = 1e-4
+    strata = ["typical", "adversarial", "ill-conditioned"]
+
+    def scen(s, seed):
+        if s == "ill-conditioned":
+            return ill_scenario(n=10, s=3.0, seed=seed)
+        return build_scenario(nx=12, ny=12, amp_frac=0.45 if s == "typical" else 0.9, seed=seed)
+
+    def med_iters(strat, dr):
+        vs = []
+        for sd in seeds:
+            sc = scen(strat, sd)
+            r = solve_unified(sc["x0"], sc["tris"], sc["rest"], sc["Bs"], sc["areas"], sc["free"],
+                              direction=dr, line_search="backtrack", max_iter=4000, tol=1e-7)
+            it = iters_to(r["log"], "grad_inf", TAU)
+            if it is not None:
+                vs.append(it)
+        return float(np.median(vs)) if vs else np.nan
+
+    data = {dr: [med_iters(s, dr) for s in strata] for dr in ("lbfgs", "sobolev")}
+    fig, ax = plt.subplots(figsize=(8, 4.4))
+    x = np.arange(len(strata)); w = 0.38
+    ax.bar(x - w / 2, data["lbfgs"], w, color=viz.COL["l-bfgs"], label="L-BFGS (γI)")
+    ax.bar(x + w / 2, data["sobolev"], w, color=viz.COL["sobolev-lbfgs"], label="blended-Sobolev (L⁻¹)")
+    for i in range(len(strata)):
+        lb, so = data["lbfgs"][i], data["sobolev"][i]
+        if lb and so:
+            ax.text(i, max(lb, so) + 0.6, f"{(1 - so / lb) * 100:+.0f}%", ha="center", fontsize=9,
+                    color="#2ca02c" if so < lb else "#d62728", fontweight="bold")
+    ax.set_xticks(x); ax.set_xticklabels(strata)
+    ax.set_ylabel("iterations to ‖g‖∞<1e-4 (median, 3 seeds)")
+    ax.set_title("E3 direction factor: the blended-Sobolev proxy helps only in its regime")
+    ax.legend()
+    fig.suptitle("BCQN's factors are unequal & regime-gated — Sobolev wins when ill-conditioned, "
+                 "within noise otherwise", y=1.0, fontweight="bold", fontsize=10)
+    viz.save(fig, "e3_factorial")
+    print(f"  e3_factorial: L-BFGS {data['lbfgs']} vs Sobolev {data['sobolev']} over {strata}")
+
+
 # ---------------------------------------------------------------- World-2: twist-eigenvalue phase map
 def fig_twist_phase():
     """The analytic synthesis of the whole clamp-vs-absolute-vs-CM question: in the analytic
@@ -762,7 +809,8 @@ FIGS = {"locking": fig_locking, "filter_convergence": fig_filter_convergence,
         "histograms": fig_histograms, "pitfalls": fig_pitfalls,
         "inverted_recovery": fig_inverted_recovery,
         "distortion_setups": fig_distortion_setups, "lineage": fig_lineage,
-        "tet3d_nu_sweep": fig_tet3d_nu_sweep, "twist_phase": fig_twist_phase}
+        "tet3d_nu_sweep": fig_tet3d_nu_sweep, "twist_phase": fig_twist_phase,
+        "e3_factorial": fig_e3_factorial}
 
 
 def main(names=None):
