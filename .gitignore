@@ -8,3 +8,4 @@ __pycache__/
 
 # polyscope headless scratch
 imgui.ini
+figures/_*.png

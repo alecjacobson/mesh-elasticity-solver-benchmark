@@ -4,6 +4,10 @@
 
 _`figures/tet3d_stretch_J.png` (polyscope headless / EGL): a P1-tet box stretched at near-incompressible ν, coloured by per-tet J=det F (centred at 1, true range). The Poisson necking and the same locking-driven J excursions seen in 2D appear here — the confound is not a 2D peculiarity._
 
+![3D nu-sweep](../figures/tet3d_nu_sweep.png)
+
+_`figures/tet3d_nu_sweep.png`: the ν-sweep rendered — ν=0.30/0.45/0.49. As ν→½ the clamp iteration count grows (3→8→20) and necking increases, while the J-spread narrows (a compressible ν=0.3 varies volume freely; near-incompressible ν=0.49 holds J≈1). The 3D locking signature is the iteration count + geometry, exactly as in 2D._
+
 Neo-Hookean ν-sweep on a 4x4x4 tet box (125 verts, 384 tets), uniform-stretch init, only the Hessian filter swapped. P1-tet element is conformance-gated (`python -m bench.tet`). Run: `python -m bench.run_3d_nu`.
 
 | ν | clamp | absolute |

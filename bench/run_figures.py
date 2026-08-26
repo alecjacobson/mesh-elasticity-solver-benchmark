@@ -3,6 +3,7 @@
 Deterministic; each fig_* function writes one or more PNGs. Kept modular so figures can be added
 incrementally and regenerated individually.
 """
+import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -656,6 +657,57 @@ def fig_tet3d():
     print(f"  3D tet: ν={nu} clamp {r['iters']} it, J∈[{Js.min():.3f},{Js.max():.3f}]")
 
 
+def fig_tet3d_nu_sweep():
+    """Polyscope-headless (EGL) ν-sweep of the 3D tet deformation: as ν→½ the box necks harder
+    (Poisson contraction) and P1-tet locking worsens — the 3D companion to the 2D locking story."""
+    from . import tet
+    from .run_3d_nu import lam_of
+    import matplotlib.colors as mcolors
+    n, S = 6, 1.5
+    nus = [0.30, 0.45, 0.49]
+    verts, tets = tet.box_tet_mesh(n, n, n)
+    Bs, vols = tet.rest_quantities(verts, tets); quad = list(zip(Bs, vols))
+    xc = verts[:, 0]; pin = (np.abs(xc) < 1e-9) | (np.abs(xc - 1) < 1e-9)
+    free = ~np.repeat(pin, 3); x0 = verts.copy(); x0[:, 0] = S * verts[:, 0]; x0 = x0.reshape(-1)
+    ps = viz.ps_headless()
+    shots = []; Jranges = []; iters = []
+    allJ = []
+    panels = []
+    for nu in nus:
+        et, _, _ = tet.make(mu=1.0, lam=lam_of(nu))
+        r = tet.solve(x0, tets, quad, free, et, "clamp", tol=1e-6, max_iter=400)
+        V = r["x"].reshape(-1, 3)
+        Js = np.array([np.linalg.det((B @ V.reshape(-1)[tet._edofs(t)]).reshape(3, 3))
+                       for B, t in zip(Bs, tets)])
+        allJ.append(Js); panels.append((nu, V, Js, r["iters"]))
+    lo = min(float(J.min()) for J in allJ); hi = max(float(J.max()) for J in allJ)
+    half = max(1 - lo, hi - 1); vlo, vhi = 1 - half, 1 + half
+    for nu, V, Js, it in panels:
+        ps.remove_all_structures()
+        vm = ps.register_volume_mesh("box", V, tets=np.asarray(tets))
+        vm.add_scalar_quantity("J", Js, defined_on="cells", enabled=True, cmap="coolwarm", vminmax=(vlo, vhi))
+        vm.set_edge_width(1.0)
+        ps.set_up_dir("y_up"); ps.set_front_dir("z_front")
+        ps.look_at((1.55, 1.05, 1.95), (S * 0.5, 0.5, 0.5))
+        shots.append((nu, viz.ps_shot(f"_tet_nu_{int(nu*1000)}"), Js, it))
+    fig, axes = plt.subplots(1, 3, figsize=(11.5, 4.2))
+    for ax, (nu, path, Js, it) in zip(axes, shots):
+        ax.imshow(plt.imread(path)); ax.axis("off")
+        ax.set_title(f"ν = {nu}\nclamp {it} it · J∈[{Js.min():.2f},{Js.max():.2f}]", fontsize=9.5)
+    sm = plt.cm.ScalarMappable(cmap="coolwarm", norm=mcolors.TwoSlopeNorm(1.0, vlo, vhi)); sm.set_array([])
+    cb = fig.colorbar(sm, ax=axes, fraction=0.02, pad=0.02); cb.set_label("J = det F (centred at 1)")
+    fig.suptitle("3D P1-tet ν-sweep (polyscope headless/EGL): necking + locking worsen as ν→½",
+                 y=1.02, fontweight="bold", fontsize=10.5)
+    viz.save(fig, "tet3d_nu_sweep")
+    # clean temp per-ν shots
+    for _, path, _, _ in shots:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+    print(f"  tet3d_nu_sweep: iters " + ", ".join(f"ν{nu}={it}" for nu, _, _, it in shots))
+
+
 FIGS = {"locking": fig_locking, "filter_convergence": fig_filter_convergence,
         "corpus_breadth": fig_corpus_breadth, "claims_ledger": fig_claims_ledger,
         "claims_network": fig_claims_network, "tet3d": fig_tet3d,
@@ -664,7 +716,8 @@ FIGS = {"locking": fig_locking, "filter_convergence": fig_filter_convergence,
         "scale_cost": fig_scale_cost, "profiles": fig_profiles,
         "histograms": fig_histograms, "pitfalls": fig_pitfalls,
         "inverted_recovery": fig_inverted_recovery,
-        "distortion_setups": fig_distortion_setups, "lineage": fig_lineage}
+        "distortion_setups": fig_distortion_setups, "lineage": fig_lineage,
+        "tet3d_nu_sweep": fig_tet3d_nu_sweep}
 
 
 def main(names=None):
