@@ -36,7 +36,8 @@ reference-integrity check in P3.5 verifies this.
 |---|---|---|
 | `python paper/make_bib.py` | `references.bib` + `11-references.md` | derived from `claims/claims.yaml` (citekey = node id); classical ancestors are in the hand-curated `references_classical.bib` |
 | `python paper/assemble.py` | `paper.md` | concatenates the section files + TOC + References |
-| `python paper/to_latex.py` | `paper.tex` | deterministic md→LaTeX **skeleton** — *not compiled here* (no local toolchain); manual finishing = venue class + inline `\cite` wiring + recompile (documented in the .tex header) |
+| `python paper/to_latex.py` | `paper.tex` | deterministic md→LaTeX (article class; unicode→LaTeX map; `\nocite{*}` bibliography; figures via `\graphicspath`) |
+| `bash paper/build.sh` | **`paper.pdf`** | full build: make_bib → assemble → to_latex → pdflatex/bibtex/pdflatex×2. Requires TeX Live (`pdflatex`+`bibtex`). **Compiled: 25 pp, 0 undefined refs.** Tracked via **Git LFS** (`.gitattributes`). Manual polish before submission = venue class + inline `\cite` (currently `\nocite{*}` lists all refs). |
 
 ## Status
 

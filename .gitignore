@@ -10,3 +10,15 @@ __pycache__/
 imgui.ini
 figures/_*.png
 results/.1a_profiles_cache.pkl
+
+# LaTeX build artifacts (paper.pdf is tracked via Git LFS)
+paper/*.aux
+paper/*.log
+paper/*.bbl
+paper/*.blg
+paper/*.out
+paper/*.toc
+paper/compile*.log
+paper/c2.log
+paper/c3.log
+paper/bibtex.log
