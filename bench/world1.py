@@ -236,7 +236,7 @@ def solve_local_global(x0, tris, rest, free_dof, max_iter=2000, tol=1e-6):
     return {"filter": "local-global", "status": status,
             "iters": len(log) - (1 if status == "converged" else 0),
             "final_energy": log[-1]["energy"], "final_grad_inf": log[-1]["grad_inf"],
-            "wall_s": time.perf_counter() - t0, "x": x}
+            "wall_s": time.perf_counter() - t0, "x": x, "log": log}
 
 
 def anderson_accelerate(G, energy, resid, x0, free, m=5, max_iter=2000, tol=1e-6):
