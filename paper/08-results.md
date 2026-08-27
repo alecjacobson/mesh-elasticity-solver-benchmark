@@ -91,8 +91,8 @@ clearly growing one at tight τ, with min–max bands and CI-gated exponents.*
   baseline.
 
 - **What *does* validate: SLIM > AQP.** To a fair relative-energy tolerance, official libigl SLIM
-  reaches the symmetric-Dirichlet minimum in **5 iterations versus AQP's 19** — one of only two
-  independently validated edges. The soft-versus-hard-constraint confound was checked and cleared;
+  reaches the symmetric-Dirichlet minimum in **5 iterations versus AQP's 19** — one of six
+  independently validated edges (§9.1). The soft-versus-hard-constraint confound was checked and cleared;
   the wall-clock is C++/Python-confounded, so the *counts* carry the verdict, and the real trade-off
   is SLIM's 5 factorizations against AQP's single one (`results/slim.md`).
 
@@ -183,11 +183,13 @@ Finally, the harness measures several confounds directly:
   performance profile on iteration count; AQP's first-order tail lengthens at tight τ; the Sobolev
   proxy is a pooled wash but wins within the ill-conditioned stratum — a regime structure the pooled
   profile hides and the per-stratum pairwise surfaces (`results/1a_profiles.md`).
-- **Anderson acceleration validates.** Wrapping ARAP local–global in Anderson mixing reaches the same
-  minimum in **13 versus 24 iterations** (a 1.85× iteration speedup, robust across three seeds and
-  three meshes — it never collapses to 1×), the second of the two independently validated edges. Each
-  iteration is one back-solve for both, so the iteration ratio is the hardware-independent work ratio;
-  the same acceleration core also speeds an unrelated Jacobi fixed-point (a generality check), and the
+- **Anderson acceleration validates — twice.** Wrapping ARAP local–global in Anderson mixing reaches
+  the same minimum in **13 versus 24 iterations** (a 1.85× iteration speedup, robust across three seeds
+  and three meshes — it never collapses to 1×). Each iteration is one back-solve for both, so the
+  iteration ratio is the hardware-independent work ratio; the same acceleration core also speeds an
+  unrelated Jacobi fixed-point (a generality check), and — wrapped instead around the *official libigl
+  SLIM* fixed-point map — cuts a slowly-contracting instance from **380 iterations to 10** (a 38×
+  reduction, `results/anderson_slim.md`), a second validated Anderson edge. The
   wall-clock speedup is smaller than the iteration speedup owing to Anderson's per-iteration
   least-squares (`results/anderson.md`).
 

@@ -65,8 +65,8 @@ which published superiority claims survive confound control. Our contributions a
   rest fixed. Applied to the contact-free solver track, it overturns, qualifies, or contextualizes
   several well-cited claims (§8).
 
-**The honest core.** Of the 160 extracted superiority edges, only two are independently validated and
-23 qualified by our measurements; the remainder stay the papers' own word pending faithful
+**The honest core.** Of the 160 extracted superiority edges, only six are independently validated and
+32 qualified by our measurements; the remainder stay the papers' own word pending faithful
 re-measurement. We regard this ledger, and the **adversarial review loop** that produced it — in
 which the benchmark's confound-untangling was turned reflexively on our *own* draft conclusions,
 forcing repeated retractions of our own overreach — as the report's real deliverable: not a

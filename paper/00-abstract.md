@@ -34,7 +34,7 @@ that a proxy method's celebrated mesh-independence is a **loose-tolerance artifa
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
 sign-indefinite eigenmode of the element Hessian.
 
-Of the 160 extracted superiority edges, only **2 are independently validated** and **23 qualified**
+Of the 160 extracted superiority edges, only **6 are independently validated** and **32 qualified**
 by our measurements; the rest remain the papers' own word pending faithful re-measurement. This is
 the honest core: rather than a leaderboard, the benchmark and its **adversarial review loop** — in
 which the harness's confound-untangling is applied reflexively to our *own* conclusions, forcing

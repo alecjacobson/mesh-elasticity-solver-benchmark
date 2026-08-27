@@ -2,11 +2,18 @@
 
 ## 9.1 The hardened ledger
 
-After the decomposition experiments, the superiority-claims graph stands at **2 validated, 23
-qualified, 113 self-claimed, and 22 unmeasured** edges (`claims/hardening.md`). The two validated
-edges are SLIM over AQP on iteration count (§8.2) and Anderson acceleration over ARAP local–global on
-convergence (§8.6); the qualified edges are dominated by claims the *paper itself* limited to a regime
-(2D, a specific energy, a mesh class) that later citations dropped, plus claims our benchmark
+After the decomposition experiments and the single-axis verification pass (§9.2), the
+superiority-claims graph stands at **6 validated, 32 qualified, 100 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The six validated edges are: SLIM over AQP on iteration count (§8.2);
+Anderson acceleration over ARAP local–global on convergence (§8.6); **Anderson acceleration over
+SLIM** (wrapping the official libigl SLIM fixed-point map, a 38× iteration reduction on a
+slowly-contracting instance, `results/anderson_slim.md`); **trust-region-adaptive filtering** and
+**Project-on-Demand Newton**, each over unfiltered full Newton on a 100-start inverted-init
+robustness battery (both recover 100/100 starts versus raw Newton's 5/100, `results/filter_robustness.md`);
+and **Stable Neo-Hookean over standard Neo-Hookean** on inversion robustness (the classical barrier
+energy is `+∞` at an inverted initialization and cannot even start, while the stable energy recovers,
+`results/stable_nu.md`). The qualified edges are dominated by claims the *paper itself* limited to a
+regime (2D, a specific energy, a mesh class) that later citations dropped, plus claims our benchmark
 reproduced only under stated conditions. (Notably, the analytic eigensystem's claim over numerical
 eigendecomposition stays *qualified*, not validated: the projection is provably equivalent, but the
 closed form is not faster than a LAPACK eigensolve on a 4×4 — the advantage lives in avoiding an
@@ -26,10 +33,18 @@ control* — not wrong, but unearned — and that when they are tested, the hone
 
 An honest benchmark must also be explicit about the *boundary* of what it can say. We triaged every
 self-claimed edge against the contact-free 2D prototype (`results/claim_triage.md`). Fourteen edges
-are **testable now** by a single-axis experiment and form the concrete verification backlog (e.g. a
-three-way clamp/absolute/blending filter head-to-head; success-rate siblings of the validated
-convergence edges; SLIM-versus-L-BFGS on official code). The majority, however, are out of reach —
-and we label each with the *specific reason* rather than dropping it:
+were **testable now** by a single-axis experiment; we have since run all fourteen (§9.1's promotions
+come from this pass). The honest split is the point: four decisive **validations** (trust-region and
+Project-on-Demand filtering over full Newton; Anderson over SLIM; Stable- over standard-Neo-Hookean),
+four regime-dependent **qualifications** (e.g. an intermediate eigenvalue blend beats both clamp and
+absolute only on a locking-relieved element; SLIM beats L-BFGS on iterations but the time-axis
+headline is out of scale), three **not-reproduced-with-documented-why** (AQP is *not* faster than
+local-global on our back-solve axis; SLIM does *not* out-run projected-Newton on our non-uniform mesh
+because a well-safeguarded Newton stays well-conditioned — the Fig.11 stall is a far-from-minimum
+pathology; AQP is *not* faster than Newton at small scale), and one **tie** (absolute versus clamp
+recover identically under a line search). "Not reproduced here, and here is precisely why" is itself a
+reported result. The majority of the graph, however, remains out of reach — and we label each edge
+with the *specific reason* rather than dropping it:
 
 - **needs unavailable code** (~34 edges) — the claim requires the paper's own implementation, which we
   will not substitute with a look-alike (that would beg the question, as with Composite Majorization,

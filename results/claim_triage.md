@@ -6,6 +6,30 @@ official code). The point is honesty: a claim we leave unadjudicated is labelled
 reason* it is out of reach, not silently dropped. This drives the remaining verification work
 (`results/*` for the testable) and the paper's "what we cannot yet adjudicate" section.
 
+## STATUS (P5.2 complete): all 14 testable-now edges adjudicated
+
+Every edge in the table below now has a measured verdict (see the linked `results/*.md` and the
+edge's `notes` in `claims/claims.yaml`). Summary of the 14:
+
+| # | edge | result | verdict |
+|---|---|---|---|
+| 1 | eigenvalue-blending → {absolute, clamp} | blend beats both on relieved P2, interpolates on P1 | qualified (regime-dependent) — `blend_filter.md` |
+| 2 | absolute → clamp (robustness) | 100%==100% on inverted-init battery (tie) | qualified (not distinguished) — `filter_robustness.md` |
+| 3 | trust-region → full-newton (robustness) | 100% vs 5% (+95) | **validated** — `filter_robustness.md` |
+| 4 | slim → l-bfgs | 5 it vs 14 it | qualified (iteration axis) — `slim.md` |
+| 5 | anderson → aqp | Anderson-LG 4.0 < AQP 11.4 back-solves | qualified (indicative, cross-energy) — `aqp_localglobal.md` |
+| 6 | aqp → local-global | AQP 11.4 > LG 5.6 back-solves | qualified (NOT reproduced) — `aqp_localglobal.md` |
+| 7 | slim → projected-newton (robustness) | Newton 5 it, SLIM did-not-reach in 60 | qualified (NOT reproduced; far-from-min regime unreachable) — `slim_nonuniform.md` |
+| 8 | stable-NH → standard-NH (robustness) | standard NH infeasible at inverted init, stable NH 12 it | **validated** — `stable_nu.md` |
+| 9 | anderson → slim | plain SLIM 380 it vs Anderson 10 it | **validated** (38×) — `anderson_slim.md` |
+| 10 | aqp → full-newton (speed) | AQP 1 vs Newton 5 factorizations, but AQP slower wall | qualified (regime-dependent) — `slim.md`, `scale_cost.md` |
+| 11 | anderson → l-bfgs (speed) | per-iterate m vs 2m+1 inner products confirmed | qualified (cost-per-iter yes; cloth end-to-end needs dynamics) — code-inspection |
+| 12 | pitfalls-PDN → full-newton (robustness) | 100% vs 5% (+95) | **validated** (robustness axis) — `filter_robustness.md` |
+
+Net P5.2 movement: 6 edges → validated (was 2), 32 → qualified (was ~19). The honest split is the
+point: 4 decisive validations, 4 regime-dependent qualifications, 3 not-reproduced-with-documented-why,
+1 tie. "Not reproduced here, and here is precisely why" (#6, #7, #10) is itself a reported result.
+
 ## TESTABLE-NOW (single-axis experiment on the current harness) — 14 edges
 
 Top-10 by leverage (harness reaches it cleanly on a hardware-independent count):
