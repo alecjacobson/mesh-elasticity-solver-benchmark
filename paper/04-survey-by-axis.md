@@ -23,24 +23,25 @@ This is the axis with the most graphics activity and the clearest metric-descent
 - **Newton / projected Newton** — the second-order baseline; `M = ∇²E` filtered to SPD.
 - **L-BFGS** — the quasi-Newton World-0 baseline; a well-implemented L-BFGS is the fair reference
   that several graphics accelerators are, in fact, measured against too weakly.
-- **Accelerated Quadratic Proxy (AQP)** — Nesterov acceleration over a fixed Laplacian metric; claims
-  mesh-independent iteration counts and large speed-ups.
-- **SLIM** — iteratively-reweighted Gauss–Newton; a second-order-like descent that reaches the
-  symmetric-Dirichlet minimum in very few iterations.
-- **BCQN** — a *blend* of a Sobolev/L-BFGS proxy with a barrier-aware line search and a
+- **Accelerated Quadratic Proxy (AQP)** [cite:aqp] — Nesterov acceleration over a fixed Laplacian
+  metric; claims mesh-independent iteration counts and large speed-ups.
+- **SLIM** [cite:slim] — iteratively-reweighted Gauss–Newton; a second-order-like descent that reaches
+  the symmetric-Dirichlet minimum in very few iterations.
+- **BCQN** [cite:bcqn] — a *blend* of a Sobolev/L-BFGS proxy with a barrier-aware line search and a
   characteristic-gradient criterion (the archetypal entangled method, §8.3).
-- **Composite Majorization** — a convex-majorizer Hessian that is SPD by construction rather than by
-  eigenvalue clamping.
-- **Anderson acceleration** — a multisecant quasi-Newton wrapper applied to a fixed-point iteration
-  (e.g. ARAP local–global).
+- **Composite Majorization** [cite:composite-majorization] — a convex-majorizer Hessian that is SPD by
+  construction rather than by eigenvalue clamping.
+- **Anderson acceleration** [cite:anderson-geometry] — a multisecant quasi-Newton wrapper applied to a
+  fixed-point iteration (e.g. ARAP local–global [cite:local-global]).
 
 ## 4.3 Hessian filter (World-2)
 
 Far from the minimum, `∇²E` is indefinite and Newton's step is not a descent direction. The *filter*
 axis decides how to fix this per element. Given the analytic eigensystem of an isotropic energy
-(Smith–de Goes–Kim), the element Hessian has closed-form eigenpairs — two *stretching* modes, a
-*flip* mode, and a *twist* mode. **Clamping** replaces each eigenvalue `λ` with `max(λ,ε)`;
-**absolute** filtering uses `max(|λ|,ε)`; **trust-region** blends. As we show in §8.5, only the twist
+(Smith–de Goes–Kim [cite:analytic-eigensystems]), the element Hessian has closed-form eigenpairs —
+two *stretching* modes, a *flip* mode, and a *twist* mode. **Clamping** [cite:clamp-filtering]
+replaces each eigenvalue `λ` with `max(λ,ε)`; **absolute** filtering [cite:absolute-filtering] uses
+`max(|λ|,ε)`; **trust-region** blends [cite:trust-region-filtering]. As we show in §8.5, only the twist
 mode is ever sign-indefinite, so the filters differ *only there* — the entire World-2 filter debate is
 one scalar per element.
 

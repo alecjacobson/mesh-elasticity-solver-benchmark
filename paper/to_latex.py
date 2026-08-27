@@ -67,6 +67,7 @@ def esc(s):
 
 def inline(s):
     s = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", s)                       # images handled at block level
+    s = re.sub(r"\[cite:([a-z0-9,\-]+)\]", r"\\cite{\1}", s)         # [cite:key] / [cite:k1,k2] -> \cite
     s = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", s)                   # links -> text
     s = re.sub(r"`([^`]+)`", lambda m: "\x00" + m.group(1) + "\x01", s)   # protect code spans
     s = re.sub(r'"([^"]*)"', r"``\1''", s)                                # straight quotes -> ``''
