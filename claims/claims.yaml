@@ -33,7 +33,7 @@ nodes:
   - {id: anderson-geometry, title: "Anderson Acceleration for Geometry Optimization", authors: "Peng, Deng, Zhang, Geng, Qin, Liu", year: 2018, venue: SIGGRAPH, world: 1, ref: "arXiv:1805.05715"}
   - {id: progressive-param, title: "Progressive Parameterizations", authors: "Liu, Ye, Ni, Fu", year: 2018, venue: "SIGGRAPH Asia", world: 1, ref: "10.1145/3197517.3201331"}
   - {id: abcd, title: "Adaptive Block Coordinate Descent (ABCD)", authors: "Naitsat, Zhu, Zeevi", year: 2020, venue: "CGF/SGP", world: 1, ref: "10.1111/cgf.14043"}
-  - {id: splitting-flip-free, title: "A Splitting Scheme for Flip-Free Distortion Energies", authors: "Stein, Li, Solomon", year: 2021, venue: SIIMS, world: 1, ref: "10.1137/21M1433058"}
+  - {id: splitting-flip-free, title: "A Splitting Scheme for Flip-Free Distortion Energies", authors: "Stein, Li, Solomon", year: 2022, venue: SIIMS, world: 1, ref: "10.1137/21M1433058"}
   - {id: advanced-mips, title: "Computing Locally Injective Mappings by Advanced MIPS", authors: "Fu, Liu, Guo", year: 2015, venue: TOG, world: 1, ref: "10.1145/2766938"}
   - {id: tlc, title: "Lifting Simplices to Find Injectivity (TLC)", authors: "Du, Aigerman, Zhou, Kovalsky, Yan, Kaufman, Ju", year: 2020, venue: SIGGRAPH, world: 1, ref: "10.1145/3386569.3392484"}
   - {id: progressive-embedding, title: "Progressive Embedding", authors: "Shen, Jiang, Zorin, Panozzo", year: 2019, venue: SIGGRAPH, world: 1, ref: "10.1145/3306346.3323012"}
@@ -66,7 +66,7 @@ nodes:
   - {id: admm-pd, title: "ADMM ⊇ Projective Dynamics", authors: "Narain, Overby, Brown", year: 2016, venue: SCA, world: 2, ref: "admm-pd 2016"}
   - {id: aa-admm, title: "Accelerating ADMM (Anderson) / AA-ADMM", authors: "Zhang, Peng, Ouyang, Deng", year: 2019, venue: "SIGGRAPH Asia", world: 2, ref: "arXiv:1909.00470"}
   - {id: vertex-block-descent, title: "Vertex Block Descent (VBD)", authors: "Chen, Liu, Yang, Yuksel", year: 2024, venue: "TOG / SIGGRAPH 2024", world: 2, ref: "arXiv:2403.06321; code github.com/AnkaChan/Gaia; contact = penalty/soft (NOT IPC-guaranteed)"}
-  - {id: jgs2, title: "JGS2: Near second-order Jacobi/Gauss-Seidel for GPU Elastodynamics", authors: "Lan, Lu, Yuan, Xu, Su, Wang, Jiang, Yang", year: 2025, venue: "TOG / SIGGRAPH 2025", world: 2, ref: "10.1145/3731182; arXiv:2506.06494; no public code found; contact = IPC-guaranteed"}
+  - {id: jgs2, title: "JGS2: Near second-order Jacobi/Gauss-Seidel for GPU Elastodynamics", authors: "Lan, Lu, Yuan, Xu, Su, Wang, Jiang, Yang", year: 2025, venue: "TOG / SIGGRAPH 2025", world: 2, ref: "10.1145/3731183; arXiv:2506.06494; no public code found; contact = IPC-guaranteed"}
   - {id: second-order-stencil-descent, title: "Second-Order Stencil Descent for Interior-Point Hyperelasticity", authors: "Lan et al.", year: 2023, venue: TOG, world: 2, ref: "10.1145/3592104"}
   - {id: pbng, title: "Position-Based Nonlinear Gauss-Seidel for Quasistatic Hyperelasticity", authors: "Chen, Han, Teran et al.", year: 2024, venue: TOG, world: 2, ref: "arXiv:2306.09021"}
   - {id: primal-xpbd, title: "Primal Extended Position Based Dynamics", authors: "Chen, Han, Fedkiw, Teran", year: 2023, venue: MIG, world: 2, ref: "10.1145/3623264.3624437"}
@@ -80,7 +80,7 @@ nodes:
   - {id: sobolev-lbfgs, title: "Sobolev-preconditioned L-BFGS (isolated BCQN proxy component)", authors: "(component of BCQN; Zhu, Bridson, Kaufman)", year: 2018, venue: "component", world: 1, ref: "arXiv:1705.00039 (D0=L^-1 proxy only)"}
   - {id: gradient-descent, title: "Gradient descent", authors: "Cauchy", year: 1847, venue: classical, world: 0, ref: "—"}
   - {id: accelerated-gradient-descent, title: "Accelerated Gradient Descent (baseline)", authors: "Nesterov-style", year: 0, venue: classical, world: 0, ref: "—"}
-  - {id: martin-multiscale, title: "Efficient Non-linear Optimization via Multi-scale Gradient Filtering", authors: "Martin, Weinkauf, Seidel", year: 2013, venue: CGF, world: 1, ref: "10.1111/cgf.12019"}
+  - {id: martin-multiscale, title: "Efficient Non-linear Optimization via Multi-scale Gradient Filtering", authors: "Martin, Joshi, Bergou, Carr", year: 2013, venue: CGF, world: 1, ref: "10.1111/cgf.12019"}
 
   # ---- World 3: contact / IPC family + baselines ----
   - {id: ipc, title: "Incremental Potential Contact (IPC)", authors: "Li et al.", year: 2020, venue: TOG, world: 3, ref: "10.1145/3386569.3392425"}
@@ -90,10 +90,10 @@ nodes:
   - {id: medial-ipc, title: "Medial IPC", authors: "Lan et al.", year: 2021, venue: TOG, world: 3, ref: "10.1145/3450626.3459753"}
   - {id: gipc, title: "GIPC: Gauss-Newton IPC Barrier", authors: "Huang et al.", year: 2024, venue: TOG, world: 3, ref: "arXiv:2308.09400"}
   - {id: stiffgipc, title: "StiffGIPC", authors: "Huang, Lu, Lin, Komura, Li", year: 2025, venue: "TOG / SIGGRAPH 2025", world: 3, ref: "arXiv:2411.06224; code github.com/KemengHuang/Stiff-GIPC"}
-  - {id: barrier-aug-lagrangian, title: "Barrier-Augmented Lagrangian for GPU Elastodynamic Contact", authors: "Guo et al.", year: 2024, venue: "SIGGRAPH Asia", world: 3, ref: "arXiv:2407.00046"}
+  - {id: barrier-aug-lagrangian, title: "Barrier-Augmented Lagrangian for GPU-based Elastodynamic Contact", authors: "Guo et al.", year: 2024, venue: "SIGGRAPH Asia", world: 3, ref: "arXiv:2407.00046"}
   - {id: ogc, title: "Offset Geometric Contact (OGC)", authors: "Chen et al.", year: 2025, venue: SIGGRAPH, world: 3, ref: "10.1145/3731205"}
   - {id: cubic-barrier-ando, title: "A Cubic Barrier with Elasticity-Inclusive Dynamic Stiffness", authors: "Ando", year: 2024, venue: "SIGGRAPH Asia", world: 3, ref: "10.1145/3687908"}
-  - {id: barrier-free-elastodynamics, title: "Robust and Efficient Penetration-Free Elastodynamics without Barriers", authors: "Zheng, Luo, Li (CMU / Genesis AI)", year: 2025, venue: TOG, world: 3, ref: "10.1145/3811035; arXiv:2512.12151"}
+  - {id: barrier-free-elastodynamics, title: "Robust and Efficient Penetration-Free Elastodynamics without Barriers", authors: "Zheng, Luo, Li (CMU / Genesis AI)", year: 2026, venue: TOG, world: 3, ref: "10.1145/3811035; arXiv:2512.12151"}
   - {id: gpu-ipc, title: "GPU-IPC (generic GPU IPC baseline)", authors: "various", year: 2023, venue: "—", world: 3, ref: "[?]"}
   - {id: arcsim, title: "ARCSim Adaptive Cloth", authors: "Narain et al.", year: 2012, venue: TOG, world: 3, ref: "ARCSim"}
   - {id: prior-rigid-engines, title: "Prior rigid-body engines (Bullet/MuJoCo/Chrono/Houdini)", authors: various, year: 2020, venue: "—", world: 3, ref: "[?]"}

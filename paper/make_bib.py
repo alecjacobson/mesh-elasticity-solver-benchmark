@@ -56,8 +56,8 @@ def entry(node):
     ref = node.get("ref", "") or ""
     year = node.get("year", 0)
     authors = node.get("authors", "") or ""
-    if year <= 0 or authors.strip() in ("—", "", "classical"):
-        return None                                   # generic baseline: cited by category, skip
+    if year <= 0 or authors.strip() in ("—", "", "classical") or authors.strip().startswith("("):
+        return None                                   # generic baseline / component-node: not a paper
     doi, arxiv = _doi(ref), _arxiv(ref)
     if not (doi or arxiv):
         return None                                   # no locatable source → don't fabricate one
