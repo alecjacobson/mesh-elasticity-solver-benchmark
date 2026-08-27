@@ -860,6 +860,45 @@ the field's superiority claims are, as of this snapshot, overwhelmingly *unteste
 control* --- not wrong, but unearned --- and that when they are tested, the honest verdict is usually a
 \emph{qualification of regime} rather than a reversal.
 
+\subsection{What we cannot yet adjudicate, and why}
+
+An honest benchmark must also be explicit about the \emph{boundary} of what it can say. We triaged every
+self-claimed edge against the contact-free 2D prototype (\texttt{results/claim\_triage.md}). Fourteen edges
+are \textbf{testable now} by a single-axis experiment and form the concrete verification backlog (e.g. a
+three-way clamp/absolute/blending filter head-to-head; success-rate siblings of the validated
+convergence edges; SLIM-versus-L-BFGS on official code). The majority, however, are out of reach ---
+and we label each with the \emph{specific reason} rather than dropping it:
+
+\begin{itemize}
+  \item \textbf{needs unavailable code} (\textasciitilde{}34 edges) --- the claim requires the paper's own implementation, which we
+\end{itemize}
+  will not substitute with a look-alike (that would beg the question, as with Composite Majorization,
+  \S8.5). The projective-dynamics / ADMM / XPBD / Vertex-Block-Descent simulation-accelerator family
+  falls here.
+\begin{itemize}
+  \item \textbf{needs contact physics} (22) --- World-3 (IPC barriers, continuous collision detection, friction);
+\end{itemize}
+  v1 implements none, so an intersection-free or friction claim has no harness to run in.
+\begin{itemize}
+  \item \textbf{needs scale} (21) --- the claim \emph{is} about 100K--1.5M-element meshes, GPU throughput, or frame-rate
+\end{itemize}
+  budgets the dense Python prototype cannot reach.
+\begin{itemize}
+  \item \textbf{entangled, needs source} (9) --- the method bundles several co-changed components that cannot be
+\end{itemize}
+  separated without the paper --- the very confound this benchmark exists to expose, now limiting it.
+\begin{itemize}
+  \item \textbf{hardware-confounded} (4), \textbf{subjective-quality} (3), \textbf{baseline-confounded} (2), \textbf{needs 3D}
+\end{itemize}
+  (1) --- respectively a GPU-vs-CPU wall-clock claim that cannot be made portable, a visual-quality
+  claim with no agreed metric, a claim resting on a weak or self-ablation baseline, and an inherently
+  3D free-boundary injectivity claim.
+
+This map of the boundary is itself a contribution: for many published claims the honest statement is
+``\emph{we cannot yet adjudicate this, and here is precisely why}.'' Three of the categories --- unavailable
+code, scale, and contact --- are exactly where a \emph{living} benchmark with author-contributed component
+ports and a contact track (\S10) would move the frontier.
+
 \subsection{The review loop applied to ourselves}
 
 The report's second contribution is methodological, and it emerged from turning the benchmark's own

@@ -13,6 +13,8 @@ polyscope-headless 3D tet.
 
 ## Findings so far
 
+**Claim triage** ([`claim_triage.md`](claim_triage.md)): every self-claimed edge classified **testable-now** (14 edges → the verification backlog) vs **untestable** with a categorized reason (needs-unavailable-code ~34, needs-contact-physics 22, needs-scale 21, entangled-needs-source 9, hardware-confounded 4, subjective-quality 3, baseline-confounded 2, needs-3D 1) — the honest boundary of what a 2D contact-free prototype can adjudicate.
+
 | # | experiment | file | headline (measured) |
 |---|---|---|---|
 | E1 | filter isolation (symmetric Dirichlet) | [`e1.md`](e1.md) | unfiltered full Newton **non-descent-stalls**; clamp/absolute/identity-shift converge to the same minimum |

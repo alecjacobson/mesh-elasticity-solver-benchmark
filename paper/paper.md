@@ -753,7 +753,36 @@ the field's superiority claims are, as of this snapshot, overwhelmingly *unteste
 control* — not wrong, but unearned — and that when they are tested, the honest verdict is usually a
 *qualification of regime* rather than a reversal.
 
-## 9.2 The review loop applied to ourselves
+## 9.2 What we cannot yet adjudicate, and why
+
+An honest benchmark must also be explicit about the *boundary* of what it can say. We triaged every
+self-claimed edge against the contact-free 2D prototype (`results/claim_triage.md`). Fourteen edges
+are **testable now** by a single-axis experiment and form the concrete verification backlog (e.g. a
+three-way clamp/absolute/blending filter head-to-head; success-rate siblings of the validated
+convergence edges; SLIM-versus-L-BFGS on official code). The majority, however, are out of reach —
+and we label each with the *specific reason* rather than dropping it:
+
+- **needs unavailable code** (~34 edges) — the claim requires the paper's own implementation, which we
+  will not substitute with a look-alike (that would beg the question, as with Composite Majorization,
+  §8.5). The projective-dynamics / ADMM / XPBD / Vertex-Block-Descent simulation-accelerator family
+  falls here.
+- **needs contact physics** (22) — World-3 (IPC barriers, continuous collision detection, friction);
+  v1 implements none, so an intersection-free or friction claim has no harness to run in.
+- **needs scale** (21) — the claim *is* about 100K–1.5M-element meshes, GPU throughput, or frame-rate
+  budgets the dense Python prototype cannot reach.
+- **entangled, needs source** (9) — the method bundles several co-changed components that cannot be
+  separated without the paper — the very confound this benchmark exists to expose, now limiting it.
+- **hardware-confounded** (4), **subjective-quality** (3), **baseline-confounded** (2), **needs 3D**
+  (1) — respectively a GPU-vs-CPU wall-clock claim that cannot be made portable, a visual-quality
+  claim with no agreed metric, a claim resting on a weak or self-ablation baseline, and an inherently
+  3D free-boundary injectivity claim.
+
+This map of the boundary is itself a contribution: for many published claims the honest statement is
+"*we cannot yet adjudicate this, and here is precisely why*." Three of the categories — unavailable
+code, scale, and contact — are exactly where a *living* benchmark with author-contributed component
+ports and a contact track (§10) would move the frontier.
+
+## 9.3 The review loop applied to ourselves
 
 The report's second contribution is methodological, and it emerged from turning the benchmark's own
 discipline on our *own* draft conclusions. We ran an **adversarial review loop**: for each result, a
@@ -780,7 +809,7 @@ a single confound rarely acts alone** — the `ν`-claim needed two removed at o
 not audit itself as adversarially as it audits the literature will simply manufacture new confounded
 claims of its own.
 
-## 9.3 The call
+## 9.4 The call
 
 We therefore offer the report not as a leaderboard but as a *method*: a taxonomy and unifying view that
 name the components, a lineage map that points each to its classical analysis, a machine-readable
