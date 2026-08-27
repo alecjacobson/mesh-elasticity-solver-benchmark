@@ -32,6 +32,8 @@ def assemble(x, tris, Bs, areas, filt, eterms=_sd_element_terms, tr_w=0.5):
             He = project_element(He, filt)
         elif filt == "trust-region":          # per-element three-state blend at the global step-w
             He = project_element_blend(He, tr_w)
+        elif filt.startswith("blend-"):       # fixed-w eigenvalue blend (eigenvalue-blending filter)
+            He = project_element_blend(He, float(filt.split("-", 1)[1]))
         g[dofs] += ge
         H[np.ix_(dofs, dofs)] += He
     return E, g, H

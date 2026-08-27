@@ -118,6 +118,14 @@ def run():
     ok7, bar_at, bar_past = _bar_conf()            # barrier line-search: step is the tight inversion bound
     from .untangle import _conformance as _unt_conf
     unt_err = _unt_conf(); ok8 = unt_err < 1e-5    # untangling area-penalty gradient vs FD
+    from .filters import project_element as _pe, project_element_blend as _peb
+    _rng = np.random.default_rng(9); _bc = _ba = 0.0; _bmin = 1e9
+    for _ in range(100):                           # blend filter: ==clamp at w=.5, ==absolute at w=1, SPD between
+        _A = _rng.standard_normal((6, 6)); _H = _A + _A.T
+        _bc = max(_bc, np.abs(_peb(_H, 0.5) - _pe(_H, "clamp")).max())
+        _ba = max(_ba, np.abs(_peb(_H, 1.0) - _pe(_H, "absolute")).max())
+        _bmin = min(_bmin, np.linalg.eigvalsh(_peb(_H, 0.75)).min())
+    ok9 = _bc < 1e-12 and _ba < 1e-12 and _bmin > 0
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
     print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
@@ -129,7 +137,9 @@ def run():
     print(f"[conformance] barrier-LS step bound: area@α={bar_at:.1e} (≈0), past<0={bar_past:.1e} "
           f"-> {'PASS' if ok7 else 'FAIL'}")
     print(f"[conformance] untangle-penalty grad vs FD: max rel err {unt_err:.1e} -> {'PASS' if ok8 else 'FAIL'}")
-    ok = ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
+    print(f"[conformance] blend filter =clamp@.5/=abs@1/SPD: {_bc:.1e}/{_ba:.1e}/min={_bmin:.1e} "
+          f"-> {'PASS' if ok9 else 'FAIL'}")
+    ok = ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 
