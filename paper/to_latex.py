@@ -68,10 +68,13 @@ def esc(s):
 def inline(s):
     s = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", s)                       # images handled at block level
     s = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", s)                   # links -> text
-    s = re.sub(r"`([^`]+)`", lambda m: r"\texttt{" + m.group(1) + "}", s)
+    s = re.sub(r"`([^`]+)`", lambda m: "\x00" + m.group(1) + "\x01", s)   # protect code spans
+    s = re.sub(r'"([^"]*)"', r"``\1''", s)                                # straight quotes -> ``''
     s = re.sub(r"\*\*([^*]+)\*\*", r"\\textbf{\1}", s)
     s = re.sub(r"\*([^*]+)\*", r"\\emph{\1}", s)
-    return esc(s)
+    s = esc(s)
+    s = s.replace("\x00", r"\texttt{").replace("\x01", "}")               # restore code (post-esc)
+    return s
 
 
 def convert_block(md):
@@ -84,25 +87,29 @@ def convert_block(md):
             out.append(r"\subsection{" + inline(_denum(ln[3:].strip())) + "}")
         elif re.match(r"^###\s", ln):
             out.append(r"\subsubsection{" + inline(_denum(ln[4:].strip())) + "}")
+        elif ln.strip().startswith("$$") and ln.strip().endswith("$$") and len(ln.strip()) > 4:
+            eq = ln.strip()[2:-2].strip()                            # display math: pass through RAW
+            out += [r"\begin{equation}", "  " + eq, r"\end{equation}"]
         elif ln.strip() == "---":
             pass
         elif ln.startswith("!["):
             m = re.match(r"!\[([^\]]*)\]\(([^)]+)\)", ln)
             cap, path = m.group(1), os.path.basename(m.group(2))
-            out += [r"\begin{figure}[t]\centering",
-                    r"  \includegraphics[width=\linewidth]{" + path + "}",
-                    r"  \caption{" + inline(cap) + "}", r"\end{figure}"]
+            # figure* spans both columns (all our figures are wide multi-panel plots)
+            out += [r"\begin{figure*}[t]\centering",
+                    r"  \includegraphics[width=\textwidth]{" + path + "}",
+                    r"  \caption{" + inline(cap) + "}", r"\end{figure*}"]
         elif ln.lstrip().startswith("|") and i + 1 < len(lines) and re.match(r"^\s*\|[-:| ]+\|", lines[i + 1]):
             rows, j = [], i
             while j < len(lines) and lines[j].lstrip().startswith("|"):
                 rows.append(lines[j]); j += 1
             cells = [[c.strip() for c in r.strip().strip("|").split("|")] for r in rows]
             ncol = len(cells[0]); header = cells[0]; body = cells[2:]
-            out.append(r"\begin{table}[t]\centering\small\begin{tabular}{" + "l" * ncol + "}")
-            out.append(r"\hline " + " & ".join(inline(h) for h in header) + r" \\ \hline")
+            out.append(r"\begin{table*}[t]\centering\footnotesize\begin{tabular}{" + "l" * ncol + "}")
+            out.append(r"\toprule " + " & ".join(inline(h) for h in header) + r" \\ \midrule")
             for row in body:
                 out.append(" & ".join(inline(c) for c in (row + [""] * ncol)[:ncol]) + r" \\")
-            out.append(r"\hline\end{tabular}\end{table}")
+            out.append(r"\bottomrule\end{tabular}\end{table*}")
             i = j
             continue
         elif ln.startswith("- "):

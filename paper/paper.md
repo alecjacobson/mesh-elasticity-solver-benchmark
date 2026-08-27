@@ -71,9 +71,7 @@ computer graphics. The same mathematical object recurs across seemingly distinct
 rest mesh and some boundary conditions, find vertex positions `x` that minimize a nonlinear elastic
 energy
 
-```
-E(x) = Σ_e V_e · ψ(F_e(x)),
-```
+$$E(\mathbf{x}) = \sum_e V_e\, \psi\!\left(F_e(\mathbf{x})\right),$$
 
 a sum over elements of a stored-energy density `ψ` of the per-element deformation gradient `F_e`.
 UV parametrization minimizes a *distortion* energy (symmetric Dirichlet, MIPS, ARAP); flesh and cloth
@@ -154,9 +152,7 @@ The starting point for honest comparison is a single observation: nearly every s
 literature — graphics, classical optimization, and machine learning alike — is an instance of
 **metric descent**,
 
-```
-x' = x − α · M⁻¹ ∇E(x),
-```
+$$\mathbf{x}' = \mathbf{x} - \alpha\, M^{-1} \nabla E(\mathbf{x}),$$
 
 an iterate that moves along the gradient of the elastic energy `E`, preconditioned by a metric `M`
 and globalized by a step length `α` (a line search) and, when `M` is only positive-semidefinite, a

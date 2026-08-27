@@ -5,9 +5,7 @@ computer graphics. The same mathematical object recurs across seemingly distinct
 rest mesh and some boundary conditions, find vertex positions `x` that minimize a nonlinear elastic
 energy
 
-```
-E(x) = Σ_e V_e · ψ(F_e(x)),
-```
+$$E(\mathbf{x}) = \sum_e V_e\, \psi\!\left(F_e(\mathbf{x})\right),$$
 
 a sum over elements of a stored-energy density `ψ` of the per-element deformation gradient `F_e`.
 UV parametrization minimizes a *distortion* energy (symmetric Dirichlet, MIPS, ARAP); flesh and cloth

@@ -4,9 +4,7 @@ The starting point for honest comparison is a single observation: nearly every s
 literature — graphics, classical optimization, and machine learning alike — is an instance of
 **metric descent**,
 
-```
-x' = x − α · M⁻¹ ∇E(x),
-```
+$$\mathbf{x}' = \mathbf{x} - \alpha\, M^{-1} \nabla E(\mathbf{x}),$$
 
 an iterate that moves along the gradient of the elastic energy `E`, preconditioned by a metric `M`
 and globalized by a step length `α` (a line search) and, when `M` is only positive-semidefinite, a
