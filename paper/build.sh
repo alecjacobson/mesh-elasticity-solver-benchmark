@@ -3,7 +3,8 @@
 set -e
 cd "$(dirname "$0")"
 python make_bib.py && python assemble.py && python to_latex.py
-pdflatex -interaction=nonstopmode -halt-on-error paper.tex >/dev/null
+rm -f paper.aux paper.bbl paper.blg paper.out paper.toc
+pdflatex -interaction=nonstopmode paper.tex >/dev/null
 bibtex paper >/dev/null
 pdflatex -interaction=nonstopmode paper.tex >/dev/null
 pdflatex -interaction=nonstopmode paper.tex >/dev/null

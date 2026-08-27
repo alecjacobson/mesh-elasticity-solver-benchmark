@@ -22,3 +22,5 @@ paper/compile*.log
 paper/c2.log
 paper/c3.log
 paper/bibtex.log
+paper/*.toc
+paper/*.lbl
