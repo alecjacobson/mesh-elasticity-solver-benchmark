@@ -82,13 +82,19 @@ def main():
 
     aspect = amax / amin
     slim_wins = (slim_it is not None) and (nw_it is None or slim_it < nw_it)
-    L = ["# SLIM vs projected-Newton on a NON-UNIFORM triangulation (measured, P5.2 #7)", "",
+    L = ["# SLIM vs projected-Newton on a NON-UNIFORM triangulation (P5.2 #7 — regime not reached)", "",
          f"Grid rest mesh with interior vertices strongly jittered: element areas span "
          f"{amin:.1e}–{amax:.1e} (**aspect {aspect:.0f}×**), all valid. Stretch ×{S:g}, boundary "
-         "pinned. Fair criterion: iterations to relative symmetric-Dirichlet energy "
+         "pinned. Criterion: iterations to relative symmetric-Dirichlet energy "
          f"`(E-E*)/(E0-E*) < 1e-4` (E\\*={Estar:.5f} projected-Newton reference, E₀={E0:.3f}). "
          "OFFICIAL libigl SLIM vs our clamp/projected-Newton. Run: `python -m bench.run_slim_nonuniform`.",
          "",
+         "> ⚠️ **This does NOT adjudicate the claim, and is not evidence against the paper.** The "
+         "claim (Fig.11) is about Newton **stalling far from the minimum** on a bad mesh. Our Newton "
+         "is clamp-**projected** (SPD-safeguarded) + line-searched, and a 2× stretch keeps it "
+         "well-conditioned — a **strawman** for a raw-Hessian-far-from-min claim. We report this to "
+         "document *why the regime is out of reach*, not to rank the methods; the edge stays "
+         "`self-claimed`.", "",
          "| method | iterations to energy-tol |", "|---|---:|",
          f"| SLIM (libigl, official) | {slim_it if slim_it is not None else 'did-not-reach'} |",
          f"| projected-Newton (clamp) | {nw_it if nw_it is not None else 'did-not-reach'} |", "",
@@ -111,17 +117,18 @@ def main():
         slim_txt = (f"**{slim_it}**" if slim_it is not None
                     else f"did **not** reach it within {SLIM_CAP} iterations (still at E={slim_final:.4f} "
                          f"vs E\\*={Estar:.4f})")
-        L.append(f"- **Not reproduced — if anything, reversed here:** projected-Newton reaches the "
-                 f"energy-tol in **{nw_it}** iterations while SLIM {slim_txt}. On this non-uniform "
-                 f"instance (aspect {aspect:.0f}×) a well-safeguarded (clamp-projected + "
+        L.append(f"- **Regime not reached (the claim's stall never occurs here):** projected-Newton "
+                 f"reaches the energy-tol in **{nw_it}** iterations while SLIM {slim_txt}. On this "
+                 f"non-uniform instance (aspect {aspect:.0f}×) a well-safeguarded (clamp-projected + "
                  "line-searched) Newton stays in a **good, near-quadratic basin** and converges "
                  "fast, whereas SLIM's reweighted first-order-like map crawls down a **slow linear "
-                 "tail** — the opposite ordering to the paper's Fig.11. That figure's SLIM≫Newton "
-                 "result is a **far-from-minimum pathology** (Newton's raw Hessian unreliable there); "
-                 "a 2× stretch does not put Newton far enough from the minimum to stall it. Honest "
-                 "verdict: the edge is **not reproduced** in this harness — the regime that produces "
-                 "it (Newton stalling far from the minimum on a bad mesh) is out of reach of a "
-                 "stretch that keeps Newton well-conditioned.")
+                 "tail**. Crucially, this is **not evidence against the paper**: its SLIM≫Newton "
+                 "result (Fig.11) is a **far-from-minimum pathology** where Newton's *raw* Hessian is "
+                 "unreliable, and a 2× stretch on a projected+line-searched Newton never enters that "
+                 "regime. Honest verdict: the edge is **not adjudicable** in this harness — the "
+                 "configuration that produces the claim (raw-Hessian Newton stalling far from the "
+                 "minimum on a bad mesh) is out of reach here, so we report the limitation rather than "
+                 "a ranking. The edge stays `self-claimed` / needs-harder-instance.")
     L += ["",
           "_Caveat: 2D, single non-uniform instance/seed, moderate stretch; official libigl SLIM "
           "grounds the base (D3); wall-clock is C++/Python-confounded so iteration counts carry the "

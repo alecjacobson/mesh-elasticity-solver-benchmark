@@ -8,23 +8,25 @@ reason* it is out of reach, not silently dropped. This drives the remaining veri
 
 ## STATUS (P5.2 complete): all 14 testable-now edges adjudicated
 
-Every edge in the table below now has a measured verdict (see the linked `results/*.md` and the
-edge's `notes` in `claims/claims.yaml`). Summary of the 14:
+Every edge below has a measured outcome (see the linked `results/*.md` and the edge `notes` in
+`claims/claims.yaml`). Statuses are POST-REVIEW: an internal adversarial pass caught four edges we had
+first marked `validated` and forced them to `qualified` (single instance / weak baseline / partly-
+definitional), and reverted three we had tried to score to `self-claimed` (not fairly adjudicable):
 
-| # | edge | result | verdict |
+| # | edge | result | status (post-review) |
 |---|---|---|---|
 | 1 | eigenvalue-blending → {absolute, clamp} | blend beats both on relieved P2, interpolates on P1 | qualified (regime-dependent) — `blend_filter.md` |
 | 2 | absolute → clamp (robustness) | 100%==100% on inverted-init battery (tie) | qualified (not distinguished) — `filter_robustness.md` |
-| 3 | trust-region → full-newton (robustness) | 100% vs 5% (+95) | **validated** — `filter_robustness.md` |
+| 3 | trust-region → full-newton (robustness) | 100% vs 5% vs an un-globalized baseline | qualified (baseline-weak) — `filter_robustness.md` |
 | 4 | slim → l-bfgs | 5 it vs 14 it | qualified (iteration axis) — `slim.md` |
-| 5 | anderson → aqp | Anderson-LG 4.0 < AQP 11.4 back-solves | qualified (indicative, cross-energy) — `aqp_localglobal.md` |
-| 6 | aqp → local-global | AQP 11.4 > LG 5.6 back-solves | qualified (NOT reproduced) — `aqp_localglobal.md` |
-| 7 | slim → projected-newton (robustness) | Newton 5 it, SLIM did-not-reach in 60 | qualified (NOT reproduced; far-from-min regime unreachable) — `slim_nonuniform.md` |
-| 8 | stable-NH → standard-NH (robustness) | standard NH infeasible at inverted init, stable NH 12 it | **validated** — `stable_nu.md` |
-| 9 | anderson → slim | plain SLIM 380 it vs Anderson 10 it | **validated** (38×) — `anderson_slim.md` |
-| 10 | aqp → full-newton (speed) | AQP 1 vs Newton 5 factorizations, but AQP slower wall | qualified (regime-dependent) — `slim.md`, `scale_cost.md` |
+| 5 | anderson → aqp | cross-energy (different objectives/minima) | self-claimed (not adjudicable) — `aqp_localglobal.md` |
+| 6 | aqp → local-global | cross-energy (SD vs ARAP, different minima) | self-claimed (not adjudicable) — `aqp_localglobal.md` |
+| 7 | slim → projected-newton (robustness) | far-from-min stall regime not reachable (Newton stays SPD) | self-claimed (regime out of reach) — `slim_nonuniform.md` |
+| 8 | stable-NH → standard-NH (robustness) | standard NH +inf at inverted init; stable NH recovers 12 it | qualified (inversion half; partly definitional; rotation untested) — `stable_nu.md` |
+| 9 | anderson → slim | plain SLIM 380 it vs Anderson 10 it (36-38x, verified faithful) | qualified (single instance; magnitude instance-selected) — `anderson_slim.md` |
+| 10 | aqp → full-newton (speed) | AQP 1 vs Newton 5 factorizations, but AQP slower wall | qualified (regime-dependent, n=1) — `slim.md`, `scale_cost.md` |
 | 11 | anderson → l-bfgs (speed) | per-iterate m vs 2m+1 inner products confirmed | qualified (cost-per-iter yes; cloth end-to-end needs dynamics) — code-inspection |
-| 12 | pitfalls-PDN → full-newton (robustness) | 100% vs 5% (+95) | **validated** (robustness axis) — `filter_robustness.md` |
+| 12 | pitfalls-PDN → full-newton (robustness) | 100% vs 5% vs an un-globalized baseline | qualified (baseline-weak) — `filter_robustness.md` |
 
 Net P5.2 movement: 6 edges → validated (was 2), 32 → qualified (was ~19). The honest split is the
 point: 4 decisive validations, 4 regime-dependent qualifications, 3 not-reproduced-with-documented-why,

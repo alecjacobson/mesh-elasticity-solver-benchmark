@@ -73,6 +73,18 @@ def main():
         d = igl.slim_precompute(V3, F, uv, igl.SYMMETRIC_DIRICHLET, bidx, bc, 1e8)
         return igl.slim_solve(d, 1).reshape(-1)
 
+    # VERIFY the re-precompute map reproduces CONTINUOUS SLIM (the load-bearing claim): run one
+    # slim_precompute + N continuous slim_solve steps, and the re-precompute-per-step G path, from
+    # the same start; the max coordinate discrepancy must be ~0 or the 'plain SLIM' baseline (and
+    # thus the speedup) is not faithful (review-P5.2).
+    d_cont = igl.slim_precompute(V3, F, x0.reshape(-1, 2).astype(np.float64),
+                                 igl.SYMMETRIC_DIRICHLET, bidx, bc, 1e8)
+    uvc = x0.reshape(-1, 2).astype(np.float64); xr = x0.copy(); reprecompute_diff = 0.0
+    for _ in range(20):
+        uvc = igl.slim_solve(d_cont, 1)
+        xr = G(xr)
+        reprecompute_diff = max(reprecompute_diff, float(np.max(np.abs(xr - uvc.reshape(-1)))))
+
     # independent high-accuracy reference minimum (hard-constrained Newton)
     rn = solve(x0, tris, Bs, areas, free, "clamp", eterms=sd, tol=1e-9, max_iter=300)
     Estar = rn["final_energy"]; E0 = sd_e(x0)
@@ -87,12 +99,18 @@ def main():
                 return k
         return None
 
+    def _iters_abs(ghist, atol=1e-4):               # absolute gradient tol (like the anderson->LG edge)
+        for k, g in enumerate(ghist):
+            if g < atol:
+                return k
+        return None
+
     MAXIT = 400
     runs = {}
     for m in (0, 5):
         r = anderson_accelerate(G, sd_e, resid, x0, free, m=m, max_iter=MAXIT, tol=1e-9)
         ghist = [e["grad_inf"] for e in r["log"]]
-        runs[m] = {"it": _iters_to_grad(ghist), "status": r["status"],
+        runs[m] = {"it": _iters_to_grad(ghist), "it_abs": _iters_abs(ghist), "status": r["status"],
                    "final": r["final_energy"], "nlog": len(ghist), "g0": ghist[0]}
 
     base = runs[0]["it"]
@@ -100,34 +118,47 @@ def main():
          "Wraps the **official libigl SLIM** fixed-point map in the map-agnostic "
          "`anderson_accelerate` core (Peng et al. 2018). `m=0` is plain SLIM (same-map baseline); "
          "`m>0` is Anderson-accelerated. Hard instance (12×12, non-affine bend k=0.8, injective "
-         "start) so plain SLIM's fixed point contracts slowly (380 it to 1e-3 residual). Metric: iterations to cut "
-         "the **fixed-point residual** (symmetric-Dirichlet gradient ‖·‖∞) to 1e-3 of its start — "
-         "the SD *energy* saturates in ~1 SLIM step here, so the residual, not the energy, carries "
-         "the long tail that acceleration acts on. The SLIM map is made pure by "
-         "re-`slim_precompute`-ing each step (reproduces continuous SLIM to 0.0). "
+         "start) so plain SLIM's fixed point contracts slowly. We report iterations to cut the "
+         "**fixed-point residual** (symmetric-Dirichlet gradient ‖·‖∞) to 1e-3 of its start AND to an "
+         "**absolute** tol ‖·‖∞<1e-4 (the criterion the validated anderson→local-global edge uses, "
+         "for consistency). The SD *energy* saturates in ~1 SLIM step here, so an energy criterion "
+         "shows nothing — the residual carries the tail acceleration acts on; we report both so the "
+         "metric choice is transparent, not selected. The SLIM map is made pure by "
+         f"re-`slim_precompute`-ing each step; we VERIFY this equals continuous SLIM: max coordinate "
+         f"discrepancy over 20 steps = **{reprecompute_diff:.1e}** (so the plain-SLIM baseline is "
+         "faithful, not an inflated re-precompute artifact). "
          "Run: `python -m bench.run_anderson_slim`.", "",
-         "| Anderson history m | iters to residual-tol | speedup vs m=0 |", "|---|---:|---:|"]
+         "| Anderson history m | iters to residual-tol (1e-3 rel) | iters to ‖g‖<1e-4 (abs) | speedup (rel/abs) |",
+         "|---|---:|---:|---:|"]
     for m in (0, 5):
-        it = runs[m]["it"]
-        sp = (f"{base / it:.2f}×" if (it and base) else "—")
+        it = runs[m]["it"]; ita = runs[m]["it_abs"]
+        base_a = runs[0]["it_abs"]
+        sp_r = (f"{base / it:.1f}×" if (it and base) else "—")
+        sp_a = (f"{base_a / ita:.1f}×" if (ita and base_a) else "—")
         tag = " (plain SLIM)" if m == 0 else ""
-        L.append(f"| {m}{tag} | {it if it is not None else runs[m]['status']} | {sp} |")
+        L.append(f"| {m}{tag} | {it if it is not None else runs[m]['status']} | "
+                 f"{ita if ita is not None else 'did-not-reach'} | {sp_r} / {sp_a} |")
 
     best_m = min((m for m in (5,) if runs[m]["it"]),
                  key=lambda m: runs[m]["it"], default=None)
     L += ["", "## Observed", ""]
     if base and best_m and runs[best_m]["it"] < base:
-        L.append(f"- **Anderson accelerates SLIM:** plain SLIM needs **{base}** iterations to the "
-                 f"residual tol; Anderson (m={best_m}) needs **{runs[best_m]['it']}** — a "
-                 f"**{base / runs[best_m]['it']:.2f}× iteration reduction** on the SAME official-SLIM "
-                 "map. This reproduces the edge on the HW-independent iteration axis: Anderson is a "
-                 "wrapper that speeds SLIM up, it does not replace it.")
-        L.append("- The acceleration is large precisely because this instance sits on SLIM's "
-                 "**slowly-contracting linear tail** — where the fixed-point residual creeps down "
-                 "over hundreds of iterations, Anderson's history-based extrapolation collapses it in "
-                 "a handful. On an easy instance (SLIM already near-quadratic) there is nothing to "
-                 "accelerate; the edge holds where SLIM's own convergence is slow. Anderson remains a "
-                 "lightweight wrapper (one small least-squares per step), not a replacement solver.")
+        L.append(f"- **Anderson accelerates SLIM (instance-dependent):** on this deliberately "
+                 f"slow-contracting instance plain SLIM needs **{base}** iterations to the residual "
+                 f"tol; Anderson (m={best_m}) needs **{runs[best_m]['it']}** — a "
+                 f"**{base / runs[best_m]['it']:.0f}× reduction** on the SAME official-SLIM map, "
+                 f"confirmed on the absolute-tol criterion too "
+                 f"({runs[0]['it_abs']}→{runs[best_m]['it_abs']}). The DIRECTION (Anderson is a "
+                 "wrapper that speeds SLIM up, not a replacement) is the result; the MAGNITUDE is "
+                 "instance-selected — we chose a bend that makes plain SLIM's tail long, so this is "
+                 "an *up-to* figure, not a typical speedup.")
+        L.append("- Why the effect exists here and vanishes elsewhere: this instance sits on SLIM's "
+                 "**slowly-contracting linear tail** (residual creeps down over hundreds of "
+                 "iterations), which is exactly what Anderson's history extrapolation collapses; on "
+                 "an easy instance where SLIM is already near-quadratic there is nothing to "
+                 "accelerate. So the edge is regime-dependent: `qualified/indicative` on a single "
+                 "hand-picked instance (m∈{0,5} only, no multi-seed/mesh sweep, no m-profile) — NOT "
+                 "the multi-condition evidence the repo reserves for `validated`.")
     elif base:
         L.append(f"- **No acceleration observed here:** plain SLIM already reaches the residual tol in "
                  f"**{base}** iterations and no history m beats it on this instance — SLIM's "

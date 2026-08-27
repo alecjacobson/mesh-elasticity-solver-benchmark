@@ -18,6 +18,7 @@ paired disagreement (cases where exactly one method succeeds) -- the honest robu
 Writes results/filter_robustness.md. Run: `python -m bench.run_filter_robustness`.
 """
 import os
+from collections import Counter
 import numpy as np
 from .solver import solve
 from . import energy_stable_neohookean as snh
@@ -53,23 +54,36 @@ def main():
             starts.append((amp, sd, scn))
 
     res = {m: [] for m in methods}          # per-start bool success, aligned across methods
+    fail_status = {m: Counter() for m in methods}   # WHY the failures fail (nondescent vs linesearch vs maxiter)
     for i, (amp, sd, scn) in enumerate(starts):
         for m in methods:
             ok, st, ninv, it = _run(scn, m, et)
             res[m].append(ok)
+            if not ok:
+                fail_status[m][st] += 1
         print(f"  [{i+1}/{len(starts)}] amp={amp} seed={sd} ninv0={scn['ninv']} "
               + " ".join(f"{m}={'Y' if res[m][-1] else 'n'}" for m in methods), flush=True)
 
-    L = ["# Filter robustness — success rate from inverted starts (measured, P5.2 #2 & #3)", "",
+    none_fail = dict(fail_status.get("none", {}))
+    L = ["# Filter robustness — success rate from inverted starts (measured, P5.2 #2 & #3 & #12)", "",
          f"Stable Neo-Hookean (nu={NU}), P1 8x8 grid, `inverted_scenario` starts swept over "
          f"severity amp in {AMPS} x {len(SEEDS)} seeds. Success = **converged AND inversion-free** "
          f"(tol 1e-6, max_iter 400). {len(starts)} genuinely-inverted starts. "
          "Run: `python -m bench.run_filter_robustness`.", "",
+         "> ⚠️ **Read the baseline honestly.** `none` is NOT a well-globalized Newton — in "
+         "`solver.solve` it HARD-TERMINATES the instant the raw Hessian yields a non-descent "
+         f"direction (its failures are **{none_fail}**, i.e. essentially all `nondescent`), with no "
+         "negative-curvature fallback or trust-region radius. So a big margin over `none` measures "
+         "**presence of *any* indefiniteness handling**, not a filter's edge over a competently "
+         "globalized Newton. The starts are also **not independent** (correlated severities on one "
+         "8×8 mesh, one energy, one ν), so a rate like `100/100` is a saturated point estimate, not a "
+         "statistically-powered success rate. These results are `qualified`, not `validated`.", "",
          "### Success rate per method", "",
-         "| method | successes / starts | rate |", "|---|---:|---:|"]
+         "| method | successes / starts | rate | failure modes |", "|---|---:|---:|---|"]
     for m in methods:
         s = sum(res[m]); n = len(res[m])
-        L.append(f"| `{m}` | {s} / {n} | {s / n:.0%} |")
+        fm = dict(fail_status[m]) or "—"
+        L.append(f"| `{m}` | {s} / {n} | {s / n:.0%} | {fm} |")
 
     L += ["", "### Paired comparison (does the claimed-more-robust method win?)", "",
           "| edge | A succ | B succ | A-only | B-only | verdict |",
@@ -104,10 +118,12 @@ def main():
                  "edge is **contradicted** on this battery.")
     a3 = verdicts["#3 trust-region->full-newton"]
     if a3[0] > a3[1]:
-        L.append(f"- **#3 trust-region > full-newton:** the rho-switchboard recovers "
-                 f"{a3[0] - a3[1]} more starts than raw Newton ({a3[2]} TR-only wins vs {a3[3]}) — "
-                 "supports the edge: unfiltered Newton takes indefinite steps and fails where the "
-                 "fallback survives.")
+        L.append(f"- **#3 trust-region ≫ unfiltered Newton (qualified):** the rho-switchboard "
+                 f"recovers {a3[0] - a3[1]} more starts than the `none` baseline ({a3[2]} TR-only "
+                 "wins). The direction is real (an unhandled indefinite Hessian fails; the SPD "
+                 "switchboard does not) — but recall the baseline hard-terminates on the first "
+                 "non-descent direction, so this measures *presence of indefiniteness handling*, "
+                 "not TR's edge over a competently globalized Newton. Qualified, not validated.")
     elif a3[0] == a3[1]:
         L.append(f"- **#3 trust-region == full-newton:** equal success ({a3[0]}); the line search "
                  "already rescues raw Newton on these starts, so the filter fallback is not the "
@@ -117,19 +133,22 @@ def main():
                  "unexpected; the edge is contradicted on this battery.")
     a12 = verdicts["#12 pitfalls-PDN->full-newton"]
     if a12[0] > a12[1]:
-        L.append(f"- **#12 project-on-demand > full-newton:** Project-on-Demand Newton (project a "
-                 f"block's Hessian only when it is indefinite) recovers {a12[0] - a12[1]} more starts "
-                 f"than unprojected Newton ({a12[2]} PDN-only wins) — supports 'PDN keeps "
-                 "Projected-Newton robustness where classical Newton fails'.")
+        L.append(f"- **#12 project-on-demand ≫ unfiltered Newton (qualified):** PDN (project a "
+                 f"block's Hessian only when indefinite → PSD assembled Hessian → always a descent "
+                 f"direction) recovers {a12[0] - a12[1]} more starts than the `none` baseline "
+                 f"({a12[2]} PDN-only wins). Same reading as #3: real direction, but the margin is "
+                 "against a baseline with *no* indefiniteness handling, so qualified, not validated.")
     elif a12[0] == a12[1]:
         L.append(f"- **#12 project-on-demand == full-newton:** equal success ({a12[0]}) here.")
     else:
         L.append(f"- **#12 full-newton > project-on-demand:** unexpected ({a12[1] - a12[0]} more) — "
                  "edge contradicted here.")
     L += ["",
-          "_Caveat: 2D, single energy/nu, one mesh; success is basin-of-attraction under a "
-          "backtracking line search (which itself safeguards raw Newton), so this measures the "
-          "FILTER's marginal robustness on top of a globalized solver, not filter-vs-nothing._"]
+          "_Caveat: 2D, single energy/nu, one 8×8 mesh, NON-INDEPENDENT correlated starts; the "
+          "`none` baseline has no negative-curvature fallback (hard-terminates on first non-descent), "
+          "so these compare 'any indefiniteness handling vs none', not a filter's edge over a "
+          "competently globalized Newton. #2 (absolute vs clamp) is the one apples-to-apples pair "
+          "here and it is a tie. All three edges are `qualified`, none `validated`._"]
 
     os.makedirs("results", exist_ok=True)
     with open("results/filter_robustness.md", "w") as f:
