@@ -948,7 +948,7 @@ _Derived from `paper/references.bib` (auto-generated from `claims/claims.yaml`) 
 **[descent-gpu]** Wang, Yang. *Descent Methods for Elastic Body Simulation on the GPU*. Proc. SIGGRAPH Asia (2016). doi:10.1145/2980179.2980236  
 **[efficient-bijective-param]** Su, Ye, Liu, Fu. *Efficient Bijective Parameterizations*. Proc. SIGGRAPH (2020). doi:10.1145/3386569.3392435  
 **[eigenvalue-blending]** Cheng, Liu, Fu. *Eigenvalue Blending for Projected Newton*. CGF (2025). doi:10.1111/cgf.70027  
-**[fiacco-mccormick-1968]** Fiacco, Anthony V., McCormick, Garth P.. *Nonlinear Programming: Sequential Unconstrained Minimization Techniques*. Wiley (1968).  
+**[fiacco-mccormick-1968]** Fiacco, Anthony V., McCormick, Garth P.. *Nonlinear Programming: Sequential Unconstrained Minimization Techniques*. Wiley (1968). doi:10.1137/1.9781611971316  
 **[foldover-free]** Garanzha. *Foldover-free maps in 50 lines of code*. Proc. SIGGRAPH (2021).  
 **[freitag-plassmann-2000]** Freitag, Lori A., Plassmann, Paul. *Local optimization-based simplicial mesh untangling and improvement*. International Journal for Numerical Methods in Engineering (2000).  
 **[gill-murray-1974]** Gill, Philip E., Murray, Walter. *Newton-type methods for unconstrained and linearly constrained optimization*. Mathematical Programming (1974). doi:10.1007/BF01585529  
@@ -965,7 +965,7 @@ _Derived from `paper/references.bib` (auto-generated from `claims/claims.yaml`) 
 **[matchmaker]** Kraevoy, Sheffer, Gotsman. *Matchmaker: constructing constrained texture maps*. Proc. SIGGRAPH (2003). doi:10.1145/1201775.882271  
 **[medial-ipc]** Lan. *Medial IPC*. TOG (2021). doi:10.1145/3450626.3459753  
 **[nesterov-1983]** Nesterov, Yurii. *A method of solving a convex programming problem with convergence rate $O(1/k^2)$*. Soviet Mathematics Doklady (1983).  
-**[nocedal-wright-2006]** Nocedal, Jorge, Wright, Stephen J.. *Numerical Optimization*. Springer (2006).  
+**[nocedal-wright-2006]** Nocedal, Jorge, Wright, Stephen J.. *Numerical Optimization*. Springer (2006). doi:10.1007/978-0-387-40065-5  
 **[ogc]** Chen. *Offset Geometric Contact (OGC)*. Proc. SIGGRAPH (2025). doi:10.1145/3731205  
 **[pbng]** Chen, Han, Teran. *Position-Based Nonlinear Gauss-Seidel for Quasistatic Hyperelasticity*. TOG (2024).  
 **[pitfalls-projection]** Longva, Löschner, Fernández-Fernández, Larionov, Ascher, Bender. *Pitfalls of Projection: Newton-type solvers for incremental potentials*.  (2023).  
@@ -978,7 +978,7 @@ _Derived from `paper/references.bib` (auto-generated from `claims/claims.yaml`) 
 **[quasi-newton-liu2017]** Liu, Bouaziz, Kavan. *Quasi-Newton Methods for Real-Time Hyperelastic Simulation*. TOG (2017).  
 **[rigid-ipc]** Ferguson. *Intersection-free Rigid Body Dynamics (Rigid-IPC)*. TOG (2021). doi:10.1145/3450626.3459802  
 **[scaf]** Jiang, Schaefer, Panozzo. *Simplicial Complex Augmentation / Scaffold (SCAF)*. Proc. SIGGRAPH Asia (2017). doi:10.1145/3130800.3130895  
-**[schnabel-eskow-1990]** Schnabel, Robert B., Eskow, Elizabeth. *A new modified Cholesky factorization*. SIAM Journal on Scientific and Statistical Computing (1990).  
+**[schnabel-eskow-1990]** Schnabel, Robert B., Eskow, Elizabeth. *A new modified Cholesky factorization*. SIAM Journal on Scientific and Statistical Computing (1990). doi:10.1137/0911064  
 **[second-order-stencil-descent]** Lan. *Second-Order Stencil Descent for Interior-Point Hyperelasticity*. TOG (2023). doi:10.1145/3592104  
 **[simo-1985-fbar]** Simo, Juan C., Taylor, Robert L., Pister, Karl S.. *Variational and projection methods for the volume constraint in finite deformation elasto-plasticity*. Computer Methods in Applied Mechanics and Engineering (1985). doi:10.1016/0045-7825(85)90033-7  
 **[simplex-assembly]** Fu, Liu. *Computing Inversion-Free Mappings by Simplex Assembly*. Proc. SIGGRAPH Asia (2016). doi:10.1145/2980179.2980231  
