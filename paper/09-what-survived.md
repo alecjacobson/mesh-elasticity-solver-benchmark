@@ -2,10 +2,15 @@
 
 ## 9.1 The hardened ledger
 
-After the decomposition experiments and the single-axis verification pass (§9.2), the
-superiority-claims graph stands at **2 validated, 33 qualified, 103 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification pass promoted ten edges from self-claimed to
-qualified but — tellingly — added *nothing* to the validated column: it stays at the same two edges,
+After the decomposition experiments and two single-axis verification passes (§9.2), the
+superiority-claims graph stands at **2 validated, 39 qualified, 97 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted sixteen edges from self-claimed to
+qualified — ten from the contact-free triage backlog and six more from a "try-harder" pass that built
+an incremental-potential testbed and faithfully re-implemented part of the simulation-accelerator
+family (quasi-Newton/Liu-2017, generalized Projective Dynamics, Chebyshev acceleration, Vertex Block
+Descent, and AQP's own AGD ablation), testing their *convergence* claims on hardware-independent
+iteration counts (`results/dynamics_solvers.md`, `results/agd_vs_aqp.md`). But — tellingly — that work
+added *nothing* to the validated column: it stays at the same two edges,
 SLIM over AQP on iteration count (§8.2, grounded on official libigl code) and Anderson acceleration
 over ARAP local–global on convergence (§8.6, a reproducible multi-seed × multi-mesh benchmark). Both
 of those meet a high bar (official code or a multi-condition profile); the new results, strong as some
@@ -63,10 +68,14 @@ wall-clock boundary at small scale. The remaining one, absolute versus clamp on 
 majority of the graph, meanwhile, remains out of reach — and we label each edge with the *specific
 reason* rather than dropping it:
 
-- **needs unavailable code** (~34 edges) — the claim requires the paper's own implementation, which we
+- **needs unavailable code** (~28 edges) — the claim requires the paper's own implementation, which we
   will not substitute with a look-alike (that would beg the question, as with Composite Majorization,
-  §8.5). The projective-dynamics / ADMM / XPBD / Vertex-Block-Descent simulation-accelerator family
-  falls here.
+  §8.5). A "try-harder" pass (§9.1) reclaimed part of this bucket: where a method's algorithm is fully
+  specified we *did* build it faithfully, so the **convergence** claims of the simulation-accelerator
+  family (quasi-Newton, Projective-Dynamics-style, Chebyshev, Vertex Block Descent) are now tested
+  (`results/dynamics_solvers.md`); what remains here is genuinely code-bound — a specific *majorizer*,
+  or a competitor port (an interior-point QP/SOCP for the injective-mapping edges). The corresponding
+  GPU-throughput/wall-clock *speed* headlines stay hardware-confounded, below.
 - **needs contact physics** (22) — World-3 (IPC barriers, continuous collision detection, friction);
   v1 implements none, so an intersection-free or friction claim has no harness to run in.
 - **needs scale** (21) — the claim *is* about 100K–1.5M-element meshes, GPU throughput, or frame-rate

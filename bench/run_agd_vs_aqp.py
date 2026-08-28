@@ -44,6 +44,15 @@ def main():
         rows.append((sx, aqp, agd))
         print(f"  sx={sx}: AQP {_it(aqp)}  AGD {_it(agd)}", flush=True)
 
+    # theta-robustness at the ill-conditioned end (review-V2.1 #4): is AGD's blow-up a mistuned-theta
+    # artifact, or intrinsic? Re-run AGD at several eta (=> several Nesterov theta) at s=2.5.
+    x0h, trish, resth, freeh = _aniso(N, 2.5)
+    theta_sweep = []
+    for eta in (10, 100, 1000, 10000):
+        r = world1.solve_aqp(x0h, trish, resth, freeh, eta=eta, max_iter=MAXIT, tol=TOL, use_proxy=False)
+        theta_sweep.append((eta, _it(r)))
+        print(f"  theta-check s=2.5 AGD eta={eta}: {_it(r)}", flush=True)
+
     L = ["# AQP vs its ablation baseline AGD (proxy on/off) across conditioning (measured, V2.1)", "",
          "`accelerated-gradient-descent` (AGD) is the AQP paper's OWN ablation: the identical "
          "accelerated scheme with the Laplacian proxy disabled (`solve_aqp(use_proxy=False)`, so "
@@ -70,6 +79,12 @@ def main():
           f"bounded ({_it(rows[-2][1])}), and at s={rows[-1][0]:g} AGD {_it(rows[-1][2])}. So the "
           "proxy earns its keep exactly in the ill-conditioned regime the paper targets, and the "
           "claim 'AQP scales where AGD scales poorly as energies become ill-conditioned' reproduces.",
+          "- **Not a mistuned-θ artifact (θ-robustness check):** AGD inherits AQP's Nesterov θ (from "
+          "η), so one might worry the blow-up is just a bad θ for the un-preconditioned operator. It is "
+          f"not — at the ill-conditioned s=2.5, AGD is slow across a 1000× sweep of η/θ: "
+          + ", ".join(f"η={e}→{v}" for e, v in theta_sweep) + " (all ≈900+ vs AQP's "
+          + f"{_it(rows[2][1]) if len(rows) > 2 else 'bounded'}). Retuning the momentum does not rescue "
+          "AGD; the missing preconditioner does.",
           "- **Honest qualification of the baseline-confound flag:** AGD is a *fair* ablation, not a "
           "weak strawman — it beats AQP when the problem is well-conditioned. The proxy's value is "
           "conditional on the Laplacian being a good preconditioner (high-distortion / spatially "

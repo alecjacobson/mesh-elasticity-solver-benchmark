@@ -12,6 +12,7 @@
 ## Observed
 
 - **`aqp → accelerated-gradient-descent` — REPRODUCES, but regime-dependent (the ablation is NOT a straw-man):** there is a clear crossover. On the **well-conditioned** end (s=1) AGD is *faster* than AQP (61 vs 573) — the Laplacian proxy is the wrong metric there and actually hurts. As the energy becomes **ill-conditioned** (s=2.5) AGD blows up (937) while AQP stays bounded (256), and at s=3.5 AGD maxi>3000. So the proxy earns its keep exactly in the ill-conditioned regime the paper targets, and the claim 'AQP scales where AGD scales poorly as energies become ill-conditioned' reproduces.
+- **Not a mistuned-θ artifact (θ-robustness check):** AGD inherits AQP's Nesterov θ (from η), so one might worry the blow-up is just a bad θ for the un-preconditioned operator. It is not — at the ill-conditioned s=2.5, AGD is slow across a 1000× sweep of η/θ: η=10→941, η=100→937, η=1000→949, η=10000→949 (all ≈900+ vs AQP's 256). Retuning the momentum does not rescue AGD; the missing preconditioner does.
 - **Honest qualification of the baseline-confound flag:** AGD is a *fair* ablation, not a weak strawman — it beats AQP when the problem is well-conditioned. The proxy's value is conditional on the Laplacian being a good preconditioner (high-distortion / spatially smooth regime), which is a real but bounded claim.
 
 _Caveat: 2D, single mesh size/seed per s, one anisotropy family; iteration-axis (HW-independent). AGD's Nesterov θ is inherited from AQP's η (as in the ablation), not separately tuned — the paper's ablation makes the same choice._

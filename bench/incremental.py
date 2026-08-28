@@ -286,8 +286,15 @@ def _vbd_step_vertex(P, xread, i):
     return out
 
 
-def _vbd(P, gauss_seidel, max_iter=800, rtol=1e-3):
+def _vbd(P, gauss_seidel, max_iter=800, rtol=1e-3, jac_omega=None):
+    """VBD sweeps. Gauss-Seidel is self-stabilising (sequential). Block-Jacobi applies all steps
+    simultaneously and MUST be under-relaxed (ω<1) or it overshoots -- as every real block-Jacobi/
+    parallel-VBD scheme does; jac_omega defaults to 1/(1+max_valence) among free vertices, the
+    standard diagonal-dominance-safe choice (review-V2.1 #2)."""
     free_v = [i for i in range(P.nv) if P.free[2 * i]]
+    if jac_omega is None:
+        maxval = max(len(P.inc[i]) for i in free_v)
+        jac_omega = 1.0 / (1.0 + maxval)
     x = P.x0.copy(); res = []
     for _ in range(max_iter):
         res.append(P.resid(x))
@@ -296,12 +303,13 @@ def _vbd(P, gauss_seidel, max_iter=800, rtol=1e-3):
         if gauss_seidel:                             # sequential: each vertex sees updated neighbours
             for i in free_v:
                 x[2 * i:2 * i + 2] = _vbd_step_vertex(P, x, i)
-        else:                                        # block-Jacobi: all steps from the SAME old x
+        else:                                        # block-Jacobi: all from old x, UNDER-RELAXED
             new = {i: _vbd_step_vertex(P, x, i) for i in free_v}
             for i, xi in new.items():
-                x[2 * i:2 * i + 2] = xi
+                xi0 = x[2 * i:2 * i + 2]
+                x[2 * i:2 * i + 2] = xi0 + jac_omega * (xi - xi0)
     name = "vbd-gs" if gauss_seidel else "vbd-jacobi"
-    return {"name": name, "res": res, "it": _iters_to(res, rtol), "x": x}
+    return {"name": name, "res": res, "it": _iters_to(res, rtol), "x": x, "jac_omega": jac_omega}
 
 
 def solve_vbd_gs(P, **kw):
