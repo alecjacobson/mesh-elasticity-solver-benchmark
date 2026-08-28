@@ -119,8 +119,8 @@ which published superiority claims survive confound control. Our contributions a
   \item \textbf{A survey by axis and a lineage map (\S4--\S5).} We organize the annotated corpus by \emph{component}
 \end{itemize}
   rather than chronology, and we trace each graphics ``innovation'' to its named classical ancestor:
-  eigenvalue filtering to modified-Cholesky Hessian modification, the accelerated quadratic proxy to
-  Nesterov acceleration, projective dynamics to ADMM, IPC barriers to primal interior-point methods.
+  eigenvalue filtering to modified-Cholesky Hessian modification \cite{gill-murray-1974}, the accelerated quadratic proxy to
+  Nesterov acceleration \cite{nesterov-1983}, projective dynamics to ADMM \cite{boyd-2011-admm}, IPC \cite{ipc} barriers to primal interior-point methods \cite{fiacco-mccormick-1968}.
   Cited as adaptations rather than inventions, the lineage points each method at the classical analysis
   that explains --- and often anticipates --- its measured behavior (\S8).
 
@@ -173,13 +173,13 @@ and turns ``method A versus method B'' into ``which axis differs, and by how muc
 
 \begin{table*}[t]\centering\footnotesize\begin{tabular}{lll}
 \toprule metric \texttt{M} & method & world \\ \midrule
-\texttt{I} (identity) & gradient descent; with momentum, Nesterov / heavy-ball & World-0 baseline \\
+\texttt{I} (identity) & gradient descent; with momentum, Nesterov / heavy-ball \cite{nesterov-1983} & World-0 baseline \\
 \texttt{$\nabla$\textsuperscript{2}E} (energy Hessian) & Newton; projected Newton once the Hessian is filtered to SPD & all \\
-Laplacian / H\textsuperscript{1} (Sobolev) & \textbf{AQP}, \textbf{BCQN}'s proxy --- a fixed graph-Laplacian preconditioner & World-1 \\
-Killing operator & \textbf{AKVF} --- an isometry-aware Riemannian metric & World-1 \\
-reweighted energy Hessian & \textbf{SLIM} --- iteratively-reweighted Gauss--Newton & World-1 \\
-Fisher information & natural gradient (Amari) & ML \\
-a fixed factorized proxy & projective dynamics / local--global (ADMM under a quadratic proxy) & World-2 \\
+Laplacian / H\textsuperscript{1} (Sobolev) & \textbf{AQP} \cite{aqp}, \textbf{BCQN}'s proxy \cite{bcqn} --- a fixed graph-Laplacian preconditioner & World-1 \\
+Killing operator & \textbf{AKVF} \cite{akvf} --- an isometry-aware Riemannian metric & World-1 \\
+reweighted energy Hessian & \textbf{SLIM} \cite{slim} --- iteratively-reweighted Gauss--Newton & World-1 \\
+Fisher information & natural gradient (Amari) \cite{amari-1998} & ML \\
+a fixed factorized proxy & projective dynamics \cite{projective-dynamics} / local--global \cite{local-global} (ADMM \cite{boyd-2011-admm} under a quadratic proxy) & World-2 \\
 \bottomrule\end{tabular}\end{table*}
 
 The payoff is a precise cross-field statement: **``Sobolev preconditioning'' in graphics and "natural
@@ -612,7 +612,8 @@ than a set of \emph{lessons about attribution}.
 
 \subsection{The headline: a near-incompressibility filtering claim, reversed then re-validated}
 
-A recent, well-cited result claims that \textbf{absolute} eigenvalue filtering beats \textbf{clamping} near
+A recent, well-cited result claims that \textbf{absolute} eigenvalue filtering \cite{absolute-filtering}
+beats \textbf{clamping} \cite{clamp-filtering} near
 incompressibility. On standard P1 constant-strain elements our harness finds the \emph{opposite}: as
 Poisson's ratio \texttt{$\nu$ $\rightarrow$ $\tfrac12$}, absolute filtering under-performs clamp and, at \texttt{$\nu$ = 0.4999}, fails to
 converge at all. Taken at face value this refutes the claim. It does not --- the reversal is a
@@ -634,7 +635,7 @@ Untangling the claim requires removing \textbf{two entangled confounds at once}:
 governs locking) and the \emph{energy} (the paper's method is built on a specific one). Removing only the
 element is not enough --- an intermediate round of our own review caught that a ``P2 fixes it'' result was
 measured on the \emph{wrong} (classical-barrier) energy. With \textbf{both} confounds controlled --- a
-locking-relieved P2 element \textbf{and} the Stable Neo-Hookean energy the method actually targets ---
+locking-relieved P2 element \textbf{and} the Stable Neo-Hookean energy \cite{stable-neo-hookean} the method actually targets ---
 absolute filtering \emph{beats} clamp near incompressibility, and its advantage **grows toward the
 incompressible limit**: 38 versus 48 iterations at \texttt{$\nu$ = 0.4999}, widening to 71 versus 113 at `$\nu$ =
 0.49999\texttt{ (}results/p2\_stable\_nu.md`). A locking artifact would \emph{collapse} at the limit; instead it
@@ -667,7 +668,7 @@ Several well-cited advantages shrink or invert once the baseline is fair and the
 held fixed:
 
 \begin{itemize}
-  \item \textbf{Trust-region filtering ``beats both clamp and absolute.''} Our own round-1 measurement reproduced
+  \item \textbf{Trust-region filtering \cite{trust-region-filtering} ``beats both clamp and absolute.''} Our own round-1 measurement reproduced
 \end{itemize}
   this --- but it was an artifact of an expensive \emph{global} eigendecomposition operator. The faithful
   \emph{per-element} blend (with a principled SPD-probe schedule) reverses it: trust-region wins on the
@@ -676,7 +677,7 @@ held fixed:
   in fact \emph{worse}-conditioned than P1's, yet converges faster (\texttt{results/world2\_filters.md}).
 
 \begin{itemize}
-  \item \textbf{AQP's mesh-independence is a loose-tolerance artifact.} AQP's celebrated mesh-independent
+  \item \textbf{AQP's mesh-independence is a loose-tolerance artifact.} AQP's \cite{aqp} celebrated mesh-independent
 \end{itemize}
   iteration count holds only to \emph{loose} tolerance. A $\tau$-sweep with a CI-gated growth exponent (iters
   $\propto$ DOF\textasciicircum{}p) shows p = $-$0.09 (CI includes 0, mesh-independent) at $\tau$ = 1e-3 but **p = +0.68 (clearly
@@ -709,7 +710,7 @@ clearly growing one at tight $\tau$, with min--max bands and CI-gated exponents.
   baseline.
 
 \begin{itemize}
-  \item *\emph{What }does\emph{ validate: SLIM > AQP.}* To a fair relative-energy tolerance, official libigl SLIM
+  \item *\emph{What }does\emph{ validate: SLIM > AQP.}* To a fair relative-energy tolerance, official libigl SLIM \cite{slim}
 \end{itemize}
   reaches the symmetric-Dirichlet minimum in \textbf{5 iterations versus AQP's 19} --- one of only two
   independently validated edges (\S9.1). The soft-versus-hard-constraint confound was checked and cleared;
@@ -718,7 +719,7 @@ clearly growing one at tight $\tau$, with min--max bands and CI-gated exponents.
 
 \subsection{Bundled methods entangle rather than add}
 
-BCQN claims ``fastest and most robust'' from three simultaneous changes --- a blended Sobolev/L-BFGS
+BCQN \cite{bcqn} claims ``fastest and most robust'' from three simultaneous changes --- a blended Sobolev/L-BFGS
 proxy, a barrier-aware line search, and a characteristic-gradient criterion. The full 2\textsuperscript{3} factorial
 (one unified solver over all three axes) shows the components \textbf{interact rather than sum}. The
 Sobolev \emph{direction} is the only factor that moves the iteration count, and only in its regime: it is
@@ -772,14 +773,14 @@ each source paper.
 
 \subsection{The clamp-versus-absolute question is one analytic scalar}
 
-Built on the \emph{validated} analytic eigensystem (which matches a finite-difference Hessian to \textasciitilde{}1e-10),
+Built on the \emph{validated} analytic eigensystem \cite{analytic-eigensystems} (which matches a finite-difference Hessian to \textasciitilde{}1e-10),
 we establish the structural fact under the entire World-2 filter debate: the 2D symmetric-Dirichlet
 element Hessian's \textbf{only sign-indefinite eigenmode is the twist}, \texttt{$\lambda$\_t = (g($\sigma$\textsubscript{1})+g($\sigma$\textsubscript{2}))/($\sigma$\textsubscript{1}+$\sigma$\textsubscript{2})}. Over
 250,000 samples of the singular-value plane, the two stretching modes and the flip mode are \emph{never}
 negative; the twist is negative over 37.8\% of the plane, all of it under compression, and exactly zero
 at the isometry (\texttt{results/twist\_analysis.md}, Figure 8.5). Therefore every projected-Newton filter is
 \emph{identical except on the twist}: clamp sends it to $\epsilon$, absolute to \texttt{|$\lambda$\_t|}, raw Newton keeps it
-(indefinite), and Composite Majorization majorizes it. The entire \texttt{$\nu$ $\rightarrow$ $\tfrac12$} filter verdict of \S8.1 is
+(indefinite), and Composite Majorization \cite{composite-majorization} majorizes it. The entire \texttt{$\nu$ $\rightarrow$ $\tfrac12$} filter verdict of \S8.1 is
 \textbf{one scalar per element}, active only under compression --- precisely the regime a near-incompressible
 material enters as it necks.
 
@@ -823,7 +824,7 @@ Finally, the harness measures several confounds directly:
   proxy is a pooled wash but wins within the ill-conditioned stratum --- a regime structure the pooled
   profile hides and the per-stratum pairwise surfaces (\texttt{results/1a\_profiles.md}).
 \begin{itemize}
-  \item \textbf{Anderson acceleration validates.} Wrapping ARAP local--global in Anderson mixing reaches
+  \item \textbf{Anderson acceleration validates.} Wrapping ARAP local--global \cite{local-global} in Anderson mixing \cite{anderson-geometry} reaches
 \end{itemize}
   the same minimum in \textbf{13 versus 24 iterations} (a 1.85$\times$ iteration speedup, robust across three seeds
   and three meshes --- it never collapses to 1$\times$), the second of the two validated edges. Each iteration

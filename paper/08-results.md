@@ -8,7 +8,8 @@ than a set of *lessons about attribution*.
 
 ## 8.1 The headline: a near-incompressibility filtering claim, reversed then re-validated
 
-A recent, well-cited result claims that **absolute** eigenvalue filtering beats **clamping** near
+A recent, well-cited result claims that **absolute** eigenvalue filtering [cite:absolute-filtering]
+beats **clamping** [cite:clamp-filtering] near
 incompressibility. On standard P1 constant-strain elements our harness finds the *opposite*: as
 Poisson's ratio `ν → ½`, absolute filtering under-performs clamp and, at `ν = 0.4999`, fails to
 converge at all. Taken at face value this refutes the claim. It does not — the reversal is a
@@ -27,7 +28,7 @@ Untangling the claim requires removing **two entangled confounds at once**: the 
 governs locking) and the *energy* (the paper's method is built on a specific one). Removing only the
 element is not enough — an intermediate round of our own review caught that a "P2 fixes it" result was
 measured on the *wrong* (classical-barrier) energy. With **both** confounds controlled — a
-locking-relieved P2 element **and** the Stable Neo-Hookean energy the method actually targets —
+locking-relieved P2 element **and** the Stable Neo-Hookean energy [cite:stable-neo-hookean] the method actually targets —
 absolute filtering *beats* clamp near incompressibility, and its advantage **grows toward the
 incompressible limit**: 38 versus 48 iterations at `ν = 0.4999`, widening to 71 versus 113 at `ν =
 0.49999` (`results/p2_stable_nu.md`). A locking artifact would *collapse* at the limit; instead it
@@ -59,14 +60,14 @@ pending gold-standard controls, so this is indicative, not a general proof.)*
 Several well-cited advantages shrink or invert once the baseline is fair and the bundled changes are
 held fixed:
 
-- **Trust-region filtering "beats both clamp and absolute."** Our own round-1 measurement reproduced
+- **Trust-region filtering [cite:trust-region-filtering] "beats both clamp and absolute."** Our own round-1 measurement reproduced
   this — but it was an artifact of an expensive *global* eigendecomposition operator. The faithful
   *per-element* blend (with a principled SPD-probe schedule) reverses it: trust-region wins on the
   locking element, where the plain filters struggle, but is a wash on the locking-relieved element.
   The operative axis is *volumetric locking*, not Hessian conditioning — measured, the P2 Hessian is
   in fact *worse*-conditioned than P1's, yet converges faster (`results/world2_filters.md`).
 
-- **AQP's mesh-independence is a loose-tolerance artifact.** AQP's celebrated mesh-independent
+- **AQP's mesh-independence is a loose-tolerance artifact.** AQP's [cite:aqp] celebrated mesh-independent
   iteration count holds only to *loose* tolerance. A τ-sweep with a CI-gated growth exponent (iters
   ∝ DOF^p) shows p = −0.09 (CI includes 0, mesh-independent) at τ = 1e-3 but **p = +0.68 (clearly
   growing)** at τ = 1e-6 (`results/mesh_independence.md`, Figure 8.2). The Laplacian proxy gives
@@ -90,7 +91,7 @@ clearly growing one at tight τ, with min–max bands and CI-gated exponents.*
   separable claim is cheap mesh-independent *initial* progress, not raw iterations versus a strong
   baseline.
 
-- **What *does* validate: SLIM > AQP.** To a fair relative-energy tolerance, official libigl SLIM
+- **What *does* validate: SLIM > AQP.** To a fair relative-energy tolerance, official libigl SLIM [cite:slim]
   reaches the symmetric-Dirichlet minimum in **5 iterations versus AQP's 19** — one of only two
   independently validated edges (§9.1). The soft-versus-hard-constraint confound was checked and cleared;
   the wall-clock is C++/Python-confounded, so the *counts* carry the verdict, and the real trade-off
@@ -98,7 +99,7 @@ clearly growing one at tight τ, with min–max bands and CI-gated exponents.*
 
 ## 8.3 Bundled methods entangle rather than add
 
-BCQN claims "fastest and most robust" from three simultaneous changes — a blended Sobolev/L-BFGS
+BCQN [cite:bcqn] claims "fastest and most robust" from three simultaneous changes — a blended Sobolev/L-BFGS
 proxy, a barrier-aware line search, and a characteristic-gradient criterion. The full 2³ factorial
 (one unified solver over all three axes) shows the components **interact rather than sum**. The
 Sobolev *direction* is the only factor that moves the iteration count, and only in its regime: it is
@@ -146,14 +147,14 @@ each source paper.
 
 ## 8.5 The clamp-versus-absolute question is one analytic scalar
 
-Built on the *validated* analytic eigensystem (which matches a finite-difference Hessian to ~1e-10),
+Built on the *validated* analytic eigensystem [cite:analytic-eigensystems] (which matches a finite-difference Hessian to ~1e-10),
 we establish the structural fact under the entire World-2 filter debate: the 2D symmetric-Dirichlet
 element Hessian's **only sign-indefinite eigenmode is the twist**, `λ_t = (g(σ₁)+g(σ₂))/(σ₁+σ₂)`. Over
 250,000 samples of the singular-value plane, the two stretching modes and the flip mode are *never*
 negative; the twist is negative over 37.8% of the plane, all of it under compression, and exactly zero
 at the isometry (`results/twist_analysis.md`, Figure 8.5). Therefore every projected-Newton filter is
 *identical except on the twist*: clamp sends it to ε, absolute to `|λ_t|`, raw Newton keeps it
-(indefinite), and Composite Majorization majorizes it. The entire `ν → ½` filter verdict of §8.1 is
+(indefinite), and Composite Majorization [cite:composite-majorization] majorizes it. The entire `ν → ½` filter verdict of §8.1 is
 **one scalar per element**, active only under compression — precisely the regime a near-incompressible
 material enters as it necks.
 
@@ -183,7 +184,7 @@ Finally, the harness measures several confounds directly:
   performance profile on iteration count; AQP's first-order tail lengthens at tight τ; the Sobolev
   proxy is a pooled wash but wins within the ill-conditioned stratum — a regime structure the pooled
   profile hides and the per-stratum pairwise surfaces (`results/1a_profiles.md`).
-- **Anderson acceleration validates.** Wrapping ARAP local–global in Anderson mixing reaches
+- **Anderson acceleration validates.** Wrapping ARAP local–global [cite:local-global] in Anderson mixing [cite:anderson-geometry] reaches
   the same minimum in **13 versus 24 iterations** (a 1.85× iteration speedup, robust across three seeds
   and three meshes — it never collapses to 1×), the second of the two validated edges. Each iteration
   is one back-solve for both, so the iteration ratio is the hardware-independent work ratio; the same

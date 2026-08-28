@@ -49,8 +49,8 @@ which published superiority claims survive confound control. Our contributions a
 
 - **A survey by axis and a lineage map (§4–§5).** We organize the annotated corpus by *component*
   rather than chronology, and we trace each graphics "innovation" to its named classical ancestor:
-  eigenvalue filtering to modified-Cholesky Hessian modification, the accelerated quadratic proxy to
-  Nesterov acceleration, projective dynamics to ADMM, IPC barriers to primal interior-point methods.
+  eigenvalue filtering to modified-Cholesky Hessian modification [cite:gill-murray-1974], the accelerated quadratic proxy to
+  Nesterov acceleration [cite:nesterov-1983], projective dynamics to ADMM [cite:boyd-2011-admm], IPC [cite:ipc] barriers to primal interior-point methods [cite:fiacco-mccormick-1968].
   Cited as adaptations rather than inventions, the lineage points each method at the classical analysis
   that explains — and often anticipates — its measured behavior (§8).
 

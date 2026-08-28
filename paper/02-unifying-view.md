@@ -16,13 +16,13 @@ and turns "method A versus method B" into "which axis differs, and by how much."
 
 | metric `M` | method | world |
 |---|---|---|
-| `I` (identity) | gradient descent; with momentum, Nesterov / heavy-ball | World-0 baseline |
+| `I` (identity) | gradient descent; with momentum, Nesterov / heavy-ball [cite:nesterov-1983] | World-0 baseline |
 | `∇²E` (energy Hessian) | Newton; projected Newton once the Hessian is filtered to SPD | all |
-| Laplacian / H¹ (Sobolev) | **AQP**, **BCQN**'s proxy — a fixed graph-Laplacian preconditioner | World-1 |
-| Killing operator | **AKVF** — an isometry-aware Riemannian metric | World-1 |
-| reweighted energy Hessian | **SLIM** — iteratively-reweighted Gauss–Newton | World-1 |
-| Fisher information | natural gradient (Amari) | ML |
-| a fixed factorized proxy | projective dynamics / local–global (ADMM under a quadratic proxy) | World-2 |
+| Laplacian / H¹ (Sobolev) | **AQP** [cite:aqp], **BCQN**'s proxy [cite:bcqn] — a fixed graph-Laplacian preconditioner | World-1 |
+| Killing operator | **AKVF** [cite:akvf] — an isometry-aware Riemannian metric | World-1 |
+| reweighted energy Hessian | **SLIM** [cite:slim] — iteratively-reweighted Gauss–Newton | World-1 |
+| Fisher information | natural gradient (Amari) [cite:amari-1998] | ML |
+| a fixed factorized proxy | projective dynamics [cite:projective-dynamics] / local–global [cite:local-global] (ADMM [cite:boyd-2011-admm] under a quadratic proxy) | World-2 |
 
 The payoff is a precise cross-field statement: **"Sobolev preconditioning" in graphics and "natural
 gradient" in machine learning are the same idea under different metrics** — both replace the Euclidean
