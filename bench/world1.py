@@ -38,10 +38,14 @@ def _vfree(free_dof):
     return free_dof[0::2]
 
 
-def solve_aqp(x0, tris, rest, free_dof, eta=100.0, max_iter=3000, tol=1e-6, c=1e-4):
+def solve_aqp(x0, tris, rest, free_dof, eta=100.0, max_iter=3000, tol=1e-6, c=1e-4, use_proxy=True):
     """Accelerated Quadratic Proxy (Kovalsky-Galun-Lipman 2016). Proxy H = cotan-Laplacian(rest)
     (tensor I2), fixed Nesterov theta from eta, Armijo line search from the accelerated point,
-    momentum restart on energy increase. Minimizes symmetric Dirichlet to the Newton minimum."""
+    momentum restart on energy increase. Minimizes symmetric Dirichlet to the Newton minimum.
+
+    use_proxy=False is the paper's own ablation baseline (`accelerated-gradient-descent`, AGD):
+    the IDENTICAL accelerated scheme with the Laplacian proxy DISABLED (descent direction d = -g
+    instead of d = L^{-1}(-g)). Comparing the two isolates exactly the proxy's contribution."""
     from .mesh import rest_quantities
     nv = rest.shape[0]
     vf = _vfree(free_dof)
@@ -71,8 +75,11 @@ def solve_aqp(x0, tris, rest, free_dof, eta=100.0, max_iter=3000, tol=1e-6, c=1e
         if gnorm < tol:
             status = "converged"; break
         d = np.zeros((nv, 2))
-        d[vf, 0] = solveL(-gv[vf, 0]); d[vf, 1] = solveL(-gv[vf, 1])
-        gd = float((gv[vf] * d[vf]).sum())           # = -g^T L^-1 g < 0 (descent)
+        if use_proxy:
+            d[vf, 0] = solveL(-gv[vf, 0]); d[vf, 1] = solveL(-gv[vf, 1])
+        else:
+            d[vf] = -gv[vf]                           # AGD ablation: identity metric (proxy off)
+        gd = float((gv[vf] * d[vf]).sum())           # descent measure (<0)
         alpha = 1.0
         while True:
             xn = y + alpha * d
@@ -91,7 +98,8 @@ def solve_aqp(x0, tris, rest, free_dof, eta=100.0, max_iter=3000, tol=1e-6, c=1e
         x_prev, x, Ecur = x, xn, En
     Efin = log[-1]["energy"] if log else np.inf
     gfin = log[-1]["grad_inf"] if log else np.inf
-    return {"filter": "aqp", "status": status, "iters": len(log) - (1 if status == "converged" else 0),
+    return {"filter": "aqp" if use_proxy else "agd", "status": status,
+            "iters": len(log) - (1 if status == "converged" else 0),
             "final_energy": Efin, "final_grad_inf": gfin, "wall_s": time.perf_counter() - t0,
             "counts": counts, "x": x.reshape(-1), "log": log}
 
