@@ -126,6 +126,9 @@ def run():
         _ba = max(_ba, np.abs(_peb(_H, 1.0) - _pe(_H, "absolute")).max())
         _bmin = min(_bmin, np.linalg.eigvalsh(_peb(_H, 0.75)).min())
     ok9 = _bc < 1e-12 and _ba < 1e-12 and _bmin > 0
+    from .incremental import _conformance as _inc_conf
+    inc_g, inc_a0, inc_blk = _inc_conf()           # incremental potential: gradPhi vs FD; A0 SPD; VBD block==Hessian block
+    ok10 = inc_g < 1e-5 and inc_a0 > 0 and inc_blk < 1e-9
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
     print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
@@ -139,7 +142,9 @@ def run():
     print(f"[conformance] untangle-penalty grad vs FD: max rel err {unt_err:.1e} -> {'PASS' if ok8 else 'FAIL'}")
     print(f"[conformance] blend filter =clamp@.5/=abs@1/SPD: {_bc:.1e}/{_ba:.1e}/min={_bmin:.1e} "
           f"-> {'PASS' if ok9 else 'FAIL'}")
-    ok = ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9
+    print(f"[conformance] incremental gradPhi/A0-SPD/VBD-block: {inc_g:.1e}/{inc_a0:.1e}/{inc_blk:.1e} "
+          f"-> {'PASS' if ok10 else 'FAIL'}")
+    ok = ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9 and ok10
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 
