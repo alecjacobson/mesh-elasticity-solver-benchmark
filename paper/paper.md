@@ -280,7 +280,7 @@ The energy fixes the geometry of the problem and, crucially, its behavior *throu
 Distortion energies (symmetric Dirichlet `‖F‖² + ‖F⁻¹‖²`, MIPS) are **barriers**: infinite at a
 degenerate or inverted element, so a solver cannot cross a fold. Classical hyperelastic Neo-Hookean
 (`μ/2(‖F‖²−d) − μ log J + λ/2 log²J`) is likewise a log-barrier at `J ≤ 0`. **Stable Neo-Hookean**
-(Smith–de Goes–Kim) removes the log barrier so the potential is finite for all `J`, enabling recovery
+(Smith–de Goes–Kim) [cite:stable-neo-hookean] removes the log barrier so the potential is finite for all `J`, enabling recovery
 from inverted initializations — a capability, not a speed, distinction (§8.4). The choice of energy is
 frequently entangled with the solver comparison; our headline case study (§8.1) turns on separating
 the two.

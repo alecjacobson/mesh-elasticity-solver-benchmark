@@ -28,9 +28,13 @@ definitional), and reverted three we had tried to score to `self-claimed` (not f
 | 11 | anderson → l-bfgs (speed) | per-iterate m vs 2m+1 inner products confirmed | qualified (cost-per-iter yes; cloth end-to-end needs dynamics) — code-inspection |
 | 12 | pitfalls-PDN → full-newton (robustness) | 100% vs 5% vs an un-globalized baseline | qualified (baseline-weak) — `filter_robustness.md` |
 
-Net P5.2 movement: 6 edges → validated (was 2), 32 → qualified (was ~19). The honest split is the
-point: 4 decisive validations, 4 regime-dependent qualifications, 3 not-reproduced-with-documented-why,
-1 tie. "Not reproduced here, and here is precisely why" (#6, #7, #10) is itself a reported result.
+Net P5.2 movement (post-review): **+10 qualified, −10 self-claimed; validated UNCHANGED at 2.** The
+verification pass qualified ten edges but validated **none** beyond the two that already met the high
+bar (official code / multi-condition profile). The honest split: **0 new validations**, ~7
+qualifications (four of them strong but held back by a single instance, a weak baseline, or a
+partly-definitional claim), 3 not-adjudicable-with-documented-why (2 cross-energy, 1
+regime-out-of-reach), 1 tie. "We cannot adjudicate this, and here is precisely why" (#5, #6, #7) is
+itself a reported result — and so is refusing to over-state the ones we can touch.
 
 ## TESTABLE-NOW (single-axis experiment on the current harness) — 14 edges
 
