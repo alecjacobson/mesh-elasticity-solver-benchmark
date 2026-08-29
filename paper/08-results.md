@@ -256,9 +256,9 @@ with its regime spelled out, while the *wall-clock/GPU* headlines remain out of 
 literal, not a hedge: several specific sub-claims did **not** reproduce on the iteration axis and we
 say so — Anderson-ADMM does not beat plain Projective Dynamics on iterations (11 vs 8), Composite
 Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5), and Projective Dynamics needs
-~4× *more* iterations than Newton, not fewer (`results/pd_vs_newton.md`) — its interactive-speed edge
-is factorization reuse (one prefactored constant system vs Newton's per-iteration refactorization), a
-per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay `qualified` on the
+~5× *more* iterations than Newton, not fewer (16–36 vs 4, `results/pd_vs_newton.md`) — its
+interactive-speed edge is factorization reuse (one prefactored constant system vs Newton's
+per-iteration refactorization), a per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay `qualified` on the
 *direction* they establish, not the headline margin. This pass moved
 **thirty-six edges** from the field's own word to `qualified`, and added *nothing* to `validated`
 (§9.1) — the honest yield of trying hard without inflating.

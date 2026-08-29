@@ -903,9 +903,9 @@ with its regime spelled out, while the \emph{wall-clock/GPU} headlines remain ou
 literal, not a hedge: several specific sub-claims did \textbf{not} reproduce on the iteration axis and we
 say so --- Anderson-ADMM does not beat plain Projective Dynamics on iterations (11 vs 8), Composite
 Majorization ties rather than beats projected-Newton (9.0 vs 8.8, \S8.5), and Projective Dynamics needs
-\textasciitilde{}4$\times$ \emph{more} iterations than Newton, not fewer (\texttt{results/pd\_vs\_newton.md}) --- its interactive-speed edge
-is factorization reuse (one prefactored constant system vs Newton's per-iteration refactorization), a
-per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay \texttt{qualified} on the
+\textasciitilde{}5$\times$ \emph{more} iterations than Newton, not fewer (16--36 vs 4, \texttt{results/pd\_vs\_newton.md}) --- its
+interactive-speed edge is factorization reuse (one prefactored constant system vs Newton's
+per-iteration refactorization), a per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay \texttt{qualified} on the
 \emph{direction} they establish, not the headline margin. This pass moved
 \textbf{thirty-six edges} from the field's own word to \texttt{qualified}, and added \emph{nothing} to \texttt{validated}
 (\S9.1) --- the honest yield of trying hard without inflating.

@@ -17,8 +17,8 @@ import numpy as np
 from .massspring import MSProblem, solve_pd, solve_newton
 
 
-def _run(P, rtol=1e-3):
-    rp = solve_pd(P, max_iter=2000, rtol=rtol)
+def _run(P, rtol=1e-5):
+    rp = solve_pd(P, max_iter=4000, rtol=rtol)
     rn = solve_newton(P, max_iter=400, rtol=rtol)
     pd_it, nw_it = rp["it"], rn["it"]
     # factorizations to reach the tol: PD factors its constant system ONCE (reused every iter);
@@ -47,7 +47,7 @@ def main():
     L = ["# Projective Dynamics vs full Newton — shared mass-spring potential (measured)", "",
          "Both minimize the **same** implicit-Euler potential `Φ(x) = ½h⁻²(x−x̃)ᵀM(x−x̃) + E(x)` "
          "(`bench/massspring.py`) and stop at the **same** residual criterion "
-         "`max|∇Φ[free]| / initial < 1e-3`, so iteration counts are directly comparable. PD is the "
+         "`max|∇Φ[free]| / initial < 1e-5`, so iteration counts are directly comparable. PD is the "
          "exact local/global (Liu 2013) minimizer of this Φ; Newton is projected-SPD with a line "
          "search. Run: `python -m bench.run_pd_vs_newton`.", "",
          "| mesh | free dof | spring k | PD iters | Newton iters | PD factorizations | Newton factorizations |",
