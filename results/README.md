@@ -64,6 +64,8 @@ polyscope-headless 3D tet.
 
 | CM ⭐ | **Composite Majorization — faithful impl, closes #14** (V3) | [`composite_majorization.md`](composite_majorization.md) | the real CM (Shtengel 2017): singular values via similarity/anti-similarity == SVD (1e-15), PSD convex-majorizer Hessian (eq. 9), **conformance-gated on the paper's Proposition 3.1 (H ⪰ ∇²f)**, monotone majorize-minimize, **same minimum as projected-Newton**; also symmetric ARAP. Honest finding on the iteration axis: **CM 9 ≈ projected-Newton 8.8** (`cm→projected-newton` NOT reproduced — a majorizer takes conservative steps; the '4× faster' is wall-clock on the shared analytic Hessian) but **CM 9 ≪ AQP 777** (`cm→aqp` reproduces, ~86×); SLIM 5 faster (`cm→slim` needs-scale). 3 edges → qualified |
 
+| PD/N | Projective Dynamics vs full Newton on the shared incremental potential | [`pd_vs_newton.md`](pd_vs_newton.md) | same Φ, same residual, so iterations compare directly. **NOT reproduced on the iteration axis:** PD needs ~4× **more** iters than Newton (PD 8–16 vs Newton 2–3) — first-order local/global vs second-order. The mechanism behind PD's interactive-speed reputation is on the **factorization** axis: PD prefactors its **constant** system **once** (1 factorization) vs Newton refactorizing every iter (2–3). `projective-dynamics→full-newton` (speed) → qualified (per-iteration-cost/wall-clock story, same shape as CM→PN: cheaper-per-step ≠ fewer-step) |
+
 ## What these already demonstrate for the benchmark's thesis
 
 1. **Confounds are real and measurable.** The near-incompressible filter comparison is confounded

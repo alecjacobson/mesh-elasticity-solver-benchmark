@@ -3,9 +3,9 @@
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 58 qualified, 78 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted thirty-five edges from self-claimed to
-qualified — ten from the contact-free triage backlog and twenty-five more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 59 qualified, 77 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted thirty-six edges from self-claimed to
+qualified — ten from the contact-free triage backlog and twenty-six more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator family (quasi-Newton/Liu-2017, Projective Dynamics, Chebyshev acceleration,
 Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD ablation), testing their
@@ -13,7 +13,8 @@ Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD abl
 (`results/dynamics_solvers.md`, `results/agd_vs_aqp.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). But — tellingly — that work
 added *nothing* to the validated column: it stays at the same two edges,
 SLIM over AQP on iteration count (§8.2, grounded on official libigl code *and* a seed × mesh profile —
-SLIM's 4–5 iterations stay below AQP's best case at every one of four resolutions, `results/slim.md`)
+SLIM's ~5 iterations, worst case 6, stay below AQP's best case at every one of four resolutions,
+`results/slim.md`)
 and Anderson acceleration over ARAP local–global on convergence (§8.6, a reproducible multi-seed ×
 multi-mesh benchmark). Both of those meet a high bar (official code *and*/or a multi-condition
 profile); the new results, strong as some are, do not, and we resisted the temptation to inflate them.
@@ -67,7 +68,7 @@ clamp-projected, line-searched Newton stays well-conditioned (so the result is a
 harness, not evidence against the paper); and AQP-faster-than-Newton is confounded by the C++/Python
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 **tie**. "We cannot adjudicate this, and here is precisely why" is itself a reported result. The
-majority of the graph, meanwhile, remains out of reach — the 78 *self-claimed* edges we took on the
+majority of the graph, meanwhile, remains out of reach — the 77 *self-claimed* edges we took on the
 field's word plus the 22 *unmeasured* World-3 edges — and we label each with the *specific reason*
 rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
 the buckets below are approximate and need not sum exactly to the ledger):

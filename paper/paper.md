@@ -34,7 +34,7 @@ that a proxy method's celebrated mesh-independence is a **loose-tolerance artifa
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
 sign-indefinite eigenmode of the element Hessian.
 
-Of the 160 extracted superiority edges, only **2 are independently validated** and **58 qualified**
+Of the 160 extracted superiority edges, only **2 are independently validated** and **59 qualified**
 by our measurements; the rest remain the papers' own word pending faithful re-measurement. This is
 the honest core: rather than a leaderboard, the benchmark and its **adversarial review loop** — in
 which the harness's confound-untangling is applied reflexively to our *own* conclusions, forcing
@@ -132,7 +132,7 @@ which published superiority claims survive confound control. Our contributions a
   several well-cited claims (§8).
 
 **The honest core.** Of the 160 extracted superiority edges, only two are independently validated and
-58 qualified by our measurements; the remainder stay the papers' own word pending faithful
+59 qualified by our measurements; the remainder stay the papers' own word pending faithful
 re-measurement. We regard this ledger, and the **adversarial review loop** that produced it — in
 which the benchmark's confound-untangling was turned reflexively on our *own* draft conclusions,
 forcing repeated retractions of our own overreach — as the report's real deliverable: not a
@@ -427,8 +427,8 @@ evidence:
 
 ![Claims ledger](../figures/claims_ledger.png)
 
-*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 78 are the papers' own
-word (`self-claimed`), 22 are unmeasured (contact), 58 are qualified, and only 2 are independently
+*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 77 are the papers' own
+word (`self-claimed`), 22 are unmeasured (contact), 59 are qualified, and only 2 are independently
 validated. The benchmark **qualifies** far more than it overturns — and refutes no published edge
 outright.*
 
@@ -625,10 +625,12 @@ clearly growing one at tight τ, with min–max bands and CI-gated exponents.*
   baseline.
 
 - **What *does* validate: SLIM > AQP.** To a fair relative-energy tolerance, official libigl SLIM [cite:slim]
-  reaches the symmetric-Dirichlet minimum in **5 iterations versus AQP's 19** — one of only two
-  independently validated edges (§9.1). The soft-versus-hard-constraint confound was checked and cleared;
-  the wall-clock is C++/Python-confounded, so the *counts* carry the verdict, and the real trade-off
-  is SLIM's 5 factorizations against AQP's single one (`results/slim.md`).
+  reaches the symmetric-Dirichlet minimum in **6 iterations versus AQP's 19** (counts aligned to a
+  common pre-step convention), and a seed × mesh profile confirms SLIM's worst case stays below AQP's
+  best case at every one of four resolutions — one of only two independently validated edges (§9.1).
+  The soft-versus-hard-constraint confound was checked and cleared; the wall-clock is
+  C++/Python-confounded, so the *counts* carry the verdict, and the real trade-off is SLIM's 6
+  factorizations against AQP's single one (`results/slim.md`).
 
 ## 8.3 Bundled methods entangle rather than add
 
@@ -785,10 +787,13 @@ The recurring shape: on the axis a 2D prototype can measure honestly — iterati
 violation, position error — the simulation family's *convergence and quality* claims mostly hold, each
 with its regime spelled out, while the *wall-clock/GPU* headlines remain out of reach. "Mostly" is
 literal, not a hedge: several specific sub-claims did **not** reproduce on the iteration axis and we
-say so — Anderson-ADMM does not beat plain Projective Dynamics on iterations (11 vs 8), and Composite
-Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5); those stay `qualified` on the
+say so — Anderson-ADMM does not beat plain Projective Dynamics on iterations (11 vs 8), Composite
+Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5), and Projective Dynamics needs
+~4× *more* iterations than Newton, not fewer (`results/pd_vs_newton.md`) — its interactive-speed edge
+is factorization reuse (one prefactored constant system vs Newton's per-iteration refactorization), a
+per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay `qualified` on the
 *direction* they establish, not the headline margin. This pass moved
-**thirty-five edges** from the field's own word to `qualified`, and added *nothing* to `validated`
+**thirty-six edges** from the field's own word to `qualified`, and added *nothing* to `validated`
 (§9.1) — the honest yield of trying hard without inflating.
 
 ---
@@ -798,9 +803,9 @@ Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5); those 
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 58 qualified, 78 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted thirty-five edges from self-claimed to
-qualified — ten from the contact-free triage backlog and twenty-five more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 59 qualified, 77 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted thirty-six edges from self-claimed to
+qualified — ten from the contact-free triage backlog and twenty-six more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator family (quasi-Newton/Liu-2017, Projective Dynamics, Chebyshev acceleration,
 Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD ablation), testing their
@@ -808,7 +813,8 @@ Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD abl
 (`results/dynamics_solvers.md`, `results/agd_vs_aqp.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). But — tellingly — that work
 added *nothing* to the validated column: it stays at the same two edges,
 SLIM over AQP on iteration count (§8.2, grounded on official libigl code *and* a seed × mesh profile —
-SLIM's 4–5 iterations stay below AQP's best case at every one of four resolutions, `results/slim.md`)
+SLIM's ~5 iterations, worst case 6, stay below AQP's best case at every one of four resolutions,
+`results/slim.md`)
 and Anderson acceleration over ARAP local–global on convergence (§8.6, a reproducible multi-seed ×
 multi-mesh benchmark). Both of those meet a high bar (official code *and*/or a multi-condition
 profile); the new results, strong as some are, do not, and we resisted the temptation to inflate them.
@@ -862,7 +868,7 @@ clamp-projected, line-searched Newton stays well-conditioned (so the result is a
 harness, not evidence against the paper); and AQP-faster-than-Newton is confounded by the C++/Python
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 **tie**. "We cannot adjudicate this, and here is precisely why" is itself a reported result. The
-majority of the graph, meanwhile, remains out of reach — the 78 *self-claimed* edges we took on the
+majority of the graph, meanwhile, remains out of reach — the 77 *self-claimed* edges we took on the
 field's word plus the 22 *unmeasured* World-3 edges — and we label each with the *specific reason*
 rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
 the buckets below are approximate and need not sum exactly to the ledger):

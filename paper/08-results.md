@@ -92,10 +92,12 @@ clearly growing one at tight τ, with min–max bands and CI-gated exponents.*
   baseline.
 
 - **What *does* validate: SLIM > AQP.** To a fair relative-energy tolerance, official libigl SLIM [cite:slim]
-  reaches the symmetric-Dirichlet minimum in **5 iterations versus AQP's 19** — one of only two
-  independently validated edges (§9.1). The soft-versus-hard-constraint confound was checked and cleared;
-  the wall-clock is C++/Python-confounded, so the *counts* carry the verdict, and the real trade-off
-  is SLIM's 5 factorizations against AQP's single one (`results/slim.md`).
+  reaches the symmetric-Dirichlet minimum in **6 iterations versus AQP's 19** (counts aligned to a
+  common pre-step convention), and a seed × mesh profile confirms SLIM's worst case stays below AQP's
+  best case at every one of four resolutions — one of only two independently validated edges (§9.1).
+  The soft-versus-hard-constraint confound was checked and cleared; the wall-clock is
+  C++/Python-confounded, so the *counts* carry the verdict, and the real trade-off is SLIM's 6
+  factorizations against AQP's single one (`results/slim.md`).
 
 ## 8.3 Bundled methods entangle rather than add
 
@@ -252,8 +254,11 @@ The recurring shape: on the axis a 2D prototype can measure honestly — iterati
 violation, position error — the simulation family's *convergence and quality* claims mostly hold, each
 with its regime spelled out, while the *wall-clock/GPU* headlines remain out of reach. "Mostly" is
 literal, not a hedge: several specific sub-claims did **not** reproduce on the iteration axis and we
-say so — Anderson-ADMM does not beat plain Projective Dynamics on iterations (11 vs 8), and Composite
-Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5); those stay `qualified` on the
+say so — Anderson-ADMM does not beat plain Projective Dynamics on iterations (11 vs 8), Composite
+Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5), and Projective Dynamics needs
+~4× *more* iterations than Newton, not fewer (`results/pd_vs_newton.md`) — its interactive-speed edge
+is factorization reuse (one prefactored constant system vs Newton's per-iteration refactorization), a
+per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay `qualified` on the
 *direction* they establish, not the headline margin. This pass moved
-**thirty-five edges** from the field's own word to `qualified`, and added *nothing* to `validated`
+**thirty-six edges** from the field's own word to `qualified`, and added *nothing* to `validated`
 (§9.1) — the honest yield of trying hard without inflating.

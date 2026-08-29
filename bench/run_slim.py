@@ -56,7 +56,10 @@ def _slim_aqp_profile(igl, meshes, seeds):
                 if len(sE) > 1 and abs(sE[-1] - sE[-2]) < 1e-13:
                     break
             ra = world1.solve_aqp(x0, tris, rest, free, max_iter=4000, tol=1e-7)
-            si = _iters_to_energy(sE, E0, Estar)
+            # FAIR iteration convention: AQP's log[0] is E(x0) (pre-step), so its index == number of
+            # steps taken. SLIM's sE[0] is POST first solve, so prepend E0 to count solves on the same
+            # pre-step convention (otherwise SLIM is silently undercounted by 1 vs AQP).
+            si = _iters_to_energy([E0] + sE, E0, Estar)
             ai = _iters_to_energy([e["energy"] for e in ra["log"]], E0, Estar)
             if si is not None:
                 srows.append(si)
@@ -99,7 +102,7 @@ def main():
         slim_E.append(energy_only(UV.reshape(-1), tris, Bs, areas, sd))
         if len(slim_E) > 1 and abs(slim_E[-1] - slim_E[-2]) < 1e-13:
             break
-    slim_it = _iters_to_energy(slim_E, E0, Estar)
+    slim_it = _iters_to_energy([E0] + slim_E, E0, Estar)  # prepend E0: count solves on AQP's pre-step convention
     slim_drift = float(np.max(np.abs(UV[bidx] - bc)))   # boundary-constraint satisfaction
 
     # our methods, per-iteration energy from their logs
@@ -170,8 +173,9 @@ def main():
               f"proxy** that refactorizes a global system each iteration -- *not* a first-order method "
               f"like AQP; that is why it needs far fewer iterations.",
               f"- **⚠️ Do NOT read the raw wall-clock across the SLIM row:** libigl SLIM is compiled "
-              f"**C++**, our AQP/L-BFGS/Newton are pure **Python/NumPy**. SLIM does the *same* "
-              f"{slim_it} iterations and {rows[0][3]} factorizations as Newton yet reports ~{nw_wall/slim_wall:.0f}× "
+              f"**C++**, our AQP/L-BFGS/Newton are pure **Python/NumPy**. SLIM does per-iteration work "
+              f"comparable to Newton (both refactorize a global system each iteration: SLIM {slim_it} "
+              f"factorizations, Newton {nw_it}) yet reports ~{nw_wall/slim_wall:.0f}× "
               f"less wall-clock -- that gap is the **compiled-vs-interpreted implementation confound**, "
               f"not an algorithmic property. Wall-clock is only comparable *within* the Python group "
               f"(there L-BFGS {lb_wall*1e3:.0f}ms < Newton {nw_wall*1e3:.0f}ms < AQP {aqp_wall*1e3:.0f}ms).",
@@ -184,7 +188,8 @@ def main():
               f"count blows up with mesh size, outrunning the few mesh-independent factorizations a "
               f"Newton-class method needs; the factorize-once win holds only at loose tau).",
               "",
-              "_Caveat: energy-tolerance criterion; single 8×8 scenario/seed; SLIM's scale- and "
+              "_Caveat: energy-tolerance criterion; this headline row is a single 8×8 scenario at the "
+              "default seed (7, distinct from the multi-seed profile's seeds 0–4 below); SLIM's scale- and "
               "mesh-independence and no-flip headlines are NOT tested here (see #29). Official-code "
               "SLIM grounds this comparison (D3), but the C++/Python wall-clock boundary means the "
               "HW-independent counts carry the verdict, not raw milliseconds._"]
@@ -221,17 +226,20 @@ def main():
             lines.append(f"| {p['nx']}×{p['nx']} | {p['verts']} | "
                          f"{np.mean(sm):.1f} [{min(sm)}–{max(sm)}] | "
                          f"{np.mean(am):.1f} [{min(am)}–{max(am)}] | {ratio:.1f}× |")
+        pk = [p for p in prof if p["slim"] and p["aqp"]]
+        s_lo = min(min(p["slim"]) for p in pk); s_hi = max(max(p["slim"]) for p in pk)
+        a_lo = min(min(p["aqp"]) for p in pk); a_hi = max(max(p["aqp"]) for p in pk)
         lines += ["",
-                  ("The SLIM-beats-AQP iteration gap **holds on every seed at every resolution: the "
-                   "per-mesh ranges never overlap** — SLIM's *worst* case (5 iters) stays below AQP's "
-                   "*best* case (≥7) at all four resolutions. SLIM's Gauss-Newton count is nearly flat "
-                   "(~4–5 iters, mesh-independent); AQP's first-order count is far larger and "
-                   "**high-variance** (single-seed values span 7–134), and its *mean* is **non-monotonic** "
-                   "in mesh size (it does not grow cleanly with resolution — do not read a scaling law "
-                   "into it). What the profile *does* establish is that `slim→aqp` is neither a "
-                   "single-seed nor a single-resolution artifact: the ordering is uniform. This is the "
-                   "seed×mesh profile the note required; combined with the official-code grounding (D3) "
-                   "it upholds the *validated* status."
+                  (f"The SLIM-beats-AQP iteration gap **holds on every seed at every resolution: the "
+                   f"per-mesh ranges never overlap** — SLIM's *worst* case ({s_hi} iters) stays below "
+                   f"AQP's *best* case ({a_lo}) at all {len(pk)} resolutions. SLIM's Gauss-Newton count "
+                   f"is nearly flat (~5 iters, range {s_lo}–{s_hi}, mesh-independent); AQP's first-order "
+                   f"count is far larger and **high-variance** (single-seed values span {a_lo}–{a_hi}), "
+                   f"and its *mean* is **non-monotonic** in mesh size (it does not grow cleanly with "
+                   f"resolution — do not read a scaling law into it). What the profile *does* establish "
+                   f"is that `slim→aqp` is neither a single-seed nor a single-resolution artifact: the "
+                   f"ordering is uniform. This is the seed×mesh profile the note required; combined with "
+                   f"the official-code grounding (D3) it upholds the *validated* status."
                    if gap_holds else
                    "On at least one resolution the per-mesh ranges OVERLAP — the gap is not uniform, so "
                    "the head-to-head is resolution-dependent; treat the margin as regime-specific.")]
