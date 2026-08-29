@@ -132,6 +132,9 @@ def main():
                  "instance (the paper's SLIM disadvantage is a large-mesh/far-from-init scalability "
                  "regime, needs-scale, not reached here).")
     L += ["",
+          "_Uses the paper's TERM-GATHERED majorizer (eq. 18, the tighter version the paper employs for "
+          "symmetric Dirichlet); the verdict is identical to the basic eq-9 CM, so the tie with "
+          "projected-Newton is not an untightened-bound artifact._", "",
           "_Faithfulness note: this is the real CM (gated on Prop 3.1 majorization + same-minimum), also "
           "implemented for symmetric ARAP (`cm_element_hessian_sarap`), where the same ordering holds "
           "(CM slightly above clamp). The honest finding: CM's headline 'faster than projected-Newton' "

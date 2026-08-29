@@ -61,12 +61,23 @@ def _components(F, B, eps=1e-9):
     return Sig, sig, dhS, dhs, Hh, Jg, Ha, Hb
 
 
-def _cm_from_parts(dhS, dhs, HhPlus, Jg, Ha, Hb, area):
-    """Assemble the CM Hessian (eq. 9) from the energy's ∂h/∂Σ, ∂h/∂σ, ∇²h⁺ and the g-pieces."""
-    H = (Jg.T @ HhPlus @ Jg
-         + max(dhS, 0.0) * (Ha + Hb)          # (∂h/∂Σ)_+ ∇²(α+β)   [g⁺_Σ = α+β]
-         + max(dhs, 0.0) * Ha                 # (∂h/∂σ)_+ ∇²α       [g⁺_σ = α]
-         + min(dhs, 0.0) * (-Hb))             # (∂h/∂σ)_- ∇²(−β)    [g⁻_σ = −β]
+def _cm_from_parts(dhS, dhs, HhPlus, Jg, Ha, Hb, area, gather=True):
+    """Assemble the CM Hessian from the energy's ∂h/∂Σ, ∂h/∂σ, ∇²h⁺ and the g-pieces.
+
+    gather=False is the basic eq. 9:
+        H = Jgᵀ∇²h⁺Jg + (∂h/∂Σ)_+ (∇²α+∇²β) + (∂h/∂σ)_+ ∇²α + (∂h/∂σ)_- ∇²(−β).
+    gather=True is the paper's TERM GATHERING (eq. 18; the paper states it uses this for symmetric
+    Dirichlet, §4): since ∇²α (resp. ∇²β) appears in two rectified terms sharing the whole matrix,
+    (a)_+ M + (b)_+ M ⪰ (a+b)_+ M lets us tighten the coefficients to the rectified TRUE second-order
+    coefficients — ∇²α gets (∂h/∂Σ+∂h/∂σ)_+ and ∇²β gets (∂h/∂Σ−∂h/∂σ)_+ — giving a TIGHTER majorizer
+    H_basic ⪰ H_gathered ⪰ ∇²f (still PSD, still majorizing)."""
+    if gather:
+        cA = max(dhS + dhs, 0.0)              # (∂h/∂Σ + ∂h/∂σ)_+  -> rectified true ∇²α coefficient
+        cB = max(dhS - dhs, 0.0)              # (∂h/∂Σ − ∂h/∂σ)_+  -> rectified true ∇²β coefficient
+        H = Jg.T @ HhPlus @ Jg + cA * Ha + cB * Hb
+    else:
+        H = (Jg.T @ HhPlus @ Jg + max(dhS, 0.0) * (Ha + Hb)
+             + max(dhs, 0.0) * Ha + min(dhs, 0.0) * (-Hb))
     return area * 0.5 * (H + H.T)
 
 
