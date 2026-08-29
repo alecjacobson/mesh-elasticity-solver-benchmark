@@ -50,6 +50,16 @@ def main():
     q_xpbd = perr(ms.solve_pbd(P, xpbd=True, max_iter=Kq, rtol=0.0)["x"])
     q_vbd = perr(ms.solve_pbng(P, max_iter=Kq, rtol=0.0)["x"])
     q_pbd = perr(ms.solve_pbd(P, xpbd=False, max_iter=Kq, rtol=0.0)["x"])
+    # robustness of "visually indistinguishable": sweep stiffness x timestep (XPBD's error grows with
+    # both -- it is sub-percent in the interactive low-k/small-dt regime, large at high k x large dt)
+    q_sweep = []
+    for kk in (1e3, 1e4, 1e5):
+        for dd in (1.0 / 60, 1.0 / 8):
+            Pk = ms.MSProblem(n=8, dt=dd, k=kk, overshoot=1.6)
+            xtk = ms.solve_newton(Pk, max_iter=400, rtol=1e-8)["x"]
+            sk = float(np.max(np.abs(xtk[Pk.free]))) + 1e-12
+            xk = ms.solve_pbd(Pk, xpbd=True, max_iter=Kq, rtol=0.0)["x"]
+            q_sweep.append((kk, dd, float(np.max(np.abs((xk - xtk)[Pk.free]))) / sk))
 
     L = ["# Constraint-projection solvers on one mass-spring timestep (measured, V2.2)", "",
          "Mass-spring implicit-Euler step (`bench/massspring.py`, conformance-gated: ∇Φ vs FD 1e-9, PD "
@@ -75,6 +85,12 @@ def main():
          f"| XPBD | {q_xpbd:.1%} |",
          f"| nonlinear-GS / VBD-style | {q_vbd:.1%} |",
          f"| PBD | {q_pbd:.1%} |", "",
+         f"XPBD position error after {Kq} sweeps is **regime-dependent** — sweeping stiffness × "
+         "timestep (it grows with both):", "",
+         "| k \\ dt | 1/60 | 1/8 |", "|---|---:|---:|",
+         f"| 1e3 | {q_sweep[0][2]:.1%} | {q_sweep[1][2]:.1%} |",
+         f"| 1e4 | {q_sweep[2][2]:.1%} | {q_sweep[3][2]:.1%} |",
+         f"| 1e5 | {q_sweep[4][2]:.1%} | {q_sweep[5][2]:.1%} |", "",
          "## Observed — edges adjudicated", ""]
 
     L.append(f"- **`primal-xpbd → xpbd` (convergence) — REPRODUCES:** XPBD **stagnates** on the "
@@ -98,17 +114,24 @@ def main():
              f"{xpbd_flat:.1f}×, converging to the compliant equilibrium), while PBD's keeps shrinking "
              f"({pbd_drop:.0f}× smaller by K={Ks[-1]}) — i.e. PBD **stiffens with iteration count** "
              "(the material gets artificially stiffer the more you iterate), exactly XPBD's headline.")
-    L.append(f"- **`xpbd → full-newton` (quality) — REPRODUCES:** although XPBD stagnates on the "
-             f"*residual*, its final POSITIONS are within **{q_xpbd:.1%}** (max) of the true Newton "
-             "implicit-Euler solution — sub-percent, i.e. **visually indistinguishable** from the more "
-             "expensive Newton reference, exactly XPBD's selling point (cheap and looks right even "
-             "though not converged in the residual sense).")
-    L.append(f"- **`vertex-block-descent → xpbd` (quality) — REPRODUCES (with one wording caveat):** "
-             f"the nonlinear-GS / VBD-style solver drives the position error to **{q_vbd:.1%}** — it "
-             f"**matches the true implicit-Euler** solution — whereas XPBD plateaus at {q_xpbd:.1%} and "
-             "never closes the gap. So 'VBD matches true implicit Euler where XPBD [does not]' holds. NB "
-             "the claim's word 'diverges' is imprecise for XPBD (it *stagnates* at a small error); it is "
-             f"**PBD** that actually moves away (its position error grows to {q_pbd:.0%}).")
+    q_hi = max(v for *_, v in q_sweep)
+    L.append(f"- **`xpbd → full-newton` (quality) — only at LOW stiffness; NOT in XPBD's stiff-cloth "
+             f"target regime:** at a soft operating point (k=1e3, dt=1/30) XPBD's 20-sweep positions are "
+             f"within **{q_xpbd:.1%}** of the true Newton solution — visually indistinguishable. But that "
+             "is exactly the regime that flatters it: sweeping stiffness × timestep (table above) the "
+             f"same 20-sweep error climbs to **{q_hi:.0%}** by k=1e5×dt=1/8, and (measured beyond the "
+             "table) ~64% at k=1e6 or dt=1. Since XPBD's whole selling point is STIFF cloth, the regime "
+             "where 'visually indistinguishable' actually matters is where it FAILS at a fixed low "
+             "budget. So the claim is heavily operating-point-tuned: it holds for soft materials/short "
+             "steps, not for the stiff regime XPBD targets. Qualified, regime-restricted.")
+    L.append(f"- **`vertex-block-descent → xpbd` (quality) — reproduces the *phenomenon*, not "
+             f"VBD-specifically:** a **generic** nonlinear Gauss–Seidel (plain per-vertex Newton -- NOT "
+             "VBD; no vertex colouring, no block-parallel structure, no VBD acceleration; this predates "
+             f"Chen-2024) drives the position error to **{q_vbd:.1%}** — it matches the true "
+             f"implicit-Euler solution — whereas XPBD plateaus at {q_xpbd:.1%}. So 'a primal solver "
+             "matches true implicit Euler where XPBD does not' holds, but this is a property of ANY "
+             "consistent primal solver, not of VBD specifically. NB the claim's word 'diverges' is "
+             f"imprecise for XPBD (it *stagnates*); it is **PBD** that moves away (error grows to {q_pbd:.0%}).")
     L += ["",
           "_Caveat: single 2D mass-spring timestep, one mesh/dt/stiffness; iteration counts and "
           "constraint-violation trends are hardware-independent. The GPU/throughput speed headlines "

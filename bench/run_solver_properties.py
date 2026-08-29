@@ -60,23 +60,26 @@ def main():
          "needs a clamp/SPD filter AND a backtracking line search every iteration. The simplicity claim "
          "is architectural and holds by construction.",
          f"- **`fast-mass-spring → full-newton` and `quasi-newton-liu2017 → full-newton` (speed) — "
-         f"REPRODUCE on the factorization axis:** local/global and quasi-Newton **prefactor ONCE** (1 "
-         f"factorization, then {pd_bs} cheap back-solves) while Newton does **{nw_fac} full "
-         f"factorizations** (one per iteration). A back-solve is far cheaper than a factorization, so a "
-         "PD/quasi-Newton *iteration* is much cheaper than a Newton *iteration* — the mechanism behind "
-         "'much faster initial work-to-error' and '>10× faster than one Newton iteration'. The literal "
-         "× is wall-clock/scale-dependent (hardware-confounded); the HW-independent count carries the "
-         "mechanism. (Newton still needs the fewest iterations — the trade is iterations vs "
-         "per-iteration cost.)",
-         f"- **`projective-dynamics → fast-mass-spring` (generality) — REPRODUCES:** the same PD "
-         f"machinery runs on a FEM **Neo-Hookean** energy ({fem_pd} iters), not only linear "
-         "mass-springs — general nodal systems, exactly Bouaziz-2014's generalization of Liu-2013.",
+         f"MECHANISM shown, NOT a speed reproduction:** local/global and quasi-Newton **prefactor ONCE** "
+         f"(1 factorization, then {pd_bs} cheap back-solves) while Newton does **{nw_fac} full "
+         f"factorizations** (one per iteration). A back-solve is asymptotically cheaper than a "
+         "factorization (by inspection, not timed) — the *mechanism* behind 'faster per iteration'. This "
+         "is NOT a reproduction of the speed claim: the literal × is wall-clock/scale-dependent "
+         f"(hardware-confounded, not claimed), {pd_bs} back-solves vs {nw_fac} factorizations could net "
+         "SLOWER on a small dense system, and Newton needs the fewest iterations. Mechanism only.",
          f"- **`quasi-newton-liu2017 → projective-dynamics` (generality) — REPRODUCES:** quasi-Newton "
-         f"L-BFGS minimizes the FEM Neo-Hookean incremental potential exactly ({fem_qn} iters); "
-         "exact local/global Projective Dynamics is restricted to quadratic-fitting energies (mass-"
-         "spring/ARAP) and only *approximates* a general energy via a fixed proxy. So quasi-Newton "
-         "supports arbitrary hyperelastic models (Neo-Hookean/StVK/…) that exact PD cannot — the "
-         "generality claim holds.",
+         f"L-BFGS minimizes the FEM Neo-Hookean incremental potential exactly ({fem_qn} iters) — it is "
+         "just L-BFGS on an arbitrary Φ. Exact local/global Projective Dynamics is restricted to "
+         "quadratic-fitting energies (mass-spring/ARAP); on a general energy it only *approximates* via "
+         f"a fixed proxy (our FEM 'PD', {fem_pd} iters, IS exactly that m=0 approximation, not exact PD). "
+         "So quasi-Newton supports arbitrary hyperelastic models (Neo-Hookean/StVK/…) that exact PD "
+         "cannot — the generality claim holds.",
+         "- **`projective-dynamics → fast-mass-spring` (generality) — NOT faithfully demonstrated, left "
+         "self-claimed:** our FEM 'PD' is the fixed-proxy m=0 *approximation*, not exact Projective "
+         "Dynamics with general constraint projections. Running it on Neo-Hookean shows the approximation "
+         "generalizes, NOT PD's actual constraint-projection generality over Liu-2013 (strain limiting, "
+         "volume, collisions). Faithfully testing that needs real PD constraint projections we did not "
+         "implement; we do not claim it.",
          "",
          "_Caveat: simplicity/generality are structural facts demonstrated on the testbeds, not "
          "iteration races; the speed items are adjudicated on factorization/back-solve COUNTS "

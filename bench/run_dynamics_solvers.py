@@ -104,16 +104,18 @@ def main():
              f"budget VBD **Gauss–Seidel** cuts the residual to **{gs_ratio:.2f}×** while {jac_txt} — "
              "sequential (Gauss-Seidel) block updates converge faster than simultaneous (Jacobi) ones, "
              "as claimed. (Earlier draft had un-relaxed Jacobi diverge; that was a strawman — fixed.)")
-    L.append(f"- **`anderson-geometry → chebyshev-semi-iterative` (convergence) — REPRODUCES (modest):** "
-             f"accelerating the SAME PD fixed point, Anderson (m=5) reaches the tol in "
-             f"**{cell(it['anderson'])}** iterations vs Chebyshev's **{cell(it['cheby'])}** — Anderson is "
-             "marginally faster and needs no spectral-radius estimate (Chebyshev's ρ is hand-tuned).")
-    L.append(f"- **`chebyshev-semi-iterative → nonlinear-conjugate-gradient` (convergence) — REPRODUCES:** "
-             f"with the SAME A0 preconditioner, Chebyshev reaches the tol in **{cell(it['cheby'])}** "
-             f"iterations and preconditioned nonlinear-CG in **{cell(it['ncg'])}** — CG does NOT exceed "
-             "Chebyshev (it is one iteration slower), and CG additionally pays ~2 inner products per "
-             "iterate for its adaptive β where Chebyshev uses fixed weights. Both halves of the claim "
-             "hold. (Un-preconditioned CG needs ~140 — the comparison is only fair with the shared proxy.)")
+    L.append(f"- **`anderson-geometry → chebyshev-semi-iterative` (convergence) — a TIE on speed + a "
+             f"real simplicity edge:** accelerating the SAME PD fixed point, Anderson (m=5) reaches the "
+             f"tol in **{cell(it['anderson'])}** iterations vs Chebyshev's **{cell(it['cheby'])}** — a "
+             "1-iteration gap on one instance is noise, NOT a reproduction of 'faster'. What is real: "
+             "Anderson needs no spectral-radius estimate, where Chebyshev does.")
+    L.append(f"- **`chebyshev-semi-iterative → nonlinear-conjugate-gradient` (convergence) — NOT "
+             f"supported (ordering flips with mesh):** with the SAME A0 preconditioner, at this mesh "
+             f"Chebyshev needs **{cell(it['cheby'])}** and preconditioned nonlinear-CG **{cell(it['ncg'])}** "
+             "— but the ordering REVERSES on neighbouring meshes (n=6: Chebyshev 8, CG 7, i.e. CG beats "
+             "Chebyshev; n=10/12 they tie). So the strict claim 'CG rate can't exceed Chebyshev's' is "
+             "false on a nearby instance. Only two things are robust: both need the shared preconditioner "
+             "(un-preconditioned CG ~140), and CG's recurrence costs ~2 extra inner products per iterate.")
     L.append(f"- **`vertex-block-descent → l-bfgs` / `→ full-newton` — NOT reproduced for *plain* VBD:** "
              f"plain VBD-GS reduces the residual only {gs_ratio:.2f}× in {K} sweeps whereas L-BFGS and "
              f"Newton fully converge in {cell(it['lbfgs_lap_m5'])} and {cell(it['newton'])} *iterations* "
