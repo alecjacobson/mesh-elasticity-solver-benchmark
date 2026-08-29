@@ -250,6 +250,10 @@ and are not adjudicated.
 
 The recurring shape: on the axis a 2D prototype can measure honestly — iterations, constraint
 violation, position error — the simulation family's *convergence and quality* claims mostly hold, each
-with its regime spelled out, while the *wall-clock/GPU* headlines remain out of reach. This pass moved
+with its regime spelled out, while the *wall-clock/GPU* headlines remain out of reach. "Mostly" is
+literal, not a hedge: several specific sub-claims did **not** reproduce on the iteration axis and we
+say so — Anderson-ADMM does not beat plain Projective Dynamics on iterations (11 vs 8), and Composite
+Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5); those stay `qualified` on the
+*direction* they establish, not the headline margin. This pass moved
 **thirty-five edges** from the field's own word to `qualified`, and added *nothing* to `validated`
 (§9.1) — the honest yield of trying hard without inflating.

@@ -783,7 +783,11 @@ and are not adjudicated.
 
 The recurring shape: on the axis a 2D prototype can measure honestly — iterations, constraint
 violation, position error — the simulation family's *convergence and quality* claims mostly hold, each
-with its regime spelled out, while the *wall-clock/GPU* headlines remain out of reach. This pass moved
+with its regime spelled out, while the *wall-clock/GPU* headlines remain out of reach. "Mostly" is
+literal, not a hedge: several specific sub-claims did **not** reproduce on the iteration axis and we
+say so — Anderson-ADMM does not beat plain Projective Dynamics on iterations (11 vs 8), and Composite
+Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5); those stay `qualified` on the
+*direction* they establish, not the headline margin. This pass moved
 **thirty-five edges** from the field's own word to `qualified`, and added *nothing* to `validated`
 (§9.1) — the honest yield of trying hard without inflating.
 
@@ -857,8 +861,10 @@ clamp-projected, line-searched Newton stays well-conditioned (so the result is a
 harness, not evidence against the paper); and AQP-faster-than-Newton is confounded by the C++/Python
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 **tie**. "We cannot adjudicate this, and here is precisely why" is itself a reported result. The
-majority of the graph, meanwhile, remains out of reach — and we label each edge with the *specific
-reason* rather than dropping it:
+majority of the graph, meanwhile, remains out of reach — the 78 *self-claimed* edges we took on the
+field's word plus the 22 *unmeasured* World-3 edges — and we label each with the *specific reason*
+rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
+the buckets below are approximate and need not sum exactly to the ledger):
 
 - **needs unavailable code** (~18 edges) — the claim requires the paper's own implementation, which we
   will not substitute with a look-alike (that would beg the question). A "try-harder" pass reclaimed
@@ -872,8 +878,9 @@ reason* rather than dropping it:
   *lifted-content* energy of an injective-mapping method whose exact per-simplex formula needs its
   paper, and a handful of competitor ports (an interior-point QP/SOCP). The corresponding
   GPU-throughput/wall-clock *speed* headlines stay hardware-confounded, below.
-- **needs contact physics** (22) — World-3 (IPC barriers, continuous collision detection, friction);
-  v1 implements none, so an intersection-free or friction claim has no harness to run in.
+- **needs contact physics** (22, exactly the *unmeasured* bucket) — World-3 (IPC barriers, continuous
+  collision detection, friction); v1 implements none, so an intersection-free or friction claim has no
+  harness to run in.
 - **needs scale** (21) — the claim *is* about 100K–1.5M-element meshes, GPU throughput, or frame-rate
   budgets the dense Python prototype cannot reach.
 - **entangled, needs source** (9) — the method bundles several co-changed components that cannot be

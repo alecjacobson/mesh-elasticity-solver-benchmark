@@ -897,7 +897,11 @@ and are not adjudicated.
 
 The recurring shape: on the axis a 2D prototype can measure honestly --- iterations, constraint
 violation, position error --- the simulation family's \emph{convergence and quality} claims mostly hold, each
-with its regime spelled out, while the \emph{wall-clock/GPU} headlines remain out of reach. This pass moved
+with its regime spelled out, while the \emph{wall-clock/GPU} headlines remain out of reach. ``Mostly'' is
+literal, not a hedge: several specific sub-claims did \textbf{not} reproduce on the iteration axis and we
+say so --- Anderson-ADMM does not beat plain Projective Dynamics on iterations (11 vs 8), and Composite
+Majorization ties rather than beats projected-Newton (9.0 vs 8.8, \S8.5); those stay \texttt{qualified} on the
+\emph{direction} they establish, not the headline margin. This pass moved
 \textbf{thirty-five edges} from the field's own word to \texttt{qualified}, and added \emph{nothing} to \texttt{validated}
 (\S9.1) --- the honest yield of trying hard without inflating.
 
@@ -970,8 +974,10 @@ clamp-projected, line-searched Newton stays well-conditioned (so the result is a
 harness, not evidence against the paper); and AQP-faster-than-Newton is confounded by the C++/Python
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 \textbf{tie}. ``We cannot adjudicate this, and here is precisely why'' is itself a reported result. The
-majority of the graph, meanwhile, remains out of reach --- and we label each edge with the *specific
-reason* rather than dropping it:
+majority of the graph, meanwhile, remains out of reach --- the 78 \emph{self-claimed} edges we took on the
+field's word plus the 22 \emph{unmeasured} World-3 edges --- and we label each with the \emph{specific reason}
+rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
+the buckets below are approximate and need not sum exactly to the ledger):
 
 \begin{itemize}
   \item \textbf{needs unavailable code} (\textasciitilde{}18 edges) --- the claim requires the paper's own implementation, which we
@@ -988,9 +994,10 @@ reason* rather than dropping it:
   paper, and a handful of competitor ports (an interior-point QP/SOCP). The corresponding
   GPU-throughput/wall-clock \emph{speed} headlines stay hardware-confounded, below.
 \begin{itemize}
-  \item \textbf{needs contact physics} (22) --- World-3 (IPC barriers, continuous collision detection, friction);
+  \item \textbf{needs contact physics} (22, exactly the \emph{unmeasured} bucket) --- World-3 (IPC barriers, continuous
 \end{itemize}
-  v1 implements none, so an intersection-free or friction claim has no harness to run in.
+  collision detection, friction); v1 implements none, so an intersection-free or friction claim has no
+  harness to run in.
 \begin{itemize}
   \item \textbf{needs scale} (21) --- the claim \emph{is} about 100K--1.5M-element meshes, GPU throughput, or frame-rate
 \end{itemize}

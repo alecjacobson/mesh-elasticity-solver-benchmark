@@ -66,8 +66,10 @@ clamp-projected, line-searched Newton stays well-conditioned (so the result is a
 harness, not evidence against the paper); and AQP-faster-than-Newton is confounded by the C++/Python
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 **tie**. "We cannot adjudicate this, and here is precisely why" is itself a reported result. The
-majority of the graph, meanwhile, remains out of reach — and we label each edge with the *specific
-reason* rather than dropping it:
+majority of the graph, meanwhile, remains out of reach — the 78 *self-claimed* edges we took on the
+field's word plus the 22 *unmeasured* World-3 edges — and we label each with the *specific reason*
+rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
+the buckets below are approximate and need not sum exactly to the ledger):
 
 - **needs unavailable code** (~18 edges) — the claim requires the paper's own implementation, which we
   will not substitute with a look-alike (that would beg the question). A "try-harder" pass reclaimed
@@ -81,8 +83,9 @@ reason* rather than dropping it:
   *lifted-content* energy of an injective-mapping method whose exact per-simplex formula needs its
   paper, and a handful of competitor ports (an interior-point QP/SOCP). The corresponding
   GPU-throughput/wall-clock *speed* headlines stay hardware-confounded, below.
-- **needs contact physics** (22) — World-3 (IPC barriers, continuous collision detection, friction);
-  v1 implements none, so an intersection-free or friction claim has no harness to run in.
+- **needs contact physics** (22, exactly the *unmeasured* bucket) — World-3 (IPC barriers, continuous
+  collision detection, friction); v1 implements none, so an intersection-free or friction claim has no
+  harness to run in.
 - **needs scale** (21) — the claim *is* about 100K–1.5M-element meshes, GPU throughput, or frame-rate
   budgets the dense Python prototype cannot reach.
 - **entangled, needs source** (9) — the method bundles several co-changed components that cannot be
