@@ -136,7 +136,7 @@ def main():
           "symmetric Dirichlet); the verdict is identical to the basic eq-9 CM, so the tie with "
           "projected-Newton is not an untightened-bound artifact._", "",
           "_Faithfulness note: this is the real CM (gated on Prop 3.1 majorization + same-minimum), also "
-          "implemented for symmetric ARAP (`cm_element_hessian_sarap`), where the same ordering holds "
+          "implemented AND conformance-gated (PSD + Prop 3.1 majorization) for symmetric ARAP (`cm_element_hessian_sarap`), where the same ordering holds "
           "(CM slightly above clamp). The honest finding: CM's headline 'faster than projected-Newton' "
           "is a WALL-CLOCK claim resting on the analytic Hessian; on the hardware-independent iteration "
           "axis for 2D distortion, CM is a conservative majorizer comparable to eigenvalue filtering and "

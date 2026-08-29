@@ -20,6 +20,12 @@ what distinguishes CM from a mere local eigenvalue clamp, whose quadric majorize
 
 Used as the `filt="composite-majorization"` Hessian in bench/solver.py (a modified-Newton with the
 CM Hessian; the true gradient drives the step, so it converges to the same minimum as clamp-Newton).
+
+Guard note: the α,β norm-Hessians and the h-derivatives are floored at eps=1e-9. Very near inversion
+(σ ≲ 0.05, det F ≲ 5e-5) the 1/σ³,1/σ⁴ terms overwhelm the exact algebra and the majorization H ⪰ ∇²f
+can break; the conformance test excludes det F ≤ 0.05 accordingly. This is not hit in practice: the
+symmetric-Dirichlet/ARAP energies are +∞ at inversion, so the line search never steps a valid iterate
+into that regime.
 """
 import numpy as np
 
@@ -94,6 +100,17 @@ def cm_element_hessian_sarap(F, B, area, eps=1e-9):
     return _cm_from_parts(dhS, dhs, HhPlus, Jg, Ha, Hb, area)
 
 
+def analytic_element_hessian_sarap(F, B, area, eps=1e-9):
+    """Exact analytic symmetric-ARAP element Hessian (full ∇²h, no rectification) — the reference the
+    ARAP CM Hessian must majorize (Prop 3.1)."""
+    Sig, sig, Jg, Ha, Hb = _g_components(F, B, eps)
+    sg = sig if sig > eps else eps
+    dhS = 2.0 * (Sig - 1.0); dhs = -2.0 * sg ** -3 + 2.0 * sg ** -2
+    Hh = np.diag([2.0, 6.0 * sg ** -4 - 4.0 * sg ** -3])   # FULL ∇²h (φ'' both signs)
+    H = Jg.T @ Hh @ Jg + dhS * (Ha + Hb) + dhs * (Ha - Hb)
+    return area * 0.5 * (H + H.T)
+
+
 def analytic_element_hessian(F, B, area):
     """EXACT (analytic) element Hessian of area·psi(F) via the α,β / singular-value chain rule --
     a byproduct of the CM construction, more accurate than the FD hess_psi at extreme singular
@@ -135,6 +152,10 @@ def _conformance():
             worst_psd = min(worst_psd, np.linalg.eigvalsh(Hcm).min())              # (2) H PSD
             # (3) Prop 3.1: CM ⪰ true (use the EXACT analytic Hessian; FD is unreliable near σ→0)
             worst_majorize = min(worst_majorize, np.linalg.eigvalsh(Hcm - Han).min())
+            # same two gates for the symmetric-ARAP CM Hessian (else the sarap path is untested)
+            Hcm_a = cm_element_hessian_sarap(F, B, areas[t]); Han_a = analytic_element_hessian_sarap(F, B, areas[t])
+            worst_psd = min(worst_psd, np.linalg.eigvalsh(Hcm_a).min())
+            worst_majorize = min(worst_majorize, np.linalg.eigvalsh(Hcm_a - Han_a).min())
             # validate the analytic Hessian against FD only where FD is reliable (moderate σ)
             if sig > 0.4 and Sig < 3.0:
                 _, _, Hfd, _ = element_terms(xe, B, areas[t])

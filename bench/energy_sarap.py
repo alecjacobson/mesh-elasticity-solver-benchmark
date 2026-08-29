@@ -10,17 +10,6 @@ det F <= 0. Gradient via the singular-value chain rule (df/dF = U diag(dg/dσ_i)
 import numpy as np
 
 
-def _svd_signed(F):
-    """SVD with a rotation-only U,V (det=+1 each) so singular values are correctly oriented."""
-    U, s, Vt = np.linalg.svd(F)
-    if np.linalg.det(U) < 0:
-        U[:, -1] *= -1; s = s.copy(); s[-1] *= 1  # keep s>=0; sign folded via V below
-    if np.linalg.det(Vt) < 0:
-        Vt[-1, :] *= -1
-    # ensure U,V are rotations: if det(U)det(V) flipped, the smaller singular value is "signed"
-    return U, s, Vt
-
-
 def psi(F):
     J = np.linalg.det(F)
     if J <= 0.0:
