@@ -213,6 +213,41 @@ def solve_anderson_pd(P, m=5, max_iter=400, rtol=1e-3):
     return {"name": "anderson-pd", "res": reslog, "it": _iters_to(reslog, rtol), "x": r["x"]}
 
 
+def solve_ncg(P, max_iter=2000, rtol=1e-3, precond=True):
+    """Nonlinear conjugate gradient on Phi (Polak-Ribière+ with restarts, backtracking line search).
+    precond=True uses the SAME fixed proxy A0=M/h²+H_rest as Chebyshev-PD as the CG preconditioner --
+    the fair apples-to-apples comparison for chebyshev→nonlinear-cg (both accelerate the identically
+    preconditioned iteration; the only difference is Chebyshev's fixed weights vs CG's adaptive β and
+    its extra inner products)."""
+    from scipy.linalg import cho_solve
+    x = P.x0.copy(); free = P.free; res = []
+    Aff = _chol(P.A0[np.ix_(free, free)]) if precond else None
+
+    def Minv(v):
+        return cho_solve(Aff, v) if precond else v
+
+    _, g, _ = P.grad_hess(x); gf = g[free].copy(); s = Minv(gf); d = -s
+    for _ in range(max_iter):
+        res.append(float(np.max(np.abs(gf))))
+        if res[-1] <= rtol * res[0]:
+            break
+        dd = np.zeros_like(x); dd[free] = d
+        gd = float(gf @ d)
+        if gd >= 0:                                   # not a descent direction -> restart to steepest
+            d = -s; dd[free] = d; gd = float(gf @ d)
+        xn, ok = _ls(P, x, free, dd, g, gtol_gd=gd)
+        if not ok:
+            break
+        _, g2, _ = P.grad_hess(xn)
+        if g2 is None:
+            break
+        gf2 = g2[free]; s2 = Minv(gf2)
+        beta = max(0.0, float(gf2 @ (s2 - s)) / (float(gf @ s) + 1e-30))       # preconditioned PR+
+        d = -s2 + beta * d
+        x, g, gf, s = xn, g2, gf2, s2
+    return {"name": "ncg", "res": res, "it": _iters_to(res, rtol), "x": x}
+
+
 def solve_gd(P, max_iter=4000, rtol=1e-3):
     """First-order gradient descent on Phi with a backtracking line search (World-0 baseline)."""
     x = P.x0.copy(); free = P.free; res = []
