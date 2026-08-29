@@ -4,8 +4,11 @@ The constraint-projection family (PBD, XPBD, Projective Dynamics, fast-mass-spri
 Gauss-Seidel/pbng) is defined on MASS-SPRING systems, where the elastic energy is a sum of squared
 distance constraints  E(x) = Σ_e (k/2)(‖x_i−x_j‖ − L_e)². On this substrate the methods are
 *faithful* (unlike the FEM fixed-proxy stand-in of bench/incremental.py): local/global == exact
-Projective Dynamics (Liu 2013), and XPBD's compliance formulation is exact. One implicit-Euler step
-minimizes  Φ(x) = 1/(2h²)(x−x̃)ᵀM(x−x̃) + E(x).
+Projective Dynamics (Liu 2013), and XPBD uses the exact Macklin-2016 compliance update. One
+implicit-Euler step minimizes  Φ(x) = 1/(2h²)(x−x̃)ᵀM(x−x̃) + E(x). NB XPBD's constraint
+Gauss-Seidel is consistent only in the harmonic/small-violation limit — its fixed point does NOT in
+general equal the Φ-minimum (it satisfies the compliant constraints but omits the momentum pull),
+which is precisely what the primal-xpbd/pbng→xpbd edges measure.
 
 Two claims this settles cleanly, both hardware-independent:
   (1) XPBD/PBD STAGNATE on the incremental-potential residual (they satisfy the constraints but omit

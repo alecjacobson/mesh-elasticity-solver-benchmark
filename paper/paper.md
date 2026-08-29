@@ -34,7 +34,7 @@ that a proxy method's celebrated mesh-independence is a **loose-tolerance artifa
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
 sign-indefinite eigenmode of the element Hessian.
 
-Of the 160 extracted superiority edges, only **2 are independently validated** and **39 qualified**
+Of the 160 extracted superiority edges, only **2 are independently validated** and **46 qualified**
 by our measurements; the rest remain the papers' own word pending faithful re-measurement. This is
 the honest core: rather than a leaderboard, the benchmark and its **adversarial review loop** — in
 which the harness's confound-untangling is applied reflexively to our *own* conclusions, forcing
@@ -132,7 +132,7 @@ which published superiority claims survive confound control. Our contributions a
   several well-cited claims (§8).
 
 **The honest core.** Of the 160 extracted superiority edges, only two are independently validated and
-39 qualified by our measurements; the remainder stay the papers' own word pending faithful
+46 qualified by our measurements; the remainder stay the papers' own word pending faithful
 re-measurement. We regard this ledger, and the **adversarial review loop** that produced it — in
 which the benchmark's confound-untangling was turned reflexively on our *own* draft conclusions,
 forcing repeated retractions of our own overreach — as the report's real deliverable: not a
@@ -427,8 +427,8 @@ evidence:
 
 ![Claims ledger](../figures/claims_ledger.png)
 
-*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 97 are the papers' own
-word (`self-claimed`), 22 are unmeasured (contact), 39 are qualified, and only 2 are independently
+*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 90 are the papers' own
+word (`self-claimed`), 22 are unmeasured (contact), 46 are qualified, and only 2 are independently
 validated. The benchmark **qualifies** far more than it overturns — and refutes no published edge
 outright.*
 
@@ -740,13 +740,14 @@ implementation language, a Hessian modification — governs a published "advanta
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 39 qualified, 97 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted sixteen edges from self-claimed to
-qualified — ten from the contact-free triage backlog and six more from a "try-harder" pass that built
-an incremental-potential testbed and faithfully re-implemented part of the simulation-accelerator
-family (quasi-Newton/Liu-2017, generalized Projective Dynamics, Chebyshev acceleration, Vertex Block
-Descent, and AQP's own AGD ablation), testing their *convergence* claims on hardware-independent
-iteration counts (`results/dynamics_solvers.md`, `results/agd_vs_aqp.md`). But — tellingly — that work
+superiority-claims graph stands at **2 validated, 46 qualified, 90 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted twenty-three edges from self-claimed to
+qualified — ten from the contact-free triage backlog and thirteen more from a "try-harder" pass that
+built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
+simulation-accelerator family (quasi-Newton/Liu-2017, Projective Dynamics, Chebyshev acceleration,
+Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD ablation), testing their
+*convergence/quality* claims on hardware-independent iteration counts and constraint-violation trends
+(`results/dynamics_solvers.md`, `results/agd_vs_aqp.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). But — tellingly — that work
 added *nothing* to the validated column: it stays at the same two edges,
 SLIM over AQP on iteration count (§8.2, grounded on official libigl code) and Anderson acceleration
 over ARAP local–global on convergence (§8.6, a reproducible multi-seed × multi-mesh benchmark). Both
@@ -805,14 +806,17 @@ wall-clock boundary at small scale. The remaining one, absolute versus clamp on 
 majority of the graph, meanwhile, remains out of reach — and we label each edge with the *specific
 reason* rather than dropping it:
 
-- **needs unavailable code** (~28 edges) — the claim requires the paper's own implementation, which we
+- **needs unavailable code** (~21 edges) — the claim requires the paper's own implementation, which we
   will not substitute with a look-alike (that would beg the question, as with Composite Majorization,
-  §8.5). A "try-harder" pass (§9.1) reclaimed part of this bucket: where a method's algorithm is fully
-  specified we *did* build it faithfully, so the **convergence** claims of the simulation-accelerator
-  family (quasi-Newton, Projective-Dynamics-style, Chebyshev, Vertex Block Descent) are now tested
-  (`results/dynamics_solvers.md`); what remains here is genuinely code-bound — a specific *majorizer*,
-  or a competitor port (an interior-point QP/SOCP for the injective-mapping edges). The corresponding
-  GPU-throughput/wall-clock *speed* headlines stay hardware-confounded, below.
+  §8.5). A "try-harder" pass (§9.1) reclaimed much of this bucket: where a method's algorithm is fully
+  specified we *did* build it faithfully, so the **convergence/quality** claims of the
+  simulation-accelerator family — quasi-Newton, Projective Dynamics, fast-mass-spring, Chebyshev,
+  Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM — are now tested
+  (`results/dynamics_solvers.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). What remains
+  here is genuinely code-bound: a specific *majorizer* (Composite Majorization), the *lifted-content*
+  energy of an injective-mapping method whose exact formula needs its paper, or a competitor port (an
+  interior-point QP/SOCP). The corresponding GPU-throughput/wall-clock *speed* headlines stay
+  hardware-confounded, below.
 - **needs contact physics** (22) — World-3 (IPC barriers, continuous collision detection, friction);
   v1 implements none, so an intersection-free or friction claim has no harness to run in.
 - **needs scale** (21) — the claim *is* about 100K–1.5M-element meshes, GPU throughput, or frame-rate
