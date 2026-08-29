@@ -34,7 +34,7 @@ that a proxy method's celebrated mesh-independence is a **loose-tolerance artifa
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
 sign-indefinite eigenmode of the element Hessian.
 
-Of the 160 extracted superiority edges, only **2 are independently validated** and **55 qualified**
+Of the 160 extracted superiority edges, only **2 are independently validated** and **58 qualified**
 by our measurements; the rest remain the papers' own word pending faithful re-measurement. This is
 the honest core: rather than a leaderboard, the benchmark and its **adversarial review loop** — in
 which the harness's confound-untangling is applied reflexively to our *own* conclusions, forcing
@@ -132,7 +132,7 @@ which published superiority claims survive confound control. Our contributions a
   several well-cited claims (§8).
 
 **The honest core.** Of the 160 extracted superiority edges, only two are independently validated and
-55 qualified by our measurements; the remainder stay the papers' own word pending faithful
+58 qualified by our measurements; the remainder stay the papers' own word pending faithful
 re-measurement. We regard this ledger, and the **adversarial review loop** that produced it — in
 which the benchmark's confound-untangling was turned reflexively on our *own* draft conclusions,
 forcing repeated retractions of our own overreach — as the report's real deliverable: not a
@@ -427,8 +427,8 @@ evidence:
 
 ![Claims ledger](../figures/claims_ledger.png)
 
-*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 81 are the papers' own
-word (`self-claimed`), 22 are unmeasured (contact), 55 are qualified, and only 2 are independently
+*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 78 are the papers' own
+word (`self-claimed`), 22 are unmeasured (contact), 58 are qualified, and only 2 are independently
 validated. The benchmark **qualifies** far more than it overturns — and refutes no published edge
 outright.*
 
@@ -691,6 +691,20 @@ at the isometry (`results/twist_analysis.md`, Figure 8.5). Therefore every proje
 **one scalar per element**, active only under compression — precisely the regime a near-incompressible
 material enters as it necks.
 
+We now implement Composite Majorization *faithfully* — its singular-value convex-concave construction
+(`bench/composite_majorization.py`), conformance-gated on the paper's own **Proposition 3.1** (the CM
+Hessian majorizes the true Hessian, $H \succeq \nabla^2 f$), on monotone majorize–minimize descent, and on
+convergence to the *same* minimum as projected-Newton, for both symmetric Dirichlet and symmetric
+ARAP. Testing it settles the long-deferred `composite-majorization` edges (`results/composite_majorization.md`):
+CM decisively beats first-order **AQP** (9 versus ~780 iterations, `→` qualified), but its headline
+**"4× faster than projected Newton" does not reproduce on the hardware-independent iteration axis** —
+CM takes 9.0 iterations versus projected-Newton's 8.8, essentially tied. This is exactly what a
+*majorizer* must do: because $H \succeq \nabla^2 f$, CM takes conservative guaranteed-descent steps, whereas the
+clamp filter minimally projects only the indefinite twist. The paper's speed advantage is a
+*wall-clock* claim resting on its cheap analytic Hessian — which it also uses for its own
+projected-Newton, so it is not the algorithmic differentiator. An honest close to the one edge we had
+left deliberately unmeasured (§9.1).
+
 ![Twist phase](../figures/twist_phase.png)
 
 *Figure 8.5. The twist eigenvalue over the singular-value plane (left; blue = negative = indefinite,
@@ -740,9 +754,9 @@ implementation language, a Hessian modification — governs a published "advanta
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 55 qualified, 81 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted thirty-two edges from self-claimed to
-qualified — ten from the contact-free triage backlog and twenty-two more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 58 qualified, 78 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted thirty-five edges from self-claimed to
+qualified — ten from the contact-free triage backlog and twenty-five more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator family (quasi-Newton/Liu-2017, Projective Dynamics, Chebyshev acceleration,
 Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD ablation), testing their
@@ -806,17 +820,18 @@ wall-clock boundary at small scale. The remaining one, absolute versus clamp on 
 majority of the graph, meanwhile, remains out of reach — and we label each edge with the *specific
 reason* rather than dropping it:
 
-- **needs unavailable code** (~21 edges) — the claim requires the paper's own implementation, which we
-  will not substitute with a look-alike (that would beg the question, as with Composite Majorization,
-  §8.5). A "try-harder" pass (§9.1) reclaimed much of this bucket: where a method's algorithm is fully
-  specified we *did* build it faithfully, so the **convergence/quality** claims of the
-  simulation-accelerator family — quasi-Newton, Projective Dynamics, fast-mass-spring, Chebyshev,
-  Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM — are now tested
-  (`results/dynamics_solvers.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). What remains
-  here is genuinely code-bound: a specific *majorizer* (Composite Majorization), the *lifted-content*
-  energy of an injective-mapping method whose exact formula needs its paper, or a competitor port (an
-  interior-point QP/SOCP). The corresponding GPU-throughput/wall-clock *speed* headlines stay
-  hardware-confounded, below.
+- **needs unavailable code** (~18 edges) — the claim requires the paper's own implementation, which we
+  will not substitute with a look-alike (that would beg the question). A "try-harder" pass reclaimed
+  most of this bucket: where a method's algorithm is fully specified we *did* build it faithfully — the
+  **convergence/quality** claims of the simulation-accelerator family (quasi-Newton, Projective
+  Dynamics, fast-mass-spring, Chebyshev, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM;
+  `results/dynamics_solvers.md`, `results/massspring_solvers.md`, `results/admm_ms.md`), **and now
+  Composite Majorization itself** — the one edge we had long left deliberately unmeasured — built
+  faithfully from its convex-concave construction and gated on the paper's own Proposition 3.1 (§8.5,
+  `results/composite_majorization.md`). What remains genuinely code-bound is smaller: the
+  *lifted-content* energy of an injective-mapping method whose exact per-simplex formula needs its
+  paper, and a handful of competitor ports (an interior-point QP/SOCP). The corresponding
+  GPU-throughput/wall-clock *speed* headlines stay hardware-confounded, below.
 - **needs contact physics** (22) — World-3 (IPC barriers, continuous collision detection, friction);
   v1 implements none, so an intersection-free or friction claim has no harness to run in.
 - **needs scale** (21) — the claim *is* about 100K–1.5M-element meshes, GPU throughput, or frame-rate
@@ -884,12 +899,15 @@ broad set of confounded ones. The report is therefore also a *plan*, and the har
   precision a locking-*relieved* P2 element allows; a fully locking-free Taylor–Hood or mixed u–p
   element is the pending gold-standard control, and 3D at scale (where the pure-Python prototype does
   not reach) is required to turn "indicative" into "definitive."
-- **Faithful ports of a few key methods.** Two methods resisted faithful re-measurement because they
-  require their source paper's specific construction, and we declined to substitute a look-alike:
-  **Composite Majorization** (its convex majorizer of the twist mode of §8.5 — the substrate is in
-  place, the specific bound is not) and the individual **injectivity-cohort** methods (TLC's lifted
-  content, foldover-free's regularizer) needed to rank *within* the cohort of §8.4. These are the
-  clearest invitations for original-author contributions.
+- **Faithful ports of a few key methods.** Where a method's construction is fully specified we now
+  build it faithfully rather than substitute a look-alike — most notably **Composite Majorization**,
+  which we implemented from its convex-concave singular-value construction and gated on the paper's own
+  Proposition 3.1 (§8.5); the honest finding is that its "faster than projected-Newton" is a wall-clock
+  claim that does not surface on the iteration axis, while it decisively beats first-order AQP. What
+  still resists faithful re-measurement are methods whose *specific per-simplex formula* we could not
+  verify without the source (the **injectivity-cohort** — TLC's lifted content, foldover-free's
+  regularizer — needed to rank *within* the cohort of §8.4). These remain the clearest invitations for
+  original-author contributions.
 - **The contact world.** World-3 (IPC and relatives) is surveyed but unmeasured; its four
   solver-external parameters (barrier stiffness, CCD tolerance, friction regularizer, time step) make
   it a benchmark-design problem in its own right, deferred to v2.

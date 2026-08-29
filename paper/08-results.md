@@ -158,6 +158,20 @@ at the isometry (`results/twist_analysis.md`, Figure 8.5). Therefore every proje
 **one scalar per element**, active only under compression — precisely the regime a near-incompressible
 material enters as it necks.
 
+We now implement Composite Majorization *faithfully* — its singular-value convex-concave construction
+(`bench/composite_majorization.py`), conformance-gated on the paper's own **Proposition 3.1** (the CM
+Hessian majorizes the true Hessian, $H \succeq \nabla^2 f$), on monotone majorize–minimize descent, and on
+convergence to the *same* minimum as projected-Newton, for both symmetric Dirichlet and symmetric
+ARAP. Testing it settles the long-deferred `composite-majorization` edges (`results/composite_majorization.md`):
+CM decisively beats first-order **AQP** (9 versus ~780 iterations, `→` qualified), but its headline
+**"4× faster than projected Newton" does not reproduce on the hardware-independent iteration axis** —
+CM takes 9.0 iterations versus projected-Newton's 8.8, essentially tied. This is exactly what a
+*majorizer* must do: because $H \succeq \nabla^2 f$, CM takes conservative guaranteed-descent steps, whereas the
+clamp filter minimally projects only the indefinite twist. The paper's speed advantage is a
+*wall-clock* claim resting on its cheap analytic Hessian — which it also uses for its own
+projected-Newton, so it is not the algorithmic differentiator. An honest close to the one edge we had
+left deliberately unmeasured (§9.1).
+
 ![Twist phase](../figures/twist_phase.png)
 
 *Figure 8.5. The twist eigenvalue over the singular-value plane (left; blue = negative = indefinite,

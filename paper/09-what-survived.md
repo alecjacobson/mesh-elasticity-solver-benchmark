@@ -3,9 +3,9 @@
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 55 qualified, 81 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted thirty-two edges from self-claimed to
-qualified — ten from the contact-free triage backlog and twenty-two more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 58 qualified, 78 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted thirty-five edges from self-claimed to
+qualified — ten from the contact-free triage backlog and twenty-five more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator family (quasi-Newton/Liu-2017, Projective Dynamics, Chebyshev acceleration,
 Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD ablation), testing their
@@ -69,17 +69,18 @@ wall-clock boundary at small scale. The remaining one, absolute versus clamp on 
 majority of the graph, meanwhile, remains out of reach — and we label each edge with the *specific
 reason* rather than dropping it:
 
-- **needs unavailable code** (~21 edges) — the claim requires the paper's own implementation, which we
-  will not substitute with a look-alike (that would beg the question, as with Composite Majorization,
-  §8.5). A "try-harder" pass (§9.1) reclaimed much of this bucket: where a method's algorithm is fully
-  specified we *did* build it faithfully, so the **convergence/quality** claims of the
-  simulation-accelerator family — quasi-Newton, Projective Dynamics, fast-mass-spring, Chebyshev,
-  Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM — are now tested
-  (`results/dynamics_solvers.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). What remains
-  here is genuinely code-bound: a specific *majorizer* (Composite Majorization), the *lifted-content*
-  energy of an injective-mapping method whose exact formula needs its paper, or a competitor port (an
-  interior-point QP/SOCP). The corresponding GPU-throughput/wall-clock *speed* headlines stay
-  hardware-confounded, below.
+- **needs unavailable code** (~18 edges) — the claim requires the paper's own implementation, which we
+  will not substitute with a look-alike (that would beg the question). A "try-harder" pass reclaimed
+  most of this bucket: where a method's algorithm is fully specified we *did* build it faithfully — the
+  **convergence/quality** claims of the simulation-accelerator family (quasi-Newton, Projective
+  Dynamics, fast-mass-spring, Chebyshev, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM;
+  `results/dynamics_solvers.md`, `results/massspring_solvers.md`, `results/admm_ms.md`), **and now
+  Composite Majorization itself** — the one edge we had long left deliberately unmeasured — built
+  faithfully from its convex-concave construction and gated on the paper's own Proposition 3.1 (§8.5,
+  `results/composite_majorization.md`). What remains genuinely code-bound is smaller: the
+  *lifted-content* energy of an injective-mapping method whose exact per-simplex formula needs its
+  paper, and a handful of competitor ports (an interior-point QP/SOCP). The corresponding
+  GPU-throughput/wall-clock *speed* headlines stay hardware-confounded, below.
 - **needs contact physics** (22) — World-3 (IPC barriers, continuous collision detection, friction);
   v1 implements none, so an intersection-free or friction claim has no harness to run in.
 - **needs scale** (21) — the claim *is* about 100K–1.5M-element meshes, GPU throughput, or frame-rate

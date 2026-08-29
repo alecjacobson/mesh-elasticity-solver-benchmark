@@ -34,6 +34,12 @@ def assemble(x, tris, Bs, areas, filt, eterms=_sd_element_terms, tr_w=0.5):
             He = project_element_blend(He, tr_w)
         elif filt.startswith("blend-"):       # fixed-w eigenvalue blend (eigenvalue-blending filter)
             He = project_element_blend(He, float(filt.split("-", 1)[1]))
+        elif filt == "composite-majorization":  # CM PSD Hessian (Shtengel 2017), symmetric-Dirichlet
+            from .composite_majorization import cm_element_hessian
+            He = cm_element_hessian((Bs[t] @ x[dofs]).reshape(2, 2), Bs[t], areas[t])
+        elif filt == "composite-majorization-sarap":   # CM Hessian for symmetric ARAP
+            from .composite_majorization import cm_element_hessian_sarap
+            He = cm_element_hessian_sarap((Bs[t] @ x[dofs]).reshape(2, 2), Bs[t], areas[t])
         g[dofs] += ge
         H[np.ix_(dofs, dofs)] += He
     return E, g, H

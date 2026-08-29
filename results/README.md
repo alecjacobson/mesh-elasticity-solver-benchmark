@@ -62,6 +62,8 @@ polyscope-headless 3D tet.
 
 | PPN | progressively-projected-newton — indefinite-element fraction (V2.7) | [`ppn_fraction.md`](ppn_fraction.md) | PPN claims it projects **<10% of elements** vs clamp projecting all. Measured along a Newton solve the indefinite fraction is **iteration-dependent: 54–57% far from the min → 2–5% near convergence (~33% mean)** — the `<10%` holds only near the solution, not through the hard early iterations. `progressively-projected-newton→clamp-filtering` **regime-specific** (mechanism holds; the <10% doesn't on a stretch) → qualified |
 
+| CM ⭐ | **Composite Majorization — faithful impl, closes #14** (V3) | [`composite_majorization.md`](composite_majorization.md) | the real CM (Shtengel 2017): singular values via similarity/anti-similarity == SVD (1e-15), PSD convex-majorizer Hessian (eq. 9), **conformance-gated on the paper's Proposition 3.1 (H ⪰ ∇²f)**, monotone majorize-minimize, **same minimum as projected-Newton**; also symmetric ARAP. Honest finding on the iteration axis: **CM 9 ≈ projected-Newton 8.8** (`cm→projected-newton` NOT reproduced — a majorizer takes conservative steps; the '4× faster' is wall-clock on the shared analytic Hessian) but **CM 9 ≪ AQP 777** (`cm→aqp` reproduces, ~86×); SLIM 5 faster (`cm→slim` needs-scale). 3 edges → qualified |
+
 ## What these already demonstrate for the benchmark's thesis
 
 1. **Confounds are real and measurable.** The near-incompressible filter comparison is confounded

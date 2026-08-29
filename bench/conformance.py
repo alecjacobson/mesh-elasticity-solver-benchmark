@@ -132,6 +132,9 @@ def run():
     from .massspring import _conformance as _ms_conf
     ms_g, ms_a0 = _ms_conf()                        # mass-spring: gradPhi vs FD; PD global system SPD
     ok11 = ms_g < 1e-5 and ms_a0 > 0
+    from .composite_majorization import _conformance as _cm_conf
+    cm_sv, cm_psd, cm_maj, cm_ana, cm_mono, cm_same, _ = _cm_conf()   # CM: Σσ=SVD; PSD; Prop 3.1; MM monotone; same min
+    ok12 = cm_sv < 1e-9 and cm_psd > -1e-7 and cm_maj > -1e-7 and cm_ana < 1e-4 and cm_mono and cm_same < 1e-6
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
     print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
@@ -149,7 +152,11 @@ def run():
           f"-> {'PASS' if ok10 else 'FAIL'}")
     print(f"[conformance] mass-spring gradPhi/PD-SPD: {ms_g:.1e}/{ms_a0:.1e} "
           f"-> {'PASS' if ok11 else 'FAIL'}")
-    ok = ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9 and ok10 and ok11
+    print(f"[conformance] composite-majorization Σσ/PSD/Prop3.1/analytic/monotone/same-min: "
+          f"{cm_sv:.0e}/{cm_psd:.0e}/{cm_maj:.0e}/{cm_ana:.0e}/{cm_mono}/{cm_same:.0e} "
+          f"-> {'PASS' if ok12 else 'FAIL'}")
+    ok = (ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9 and ok10 and ok11
+          and ok12)
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 

@@ -10,12 +10,15 @@ broad set of confounded ones. The report is therefore also a *plan*, and the har
   precision a locking-*relieved* P2 element allows; a fully locking-free Taylor–Hood or mixed u–p
   element is the pending gold-standard control, and 3D at scale (where the pure-Python prototype does
   not reach) is required to turn "indicative" into "definitive."
-- **Faithful ports of a few key methods.** Two methods resisted faithful re-measurement because they
-  require their source paper's specific construction, and we declined to substitute a look-alike:
-  **Composite Majorization** (its convex majorizer of the twist mode of §8.5 — the substrate is in
-  place, the specific bound is not) and the individual **injectivity-cohort** methods (TLC's lifted
-  content, foldover-free's regularizer) needed to rank *within* the cohort of §8.4. These are the
-  clearest invitations for original-author contributions.
+- **Faithful ports of a few key methods.** Where a method's construction is fully specified we now
+  build it faithfully rather than substitute a look-alike — most notably **Composite Majorization**,
+  which we implemented from its convex-concave singular-value construction and gated on the paper's own
+  Proposition 3.1 (§8.5); the honest finding is that its "faster than projected-Newton" is a wall-clock
+  claim that does not surface on the iteration axis, while it decisively beats first-order AQP. What
+  still resists faithful re-measurement are methods whose *specific per-simplex formula* we could not
+  verify without the source (the **injectivity-cohort** — TLC's lifted content, foldover-free's
+  regularizer — needed to rank *within* the cohort of §8.4). These remain the clearest invitations for
+  original-author contributions.
 - **The contact world.** World-3 (IPC and relatives) is surveyed but unmeasured; its four
   solver-external parameters (barrier stiffness, CCD tolerance, friction regularizer, time step) make
   it a benchmark-design problem in its own right, deferred to v2.
