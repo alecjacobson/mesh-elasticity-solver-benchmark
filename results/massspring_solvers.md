@@ -19,11 +19,21 @@ Mean absolute constraint violation `|‖xᵢ−xⱼ‖−L|` after exactly K Gau
 | XPBD | 1.01e-01 | 1.01e-01 | 1.01e-01 | 1.01e-01 |
 | PBD | 9.09e-02 | 6.77e-02 | 2.92e-02 | 3.86e-03 |
 
+### Quality: max position error vs the true implicit-Euler solution (after K=20 sweeps, as a fraction of the deformation scale)
+
+| method | ‖x − x_trueIE‖∞ / scale |
+|---|---:|
+| XPBD | 0.7% |
+| nonlinear-GS / VBD-style | 0.0% |
+| PBD | 42.8% |
+
 ## Observed — edges adjudicated
 
 - **`primal-xpbd → xpbd` (convergence) — REPRODUCES:** XPBD **stagnates** on the incremental-potential residual — it flat-lines at **0.14·r₀** (≈52) and never reaches the tol, because its constraint sweep omits the momentum-coupling term. Newton, local/global, and nonlinear-GS — all of which retain the full residual — drive it to 0 in 2/8/14 iterations. So a primal method that keeps the backward-Euler momentum residual converges where XPBD stalls.
 - **`pbng → xpbd` (convergence) — REPRODUCES:** nonlinear Gauss–Seidel reaches the tol in **14** iterations while XPBD stagnates at 0.14·r₀ — 'reaches tolerance where XPBD stagnates', exactly as claimed.
 - **`fast-mass-spring → pbd` and `projective-dynamics → pbd` (quality) — REPRODUCE:** local/global (which IS fast-mass-spring / mass-spring Projective Dynamics) converges to the exact implicit-Euler minimum (8 it, residual→0), whereas PBD (no compliance) does NOT — its residual GROWS to 4.0·r₀ as it over-constrains. PD reaches the true dynamics; PBD does not.
 - **`xpbd → pbd` (quality) — REPRODUCES:** across K=2→80 sweeps XPBD's constraint violation is essentially iteration-count-INDEPENDENT (varies 1.0×, converging to the compliant equilibrium), while PBD's keeps shrinking (24× smaller by K=80) — i.e. PBD **stiffens with iteration count** (the material gets artificially stiffer the more you iterate), exactly XPBD's headline.
+- **`xpbd → full-newton` (quality) — REPRODUCES:** although XPBD stagnates on the *residual*, its final POSITIONS are within **0.7%** (max) of the true Newton implicit-Euler solution — sub-percent, i.e. **visually indistinguishable** from the more expensive Newton reference, exactly XPBD's selling point (cheap and looks right even though not converged in the residual sense).
+- **`vertex-block-descent → xpbd` (quality) — REPRODUCES (with one wording caveat):** the nonlinear-GS / VBD-style solver drives the position error to **0.0%** — it **matches the true implicit-Euler** solution — whereas XPBD plateaus at 0.7% and never closes the gap. So 'VBD matches true implicit Euler where XPBD [does not]' holds. NB the claim's word 'diverges' is imprecise for XPBD (it *stagnates* at a small error); it is **PBD** that actually moves away (its position error grows to 43%).
 
 _Caveat: single 2D mass-spring timestep, one mesh/dt/stiffness; iteration counts and constraint-violation trends are hardware-independent. The GPU/throughput speed headlines (jgs2, vbd, pbng 6–7× Newton) are NOT adjudicated. PD here is EXACT local/global for mass-spring (not the FEM fixed-proxy stand-in of results/dynamics_solvers.md)._

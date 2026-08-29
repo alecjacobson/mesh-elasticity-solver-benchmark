@@ -193,6 +193,43 @@ def solve_cheby(P, rho=0.9, max_iter=400, rtol=1e-3):
     return {"name": "cheby-pd", "res": res, "it": _iters_to(res, rtol), "x": x}
 
 
+def solve_anderson_pd(P, m=5, max_iter=400, rtol=1e-3):
+    """Anderson acceleration (Peng 2018 / anderson-geometry core) of the SAME PD fixed point that
+    solve_cheby accelerates -- an apples-to-apples Anderson-vs-Chebyshev on one contraction."""
+    from .world1 import anderson_accelerate
+    free = P.free
+    Aff = _chol(P.A0[np.ix_(free, free)])
+
+    def G(x):
+        d, _ = _fixed_metric_dir(P, x, Aff)
+        return x + d
+
+    def resid(x):
+        _, g, _ = P.grad_hess(x)
+        return np.inf if g is None else float(np.max(np.abs(g[free])))
+
+    r = anderson_accelerate(G, P.phi, resid, P.x0.copy(), free, m=m, max_iter=max_iter, tol=1e-9)
+    reslog = [e["grad_inf"] for e in r["log"]]
+    return {"name": "anderson-pd", "res": reslog, "it": _iters_to(reslog, rtol), "x": r["x"]}
+
+
+def solve_gd(P, max_iter=4000, rtol=1e-3):
+    """First-order gradient descent on Phi with a backtracking line search (World-0 baseline)."""
+    x = P.x0.copy(); free = P.free; res = []
+    for _ in range(max_iter):
+        _, g, _ = P.grad_hess(x)
+        if g is None:
+            break
+        res.append(float(np.max(np.abs(g[free]))))
+        if res[-1] <= rtol * res[0]:
+            break
+        d = np.zeros_like(x); d[free] = -g[free]
+        x, ok = _ls(P, x, free, d, g)
+        if not ok:
+            break
+    return {"name": "gd", "res": res, "it": _iters_to(res, rtol), "x": x}
+
+
 def solve_lbfgs(P, mode="lap", m=5, max_iter=400, rtol=1e-3):
     """L-BFGS on Phi. mode='lap' uses A0^{-1} as the initial inverse-Hessian (quasi-newton-liu2017);
     mode='id' uses the scaled-identity initial inverse-Hessian (plain L-BFGS)."""
