@@ -855,6 +855,52 @@ Finally, the harness measures several confounds directly:
 Every one of these is a place where a single, unstated component choice --- a filter, a criterion, an
 implementation language, a Hessian modification --- governs a published ``advantage.''
 
+\subsection{The simulation-accelerator family, on one shared potential}
+
+A large part of the corpus --- projective dynamics, XPBD/PBD, vertex block descent, quasi-Newton,
+Chebyshev, ADMM, and their Anderson accelerations --- had been triaged ``needs the paper's code.'' A
+\emph{try-harder} pass shows most of it is not code-bound at all: these methods are simply different inner
+minimizers of the \textbf{same} implicit-Euler incremental potential (or, for the position-based family, the
+same mass-spring system). Building that shared testbed once --- conformance-gated so each solver's
+per-vertex block equals the assembled Hessian block, its projective-dynamics global system is exact
+local/global, and its XPBD update is the exact compliance form --- lets every method be compared on the
+\emph{hardware-independent} iteration/quality axis, faithfully. The convergence claims largely \textbf{reproduce};
+the GPU/throughput \emph{speed} headlines (jgs2's ``8000$\times$/step'', VBD's ``10$\times$ XPBD'') stay hardware-confounded
+and are not adjudicated.
+
+\begin{itemize}
+  \item \textbf{Second-order and preconditioning beat first order, as claimed.} Quasi-Newton with a mass+Laplacian
+\end{itemize}
+  initial metric converges in \textbf{6 iterations versus 78} for scaled-identity L-BFGS; adding L-BFGS
+  history to the fixed-proxy step (Projective-Dynamics-style) improves it (6 vs 10); Chebyshev and
+  Anderson each shave the proxy's tail (7 and 6 vs 10) (\texttt{results/dynamics\_solvers.md}). Composite
+  Majorization --- implemented faithfully (\S8.5) --- needs \textbf{9 iterations versus AQP's \textasciitilde{}780}
+  (\texttt{results/composite\_majorization.md}).
+\begin{itemize}
+  \item \textbf{XPBD's compliance is real; its residual is not the physics.} On the mass-spring testbed XPBD's
+\end{itemize}
+  constraint sweep \textbf{stagnates} on the incremental-potential residual (it omits the momentum coupling),
+  while local/global, Newton, and nonlinear Gauss--Seidel drive it to zero --- so a \emph{primal} method
+  ``reaches tolerance where XPBD stagnates'' reproduces. Yet XPBD's \emph{positions} stay within \textbf{0.7\%} of the
+  true Newton solution at a soft operating point --- ``visually indistinguishable,'' but only there: at
+  stiff-cloth stiffness $\times$ large timestep the error climbs to \textbf{65\%}. And XPBD's constraint violation is
+  \textbf{iteration-count independent} (compliance) where PBD stiffens \textasciitilde{}23$\times$ with iterations
+  (\texttt{results/massspring\_solvers.md}).
+\begin{itemize}
+  \item \textbf{Vertex Block Descent and the proxy ablations.} Gauss--Seidel block updates converge where an
+\end{itemize}
+  under-relaxed block-Jacobi crawls; AQP's own AGD ablation (proxy disabled) \emph{beats} AQP when
+  well-conditioned but blows up when ill-conditioned --- across a 1000$\times$ sweep of the momentum parameter,
+  so the proxy's value is real but conditional, and the ``baseline-confounded'' flag is defused
+  (\texttt{results/agd\_vs\_aqp.md}). Anderson-accelerated ADMM cuts plain ADMM 11$\rightarrow$6 iterations
+  (\texttt{results/admm\_ms.md}).
+
+The recurring shape: on the axis a 2D prototype can measure honestly --- iterations, constraint
+violation, position error --- the simulation family's \emph{convergence and quality} claims mostly hold, each
+with its regime spelled out, while the \emph{wall-clock/GPU} headlines remain out of reach. This pass moved
+\textbf{thirty-five edges} from the field's own word to \texttt{qualified}, and added \emph{nothing} to \texttt{validated}
+(\S9.1) --- the honest yield of trying hard without inflating.
+
 
 \section{What Survived --- and the Review Loop as Method}
 
