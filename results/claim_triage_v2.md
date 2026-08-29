@@ -31,10 +31,20 @@ edges moved self-claimed → qualified with measured, iteration-axis evidence:
 - **second-order-stencil-descent → {gradient-descent, gauss-seidel} (convergence)** — a 2nd-order
   block sweep (≈ our VBD-GS) vs first-order GD (`descent.solve_gd`) and vs a GS baseline, per unit
   work (careful: a VBD *sweep* ≠ a global *iteration*; report per-work, not per-sweep).
-- **tlc → tua (robustness)** — TUA is TLC's α=0 special case, and TUA == our existing area penalty
-  (`bench/untangle.py`). Implement the TLC lifted-content energy and test on the folded-init
-  harness (`run_injectivity`): does TLC untangle where the plain area penalty stalls?
-- **foldover-free → tlc (robustness)** — needs both energies + a large-rotation folded init.
+- **admm-pd → projective-dynamics / aa-admm → admm (convergence)** — ADMM is well-specified
+  (Overby 2017 ADMM-PD; the x-update reuses the PD global system, the z-update is a per-spring prox,
+  the dual is a running sum). Anderson-accelerated ADMM wraps the ADMM fixed point in our existing
+  `anderson_accelerate` core. Both testable on the V2.2 mass-spring substrate.
+- **second-order-stencil-descent → {gradient-descent, gauss-seidel}** — GD exists; a 2nd-order block
+  sweep ≈ VBD-GS. Report per-work, not per-sweep.
+
+**BLOCKED on the source paper (will NOT fake — same discipline as #14 Composite Majorization):**
+- **tlc → tua / foldover-free → tlc (robustness)** — the Total Lifted Content energy (Du 2020) has a
+  specific per-simplex lifted-content formula (a lifting parameter ε combined with the signed area)
+  that we could not verify from the homepage/README, only the paper. TUA (Σ|Aₜ|) is trivial, but
+  testing "TLC fixes TUA's stuck minima" needs the faithful TLC energy — implementing a look-alike
+  would repeat the round-1 unfaithful-substitution mistake. Needs the paper in hand; stays
+  self-claimed. (Our `untangle.py` is a *one-sided* penalty, NOT TUA's Σ|A|, so it is not a substitute.)
 
 ## Genuinely OUT OF REACH — with a tight reason (not "we didn't try")
 
