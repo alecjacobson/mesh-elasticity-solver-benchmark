@@ -3,9 +3,9 @@
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 54 qualified, 82 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted thirty-one edges from self-claimed to
-qualified — ten from the contact-free triage backlog and twenty-one more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 55 qualified, 81 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted thirty-two edges from self-claimed to
+qualified — ten from the contact-free triage backlog and twenty-two more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator family (quasi-Newton/Liu-2017, Projective Dynamics, Chebyshev acceleration,
 Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD ablation), testing their

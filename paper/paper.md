@@ -34,7 +34,7 @@ that a proxy method's celebrated mesh-independence is a **loose-tolerance artifa
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
 sign-indefinite eigenmode of the element Hessian.
 
-Of the 160 extracted superiority edges, only **2 are independently validated** and **54 qualified**
+Of the 160 extracted superiority edges, only **2 are independently validated** and **55 qualified**
 by our measurements; the rest remain the papers' own word pending faithful re-measurement. This is
 the honest core: rather than a leaderboard, the benchmark and its **adversarial review loop** — in
 which the harness's confound-untangling is applied reflexively to our *own* conclusions, forcing
@@ -132,7 +132,7 @@ which published superiority claims survive confound control. Our contributions a
   several well-cited claims (§8).
 
 **The honest core.** Of the 160 extracted superiority edges, only two are independently validated and
-54 qualified by our measurements; the remainder stay the papers' own word pending faithful
+55 qualified by our measurements; the remainder stay the papers' own word pending faithful
 re-measurement. We regard this ledger, and the **adversarial review loop** that produced it — in
 which the benchmark's confound-untangling was turned reflexively on our *own* draft conclusions,
 forcing repeated retractions of our own overreach — as the report's real deliverable: not a
@@ -427,8 +427,8 @@ evidence:
 
 ![Claims ledger](../figures/claims_ledger.png)
 
-*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 82 are the papers' own
-word (`self-claimed`), 22 are unmeasured (contact), 54 are qualified, and only 2 are independently
+*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 81 are the papers' own
+word (`self-claimed`), 22 are unmeasured (contact), 55 are qualified, and only 2 are independently
 validated. The benchmark **qualifies** far more than it overturns — and refutes no published edge
 outright.*
 
@@ -740,9 +740,9 @@ implementation language, a Hessian modification — governs a published "advanta
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 54 qualified, 82 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted thirty-one edges from self-claimed to
-qualified — ten from the contact-free triage backlog and twenty-one more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 55 qualified, 81 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted thirty-two edges from self-claimed to
+qualified — ten from the contact-free triage backlog and twenty-two more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator family (quasi-Newton/Liu-2017, Projective Dynamics, Chebyshev acceleration,
 Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD ablation), testing their

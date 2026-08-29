@@ -60,6 +60,8 @@ polyscope-headless 3D tet.
 
 | PROP | structural solver properties — simplicity/generality/factorization count (V2.6) | [`solver_properties.md`](solver_properties.md) | architectural facts on the testbeds: **PD is monotone with no line-search/filter/SVD** (`projective-dynamics→full-newton` simplicity); **PD & quasi-Newton prefactor once (1 factorization) vs Newton's 5** (`fast-mass-spring→full-newton`, `quasi-newton→full-newton` speed *mechanism*, HW-independent — wall-clock × not claimed); **PD-style & L-BFGS run on FEM Neo-Hookean** not just mass-spring (`quasi-newton→projective-dynamics` generality). 4 edges → qualified (`projective-dynamics→fast-mass-spring` reverted to self-claimed — our FEM-PD is the fixed-proxy approximation, not exact PD's constraint generality) |
 
+| PPN | progressively-projected-newton — indefinite-element fraction (V2.7) | [`ppn_fraction.md`](ppn_fraction.md) | PPN claims it projects **<10% of elements** vs clamp projecting all. Measured along a Newton solve the indefinite fraction is **iteration-dependent: 54–57% far from the min → 2–5% near convergence (~33% mean)** — the `<10%` holds only near the solution, not through the hard early iterations. `progressively-projected-newton→clamp-filtering` **regime-specific** (mechanism holds; the <10% doesn't on a stretch) → qualified |
+
 ## What these already demonstrate for the benchmark's thesis
 
 1. **Confounds are real and measurable.** The near-incompressible filter comparison is confounded
