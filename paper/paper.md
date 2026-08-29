@@ -807,10 +807,11 @@ Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD abl
 *convergence/quality* claims on hardware-independent iteration counts and constraint-violation trends
 (`results/dynamics_solvers.md`, `results/agd_vs_aqp.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). But — tellingly — that work
 added *nothing* to the validated column: it stays at the same two edges,
-SLIM over AQP on iteration count (§8.2, grounded on official libigl code) and Anderson acceleration
-over ARAP local–global on convergence (§8.6, a reproducible multi-seed × multi-mesh benchmark). Both
-of those meet a high bar (official code or a multi-condition profile); the new results, strong as some
-are, do not, and we resisted the temptation to inflate them.
+SLIM over AQP on iteration count (§8.2, grounded on official libigl code *and* a seed × mesh profile —
+SLIM's 4–5 iterations stay below AQP's best case at every one of four resolutions, `results/slim.md`)
+and Anderson acceleration over ARAP local–global on convergence (§8.6, a reproducible multi-seed ×
+multi-mesh benchmark). Both of those meet a high bar (official code *and*/or a multi-condition
+profile); the new results, strong as some are, do not, and we resisted the temptation to inflate them.
 
 That restraint is itself a finding, and it came from turning the review loop on our *own* first
 verdicts: an internal adversarial pass caught four edges we had initially marked *validated* and
