@@ -188,9 +188,22 @@ area preservation — both barrier-free energies still succeed, but the raw area
 first-order steps to first-crossing than the elastic energy needs Newton steps; we report this as
 suggestive of a shallower basin rather than a clean ratio, since the two use different algorithms and
 their iteration counts are not work-comparable. This is exactly the capability axis — untangle from
-folds — that separates the injectivity cohort from distortion-barrier minimizers; a faithful port of
-each cohort member (TLC's lifted content, etc.) to rank *within* the cohort is deferred, as it requires
-each source paper.
+folds — that separates the injectivity cohort from distortion-barrier minimizers.
+
+We now port one cohort member *faithfully*. **Total Lifted Content** (TLC, Du et al. 2020
+[cite:tlc]) — reimplemented from the paper and its reference code as the exact lifted-content energy
+(the Cayley–Menger form on lifted squared edge lengths, uniform auxiliary, auto-scaled lifting `α`) and
+conformance-gated on its defining properties (finite and smooth at a fold, `α → 0` equal to total
+unsigned area, untangles to full injectivity; `bench/tlc.py`) — settles TLC's own key ablation
+`tlc → tua`. On eight folded initializations (convex and non-convex targets), TLC untangles **6/8**
+where its `α = 0` limit (Total Unsigned Area) untangles only **1/8**, and where both succeed TLC's
+lifted gradient reaches injectivity in fewer iterations (median 34 vs 60) — a clean single-axis
+confirmation of the paper's Proposition 4.3, that the *lifting* is what turns the degenerate
+unsigned-area plateau into an injective minimizer (`results/tlc.md`). The barrier symmetric-Dirichlet
+energy remains `+∞` at a fold and cannot start at all — the capability distinction, now drawn with the
+real TLC energy rather than a classical area-penalty stand-in. Ranking TLC *against the other cohort
+members* (foldover-free, LBD, simplex-assembly) still needs their code, and TLC's large-scale
+100%-success headline is not adjudicated here.
 
 ## 8.5 The clamp-versus-absolute question is one analytic scalar
 
@@ -305,5 +318,5 @@ Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5), and Pr
 interactive-speed edge is factorization reuse (one prefactored constant system vs Newton's
 per-iteration refactorization), a per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay `qualified` on the
 *direction* they establish, not the headline margin. This pass moved
-**thirty-nine edges** from the field's own word to `qualified`, and added *nothing* to `validated`
+**forty edges** from the field's own word to `qualified`, and added *nothing* to `validated`
 (§9.1) — the honest yield of trying hard without inflating.

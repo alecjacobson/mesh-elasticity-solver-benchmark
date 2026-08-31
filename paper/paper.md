@@ -34,7 +34,7 @@ that a proxy method's celebrated mesh-independence is a **loose-tolerance artifa
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
 sign-indefinite eigenmode of the element Hessian.
 
-Of the 160 extracted superiority edges, only **2 are independently validated** and **62 qualified**
+Of the 160 extracted superiority edges, only **2 are independently validated** and **63 qualified**
 by our measurements; the rest remain the papers' own word pending faithful re-measurement. This is
 the honest core: rather than a leaderboard, the benchmark and its **adversarial review loop** — in
 which the harness's confound-untangling is applied reflexively to our *own* conclusions, forcing
@@ -132,7 +132,7 @@ which published superiority claims survive confound control. Our contributions a
   several well-cited claims (§8).
 
 **The honest core.** Of the 160 extracted superiority edges, only two are independently validated and
-62 qualified by our measurements; the remainder stay the papers' own word pending faithful
+63 qualified by our measurements; the remainder stay the papers' own word pending faithful
 re-measurement. We regard this ledger, and the **adversarial review loop** that produced it — in
 which the benchmark's confound-untangling was turned reflexively on our *own* draft conclusions,
 forcing repeated retractions of our own overreach — as the report's real deliverable: not a
@@ -497,8 +497,8 @@ evidence:
 
 ![Claims ledger](../figures/claims_ledger.png)
 
-*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 74 are the papers' own
-word (`self-claimed`), 22 are unmeasured (contact), 62 are qualified, and only 2 are independently
+*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 73 are the papers' own
+word (`self-claimed`), 22 are unmeasured (contact), 63 are qualified, and only 2 are independently
 validated. The benchmark **qualifies** far more than it overturns — and refutes no published edge
 outright.*
 
@@ -791,9 +791,22 @@ area preservation — both barrier-free energies still succeed, but the raw area
 first-order steps to first-crossing than the elastic energy needs Newton steps; we report this as
 suggestive of a shallower basin rather than a clean ratio, since the two use different algorithms and
 their iteration counts are not work-comparable. This is exactly the capability axis — untangle from
-folds — that separates the injectivity cohort from distortion-barrier minimizers; a faithful port of
-each cohort member (TLC's lifted content, etc.) to rank *within* the cohort is deferred, as it requires
-each source paper.
+folds — that separates the injectivity cohort from distortion-barrier minimizers.
+
+We now port one cohort member *faithfully*. **Total Lifted Content** (TLC, Du et al. 2020
+[cite:tlc]) — reimplemented from the paper and its reference code as the exact lifted-content energy
+(the Cayley–Menger form on lifted squared edge lengths, uniform auxiliary, auto-scaled lifting `α`) and
+conformance-gated on its defining properties (finite and smooth at a fold, `α → 0` equal to total
+unsigned area, untangles to full injectivity; `bench/tlc.py`) — settles TLC's own key ablation
+`tlc → tua`. On eight folded initializations (convex and non-convex targets), TLC untangles **6/8**
+where its `α = 0` limit (Total Unsigned Area) untangles only **1/8**, and where both succeed TLC's
+lifted gradient reaches injectivity in fewer iterations (median 34 vs 60) — a clean single-axis
+confirmation of the paper's Proposition 4.3, that the *lifting* is what turns the degenerate
+unsigned-area plateau into an injective minimizer (`results/tlc.md`). The barrier symmetric-Dirichlet
+energy remains `+∞` at a fold and cannot start at all — the capability distinction, now drawn with the
+real TLC energy rather than a classical area-penalty stand-in. Ranking TLC *against the other cohort
+members* (foldover-free, LBD, simplex-assembly) still needs their code, and TLC's large-scale
+100%-success headline is not adjudicated here.
 
 ## 8.5 The clamp-versus-absolute question is one analytic scalar
 
@@ -908,7 +921,7 @@ Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5), and Pr
 interactive-speed edge is factorization reuse (one prefactored constant system vs Newton's
 per-iteration refactorization), a per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay `qualified` on the
 *direction* they establish, not the headline margin. This pass moved
-**thirty-nine edges** from the field's own word to `qualified`, and added *nothing* to `validated`
+**forty edges** from the field's own word to `qualified`, and added *nothing* to `validated`
 (§9.1) — the honest yield of trying hard without inflating.
 
 ---
@@ -918,14 +931,15 @@ per-iteration refactorization), a per-step-cost story that resolves to wall-cloc
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 62 qualified, 74 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted thirty-nine edges from self-claimed to
-qualified — ten from the contact-free triage backlog and twenty-nine more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 63 qualified, 73 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted forty edges from self-claimed to
+qualified — ten from the contact-free triage backlog and thirty more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator and distortion-solver families (quasi-Newton/Liu-2017, Projective Dynamics,
 Chebyshev acceleration, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, AQP's own AGD
 ablation, and — reimplemented from the paper *and* the authors' reference code — the full **Blended
-Cured Quasi-Newton** (§8.3) and **Composite Majorization** (§8.5) distortion solvers), testing their
+Cured Quasi-Newton** (§8.3), **Composite Majorization** (§8.5), and **Total Lifted Content** (§8.4)
+solvers), testing their
 *convergence/quality* claims on hardware-independent iteration counts and constraint-violation trends
 (`results/dynamics_solvers.md`, `results/agd_vs_aqp.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). But — tellingly — that work
 added *nothing* to the validated column: it stays at the same two edges,
@@ -985,7 +999,7 @@ clamp-projected, line-searched Newton stays well-conditioned (so the result is a
 harness, not evidence against the paper); and AQP-faster-than-Newton is confounded by the C++/Python
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 **tie**. "We cannot adjudicate this, and here is precisely why" is itself a reported result. The
-majority of the graph, meanwhile, remains out of reach — the 74 *self-claimed* edges we took on the
+majority of the graph, meanwhile, remains out of reach — the 73 *self-claimed* edges we took on the
 field's word plus the 22 *unmeasured* World-3 edges — and we label each with the *specific reason*
 rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
 the buckets below are approximate and need not sum exactly to the ledger):
@@ -999,11 +1013,13 @@ the buckets below are approximate and need not sum exactly to the ledger):
   Majorization** (from its convex-concave construction, gated on the paper's Proposition 3.1; §8.5), **and
   the full Blended Cured Quasi-Newton** (reimplemented from the paper *and* the authors' reference code —
   proxy, blend, cured direction filter, line search and characteristic-norm stop — settling its
-  `→ aqp`, `→ projected-newton` and `→ composite-majorization` edges; §8.3, `results/bcqn.md`). What
-  remains genuinely code-bound is smaller: the
-  *lifted-content* energy of an injective-mapping method whose exact per-simplex formula needs its
-  paper, and a handful of competitor ports (an interior-point QP/SOCP). The corresponding
-  GPU-throughput/wall-clock *speed* headlines stay hardware-confounded, below.
+  `→ aqp`, `→ projected-newton` and `→ composite-majorization` edges; §8.3, `results/bcqn.md`), **and
+  Total Lifted Content** (the injective-mapping *lifted-content* energy, reimplemented from its paper and
+  reference code in the Cayley–Menger form — barrier-free, gated, settling `tlc → tua`; §8.4,
+  `results/tlc.md`). What remains genuinely code-bound is smaller: the other injectivity-cohort members
+  (foldover-free, LBD, simplex-assembly) needed to rank *within* that cohort, and a handful of
+  competitor ports (an interior-point QP/SOCP). The corresponding GPU-throughput/wall-clock *speed*
+  headlines stay hardware-confounded, below.
 - **needs contact physics** (22, exactly the *unmeasured* bucket) — World-3 (IPC barriers, continuous
   collision detection, friction); v1 implements none, so an intersection-free or friction claim has no
   harness to run in.

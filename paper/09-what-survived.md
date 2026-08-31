@@ -3,14 +3,15 @@
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 62 qualified, 74 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted thirty-nine edges from self-claimed to
-qualified — ten from the contact-free triage backlog and twenty-nine more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 63 qualified, 73 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted forty edges from self-claimed to
+qualified — ten from the contact-free triage backlog and thirty more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator and distortion-solver families (quasi-Newton/Liu-2017, Projective Dynamics,
 Chebyshev acceleration, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, AQP's own AGD
 ablation, and — reimplemented from the paper *and* the authors' reference code — the full **Blended
-Cured Quasi-Newton** (§8.3) and **Composite Majorization** (§8.5) distortion solvers), testing their
+Cured Quasi-Newton** (§8.3), **Composite Majorization** (§8.5), and **Total Lifted Content** (§8.4)
+solvers), testing their
 *convergence/quality* claims on hardware-independent iteration counts and constraint-violation trends
 (`results/dynamics_solvers.md`, `results/agd_vs_aqp.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). But — tellingly — that work
 added *nothing* to the validated column: it stays at the same two edges,
@@ -70,7 +71,7 @@ clamp-projected, line-searched Newton stays well-conditioned (so the result is a
 harness, not evidence against the paper); and AQP-faster-than-Newton is confounded by the C++/Python
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 **tie**. "We cannot adjudicate this, and here is precisely why" is itself a reported result. The
-majority of the graph, meanwhile, remains out of reach — the 74 *self-claimed* edges we took on the
+majority of the graph, meanwhile, remains out of reach — the 73 *self-claimed* edges we took on the
 field's word plus the 22 *unmeasured* World-3 edges — and we label each with the *specific reason*
 rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
 the buckets below are approximate and need not sum exactly to the ledger):
@@ -84,11 +85,13 @@ the buckets below are approximate and need not sum exactly to the ledger):
   Majorization** (from its convex-concave construction, gated on the paper's Proposition 3.1; §8.5), **and
   the full Blended Cured Quasi-Newton** (reimplemented from the paper *and* the authors' reference code —
   proxy, blend, cured direction filter, line search and characteristic-norm stop — settling its
-  `→ aqp`, `→ projected-newton` and `→ composite-majorization` edges; §8.3, `results/bcqn.md`). What
-  remains genuinely code-bound is smaller: the
-  *lifted-content* energy of an injective-mapping method whose exact per-simplex formula needs its
-  paper, and a handful of competitor ports (an interior-point QP/SOCP). The corresponding
-  GPU-throughput/wall-clock *speed* headlines stay hardware-confounded, below.
+  `→ aqp`, `→ projected-newton` and `→ composite-majorization` edges; §8.3, `results/bcqn.md`), **and
+  Total Lifted Content** (the injective-mapping *lifted-content* energy, reimplemented from its paper and
+  reference code in the Cayley–Menger form — barrier-free, gated, settling `tlc → tua`; §8.4,
+  `results/tlc.md`). What remains genuinely code-bound is smaller: the other injectivity-cohort members
+  (foldover-free, LBD, simplex-assembly) needed to rank *within* that cohort, and a handful of
+  competitor ports (an interior-point QP/SOCP). The corresponding GPU-throughput/wall-clock *speed*
+  headlines stay hardware-confounded, below.
 - **needs contact physics** (22, exactly the *unmeasured* bucket) — World-3 (IPC barriers, continuous
   collision detection, friction); v1 implements none, so an intersection-free or friction claim has no
   harness to run in.
