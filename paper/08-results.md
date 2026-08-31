@@ -1,10 +1,14 @@
 # 8. Results: The Decomposition Experiments
 
 This section is the report's reason to exist. Each result below is a single-axis decomposition on the
-2D contact-free track, produced by the conformance-gated harness and regenerable from `bench/`; every
-number cites a `results/*.md` file. The headlines are *indicative* — 2D, dense solves, small meshes,
-few seeds — and each is stated with its regime of validity. What survives is less a set of rankings
-than a set of *lessons about attribution*.
+contact-free track, produced by the conformance-gated harness and regenerable from `bench/`; every
+number cites a `results/*.md` file. Most v1 decompositions run on a 2D prototype (dense solves, small
+meshes, few seeds), and those headlines are *indicative*, each stated with its regime of validity. The
+near-incompressibility headline (§8.1) additionally runs on a new **sparse, analytic-Hessian 3D
+tetrahedral path** whose projected-Newton scales to **131,712 elements / 68,121 DOF with a
+mesh-independent iteration count** (4–5 Newton steps flat across a 3k→132k sweep; `results/scale_3d.md`)
+— the substrate that takes the 2D lessons toward the scale the claims are actually about. What survives
+is less a set of rankings than a set of *lessons about attribution*.
 
 ## 8.1 The headline: a near-incompressibility filtering claim, reversed then re-validated
 

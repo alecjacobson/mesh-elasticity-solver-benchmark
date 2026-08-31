@@ -650,10 +650,14 @@ and all three worlds (World-1-heavy).*
 \section{Results: The Decomposition Experiments}
 
 This section is the report's reason to exist. Each result below is a single-axis decomposition on the
-2D contact-free track, produced by the conformance-gated harness and regenerable from \texttt{bench/}; every
-number cites a \texttt{results/\emph{.md} file. The headlines are }indicative* --- 2D, dense solves, small meshes,
-few seeds --- and each is stated with its regime of validity. What survives is less a set of rankings
-than a set of \emph{lessons about attribution}.
+contact-free track, produced by the conformance-gated harness and regenerable from \texttt{bench/}; every
+number cites a \texttt{results/*.md} file. Most v1 decompositions run on a 2D prototype (dense solves, small
+meshes, few seeds), and those headlines are \emph{indicative}, each stated with its regime of validity. The
+near-incompressibility headline (\S8.1) additionally runs on a new **sparse, analytic-Hessian 3D
+tetrahedral path\textbf{ whose projected-Newton scales to }131,712 elements / 68,121 DOF with a
+mesh-independent iteration count** (4--5 Newton steps flat across a 3k$\rightarrow$132k sweep; \texttt{results/scale\_3d.md})
+--- the substrate that takes the 2D lessons toward the scale the claims are actually about. What survives
+is less a set of rankings than a set of \emph{lessons about attribution}.
 
 \subsection{The headline: a near-incompressibility filtering claim, reversed then re-validated}
 
