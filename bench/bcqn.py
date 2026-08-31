@@ -135,7 +135,8 @@ def solve_bcqn(x0, tris, rest, free_dof, m=5, eps=1e-3, max_iter=3000, blend=Tru
         E, g = assemble_eg(x, tris, Bs, areas, element_eg)
         gf = g[fidx]
         gnf = float(np.linalg.norm(gf)); gninf = float(np.max(np.abs(gf)))
-        log.append({"iter": it, "energy": E, "grad_inf": gninf, "grad2": gnf, "beta": beta_last})
+        log.append({"iter": it, "energy": E, "grad_inf": gninf, "grad2": gnf, "beta": beta_last,
+                    "wall_s": time.perf_counter() - t0})
         if gnf <= eps * char:
             status = "converged"; break
         # (1) two-loop L-BFGS with H0 = L^{-1}, history stores (s, z)

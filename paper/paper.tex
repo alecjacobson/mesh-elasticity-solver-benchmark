@@ -773,6 +773,25 @@ clearly growing one at tight $\tau$, with min--max bands and CI-gated exponents.
   C++/Python-confounded, so the \emph{counts} carry the verdict, and the real trade-off is SLIM's 6
   factorizations against AQP's single one (\texttt{results/slim.md}).
 
+That SLIM-versus-AQP trade-off --- few expensive iterations versus many cheap ones --- is the whole field
+in miniature, and Figure 8.2b makes it concrete across \emph{all} the faithful distortion solvers at once,
+on a single controlled instance.
+
+\begin{figure*}[t]\centering
+  \includegraphics[width=\textwidth]{running_example.png}
+  \caption{Running example}
+\end{figure*}
+
+*Figure 8.2b. The controlled running example --- one symmetric-Dirichlet scene, six faithfully
+implemented solvers, convergence to a shared minimum shown both ways. \textbf{Left (vs iteration):}
+projected-Newton and Composite Majorization reach the minimum in the fewest steps, BCQN close behind,
+AQP slowest --- second-order and superlinear methods win the iteration axis. \textbf{Right (vs cost):} the
+ranking compresses and re-orders, because Newton and CM refactor a coupled Hessian every iteration
+while AQP and BCQN factor once and reuse it --- ``fewest iterations'' is not ``cheapest.'' Wall-clock is
+comparable only within this pure-Python group (libigl SLIM's compiled C++ is excluded from the time
+axis); iteration counts remain the portable, hardware-independent verdict, and the cost panel is
+illustrative of the per-iteration-cost structure the benchmark keeps separate from the algorithm.*
+
 \subsection{Bundled methods entangle rather than add}
 
 BCQN \cite{bcqn} claims ``fastest and most robust'' from three simultaneous changes --- a blended Sobolev/L-BFGS

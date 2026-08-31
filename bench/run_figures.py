@@ -866,7 +866,68 @@ def fig_tet3d_nu_sweep():
     print(f"  tet3d_nu_sweep: iters " + ", ".join(f"ν{nu}={it}" for nu, _, _, it in shots))
 
 
+def fig_running_example():
+    """The controlled running example: ONE World-1 scene, all faithful distortion solvers, convergence
+    to a shared minimum shown BOTH vs iteration (left) and vs implementation-fair wall-clock (right,
+    all pure Python/NumPy). The two panels tell opposite halves of the story: Newton and Composite
+    Majorization reach the minimum in the FEWEST iterations, but each iteration refactorises a coupled
+    Hessian, so on the cost axis the factor-once methods (AQP, BCQN) become competitive — 'fewest
+    iterations' is not 'cheapest'."""
+    from .solver import solve
+    from .energy import element_terms as sd, element_eg
+    from .descent import solve_lbfgs
+    from . import world1
+    from .bcqn import solve_bcqn
+    from .run_e1 import build_scenario
+    SEED, N = 7, 10
+    sc = build_scenario(nx=N, ny=N, seed=SEED)
+    a = (sc["x0"], sc["tris"], sc["Bs"], sc["areas"], sc["free"])
+    ref = solve(*a, "clamp", eterms=sd, tol=1e-11, max_iter=200)
+    res = {
+        "projected-Newton": solve(*a, "clamp", eterms=sd, tol=1e-9, max_iter=200),
+        "Composite Majorization": solve(*a, "composite-majorization", eterms=sd, tol=1e-9, max_iter=400),
+        "BCQN (faithful)": solve_bcqn(sc["x0"], sc["tris"], sc["rest"], sc["free"], eps=1e-8, max_iter=800),
+        "SL-BFGS (proxy)": world1.solve_sobolev_lbfgs(sc["x0"], sc["tris"], sc["rest"], sc["free"], max_iter=800, tol=1e-9),
+        "AQP": world1.solve_aqp(sc["x0"], sc["tris"], sc["rest"], sc["free"], max_iter=1500, tol=1e-9),
+        "L-BFGS": solve_lbfgs(*a, element_eg, max_iter=800, tol=1e-9),
+    }
+    Estar = min([ref["final_energy"]] + [r["final_energy"] for r in res.values()])
+    span = (sc["E0"] - Estar) + 1e-30
+    col = {"projected-Newton": "#111111", "Composite Majorization": "#9467bd",
+           "BCQN (faithful)": "#e45756", "SL-BFGS (proxy)": "#f2a900",
+           "AQP": "#4c78a8", "L-BFGS": "#59a14f"}
+    FLOOR = 1e-7                                   # focus on the region down to a tight-ish tolerance
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11.5, 4.6))
+    xmax_it = xmax_t = 0
+    for m, r in res.items():
+        g = np.array([max((e["energy"] - Estar) / span, 1e-12) for e in r["log"]])
+        t = np.array([e.get("wall_s", 0.0) for e in r["log"]]) * 1e3      # ms
+        k = next((i for i, v in enumerate(g) if v <= FLOOR), len(g) - 1)  # truncate at first reach
+        k = min(k + 1, len(g))
+        xmax_it = max(xmax_it, k); xmax_t = max(xmax_t, t[k - 1] if k else 0)
+        axL.semilogy(range(k), g[:k], color=col[m], lw=1.9, label=m, marker="o", ms=2.5)
+        axR.semilogy(t[:k], g[:k], color=col[m], lw=1.9, label=m, marker="o", ms=2.5)
+    for ax, xl in ((axL, "iteration"), (axR, "wall-clock (ms) — pure Python/NumPy, implementation-fair")):
+        ax.axhline(1e-4, color="#bbb", ls="--", lw=0.8)
+        ax.text(0.98, 1.3e-4, "benchmark τ", ha="right", fontsize=7, color="#999", transform=ax.get_yaxis_transform())
+        ax.set_xlabel(xl); ax.set_ylabel("(E - E*) / (E0 - E*)")
+        ax.set_ylim(FLOOR, 2.0)
+    axL.set_xlim(0, xmax_it + 1); axR.set_xlim(0, xmax_t * 1.05 + 1)
+    axL.set_title("convergence vs iteration (2nd-order wins)")
+    axR.set_title("convergence vs cost (factor-once methods catch up)")
+    axL.legend(fontsize=8, loc="upper right")
+    fig.suptitle(f"Running example - symmetric Dirichlet, {N}x{N} grid, seed {SEED}: fewest iterations "
+                 "!= cheapest (Newton/CM refactor each step; AQP/BCQN factor once)",
+                 y=1.02, fontweight="bold", fontsize=10)
+    fig.text(0.5, -0.03, "Single controlled instance; wall-clock comparable only WITHIN this "
+             "pure-Python group (libigl SLIM's compiled C++ excluded from the time axis). Iteration "
+             "counts are the hardware-independent axis; the cost axis illustrates the per-iteration-cost "
+             "trade-off, not a portable timing.", ha="center", fontsize=7.5, color="#666")
+    viz.save(fig, "running_example")
+
+
 FIGS = {"locking": fig_locking, "filter_convergence": fig_filter_convergence,
+        "running_example": fig_running_example,
         "corpus_breadth": fig_corpus_breadth, "claims_ledger": fig_claims_ledger,
         "claims_network": fig_claims_network, "tet3d": fig_tet3d,
         "mesh_independence": fig_mesh_independence,
