@@ -1,0 +1,71 @@
+name: build-paper
+
+# Builds paper/paper.pdf from the markdown sources on every push that touches the paper or figures,
+# so the PDF never goes stale and no local TeX install is required. The PDF is uploaded as a
+# downloadable artifact and, on pushes to main, committed back to the repo (with [skip ci] so the
+# commit does not re-trigger this workflow).
+
+on:
+  push:
+    paths:
+      - 'paper/**'
+      - 'figures/**'
+      - '.github/workflows/build-paper.yml'
+  pull_request:
+    paths:
+      - 'paper/**'
+      - 'figures/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-paper-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true                      # paper/*.pdf is git-LFS tracked; figures are plain files
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Python deps (markdown -> LaTeX preprocessing)
+        run: pip install pyyaml          # make_bib.py / assemble.py / to_latex.py only need yaml
+
+      - name: Install TeX Live + poppler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-base texlive-latex-recommended texlive-latex-extra \
+            texlive-fonts-recommended texlive-fonts-extra texlive-bibtex-extra \
+            texlive-science texlive-plain-generic poppler-utils
+          # egpubl.cls + eg-alpha*.bst + egweblnk.sty are vendored in paper/, so no EG-specific
+          # package install is needed beyond a standard TeX Live.
+
+      - name: Build paper (assemble md -> tex, then pdflatex + bibtex + pdflatex x2)
+        run: |
+          bash paper/build.sh || { echo '--- paper/paper.log (tail) ---'; tail -n 120 paper/paper.log; exit 1; }
+
+      - name: Upload PDF artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-pdf
+          path: paper/paper.pdf
+          if-no-files-found: error
+
+      - name: Commit rebuilt PDF back to main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'CI: rebuild paper.pdf [skip ci]'
+          # commit all derived artifacts so the repo never drifts from the section sources
+          file_pattern: 'paper/paper.pdf paper/paper.tex paper/paper.md paper/references.bib paper/11-references.md'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
