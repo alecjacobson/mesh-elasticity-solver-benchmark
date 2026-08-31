@@ -3,12 +3,14 @@
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 59 qualified, 77 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted thirty-six edges from self-claimed to
-qualified — ten from the contact-free triage backlog and twenty-six more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 62 qualified, 74 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted thirty-nine edges from self-claimed to
+qualified — ten from the contact-free triage backlog and twenty-nine more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
-simulation-accelerator family (quasi-Newton/Liu-2017, Projective Dynamics, Chebyshev acceleration,
-Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD ablation), testing their
+simulation-accelerator and distortion-solver families (quasi-Newton/Liu-2017, Projective Dynamics,
+Chebyshev acceleration, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, AQP's own AGD
+ablation, and — reimplemented from the paper *and* the authors' reference code — the full **Blended
+Cured Quasi-Newton** (§8.3) and **Composite Majorization** (§8.5) distortion solvers), testing their
 *convergence/quality* claims on hardware-independent iteration counts and constraint-violation trends
 (`results/dynamics_solvers.md`, `results/agd_vs_aqp.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). But — tellingly — that work
 added *nothing* to the validated column: it stays at the same two edges,
@@ -68,20 +70,22 @@ clamp-projected, line-searched Newton stays well-conditioned (so the result is a
 harness, not evidence against the paper); and AQP-faster-than-Newton is confounded by the C++/Python
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 **tie**. "We cannot adjudicate this, and here is precisely why" is itself a reported result. The
-majority of the graph, meanwhile, remains out of reach — the 77 *self-claimed* edges we took on the
+majority of the graph, meanwhile, remains out of reach — the 74 *self-claimed* edges we took on the
 field's word plus the 22 *unmeasured* World-3 edges — and we label each with the *specific reason*
 rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
 the buckets below are approximate and need not sum exactly to the ledger):
 
-- **needs unavailable code** (~18 edges) — the claim requires the paper's own implementation, which we
+- **needs unavailable code** (~15 edges) — the claim requires the paper's own implementation, which we
   will not substitute with a look-alike (that would beg the question). A "try-harder" pass reclaimed
   most of this bucket: where a method's algorithm is fully specified we *did* build it faithfully — the
   **convergence/quality** claims of the simulation-accelerator family (quasi-Newton, Projective
   Dynamics, fast-mass-spring, Chebyshev, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM;
-  `results/dynamics_solvers.md`, `results/massspring_solvers.md`, `results/admm_ms.md`), **and now
-  Composite Majorization itself** — the one edge we had long left deliberately unmeasured — built
-  faithfully from its convex-concave construction and gated on the paper's own Proposition 3.1 (§8.5,
-  `results/composite_majorization.md`). What remains genuinely code-bound is smaller: the
+  `results/dynamics_solvers.md`, `results/massspring_solvers.md`, `results/admm_ms.md`), **Composite
+  Majorization** (from its convex-concave construction, gated on the paper's Proposition 3.1; §8.5), **and
+  the full Blended Cured Quasi-Newton** (reimplemented from the paper *and* the authors' reference code —
+  proxy, blend, cured direction filter, line search and characteristic-norm stop — settling its
+  `→ aqp`, `→ projected-newton` and `→ composite-majorization` edges; §8.3, `results/bcqn.md`). What
+  remains genuinely code-bound is smaller: the
   *lifted-content* energy of an injective-mapping method whose exact per-simplex formula needs its
   paper, and a handful of competitor ports (an interior-point QP/SOCP). The corresponding
   GPU-throughput/wall-clock *speed* headlines stay hardware-confounded, below.

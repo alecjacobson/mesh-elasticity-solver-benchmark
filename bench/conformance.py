@@ -138,6 +138,9 @@ def run():
     from .tet_scale import _conformance as _t3_conf
     t3_g, t3_h, t3_re, t3_rg, t3_de, t3_dg = _t3_conf()   # 3D scalable tet: analytic grad/Hess vs FD; rigid inv; ==dense tet.py
     ok13 = t3_g < 1e-5 and t3_h < 1e-4 and t3_re < 1e-9 and t3_rg < 1e-8 and t3_de < 1e-10 and t3_dg < 1e-10
+    from .bcqn import _conformance as _bcqn_conf
+    bq_beta, bq_mono, bq_same, bq_st, bq_it = _bcqn_conf()   # faithful BCQN: β∈[0,1]; monotone; ==p-Newton min
+    ok14 = bool(bq_beta) and bool(bq_mono) and bq_same < 1e-5 and bq_st == "converged"
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
     print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
@@ -161,8 +164,10 @@ def run():
     print(f"[conformance] 3D-scale tet analytic grad/Hess vs FD, rigid, =dense: "
           f"{t3_g:.0e}/{t3_h:.0e}/{t3_re:.0e}/{t3_rg:.0e}/{t3_de:.0e}/{t3_dg:.0e} "
           f"-> {'PASS' if ok13 else 'FAIL'}")
+    print(f"[conformance] faithful BCQN β∈[0,1]/monotone/==p-Newton min: "
+          f"{bq_beta}/{bq_mono}/{bq_same:.0e} ({bq_it} it) -> {'PASS' if ok14 else 'FAIL'}")
     ok = (ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9 and ok10 and ok11
-          and ok12 and ok13)
+          and ok12 and ok13 and ok14)
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 

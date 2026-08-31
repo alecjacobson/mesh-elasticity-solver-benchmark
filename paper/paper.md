@@ -34,7 +34,7 @@ that a proxy method's celebrated mesh-independence is a **loose-tolerance artifa
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
 sign-indefinite eigenmode of the element Hessian.
 
-Of the 160 extracted superiority edges, only **2 are independently validated** and **59 qualified**
+Of the 160 extracted superiority edges, only **2 are independently validated** and **62 qualified**
 by our measurements; the rest remain the papers' own word pending faithful re-measurement. This is
 the honest core: rather than a leaderboard, the benchmark and its **adversarial review loop** — in
 which the harness's confound-untangling is applied reflexively to our *own* conclusions, forcing
@@ -132,7 +132,7 @@ which published superiority claims survive confound control. Our contributions a
   several well-cited claims (§8).
 
 **The honest core.** Of the 160 extracted superiority edges, only two are independently validated and
-59 qualified by our measurements; the remainder stay the papers' own word pending faithful
+62 qualified by our measurements; the remainder stay the papers' own word pending faithful
 re-measurement. We regard this ledger, and the **adversarial review loop** that produced it — in
 which the benchmark's confound-untangling was turned reflexively on our *own* draft conclusions,
 forcing repeated retractions of our own overreach — as the report's real deliverable: not a
@@ -469,8 +469,8 @@ evidence:
 
 ![Claims ledger](../figures/claims_ledger.png)
 
-*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 77 are the papers' own
-word (`self-claimed`), 22 are unmeasured (contact), 59 are qualified, and only 2 are independently
+*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 74 are the papers' own
+word (`self-claimed`), 22 are unmeasured (contact), 62 are qualified, and only 2 are independently
 validated. The benchmark **qualifies** far more than it overturns — and refutes no published edge
 outright.*
 
@@ -702,6 +702,24 @@ with ill-conditioning and vanishes elsewhere — and interacts with the line-sea
 not three co-equal contributions. On this barrier energy, the barrier-aware line search is moreover
 partly *redundant* with the energy's own `+∞`-at-inversion barrier.
 
+**The assembled method, faithfully.** To test the *whole* method rather than its factored parts, we
+reimplemented BCQN end-to-end from the paper and the authors' reference code — the `L = 2·`cotan-Laplacian
+proxy factored once, the blend `β = \mathrm{clamp}(\mathrm{normest}(L)\,y^\top\! Ls / \sum_t a_t, 0, 1)`
+(Eq. 13), the "cured" barrier-aware direction filter (a per-element no-inversion QP solved by damped
+projected Jacobi), the inversion-free/Armijo line search, and the characteristic-gradient stop — and
+conformance-gated it on `β∈[0,1]`, monotone descent, and convergence to the projected-Newton minimum
+(`bench/bcqn.py`). On symmetric Dirichlet over six mesh/seed scenarios (`results/bcqn.md`), full BCQN
+reaches the shared energy tolerance in **8.0 iterations, versus AQP's 26.3, its own no-blend
+Sobolev-L-BFGS ablation's 12.7, and a well-implemented L-BFGS's 12.0** — so `bcqn → aqp` and the blend's
+contribution both **reproduce on the hardware-independent axis**, and the paper's headline over AQP is
+earned there (its `>7×` wall-clock figure is a separate, hardware-confounded claim). Against the
+second-order methods the ordering **inverts**, exactly as expected: BCQN needs **more** iterations than
+projected-Newton (6.8) and Composite Majorization (7.0), because it descends a *fixed* scalar-Laplacian
+proxy while they refactor a coupled Hessian each step. BCQN's `→ projected-newton` / `→ CM` claim is
+therefore the same shape as Projective Dynamics → Newton (§8.7): a *cheaper-per-iteration*, factor-once
+argument that lives in wall-clock and memory-at-scale, not a fewer-iterations one — so it stays
+`qualified` on the mechanism, not the iteration axis.
+
 ## 8.4 Injectivity is a capability axis, not a speed contest
 
 The World-1 injectivity methods (TLC, foldover-free, progressive embedding) are barrier-free untangling
@@ -840,7 +858,7 @@ Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5), and Pr
 interactive-speed edge is factorization reuse (one prefactored constant system vs Newton's
 per-iteration refactorization), a per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay `qualified` on the
 *direction* they establish, not the headline margin. This pass moved
-**thirty-six edges** from the field's own word to `qualified`, and added *nothing* to `validated`
+**thirty-nine edges** from the field's own word to `qualified`, and added *nothing* to `validated`
 (§9.1) — the honest yield of trying hard without inflating.
 
 ---
@@ -850,12 +868,14 @@ per-iteration refactorization), a per-step-cost story that resolves to wall-cloc
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 59 qualified, 77 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted thirty-six edges from self-claimed to
-qualified — ten from the contact-free triage backlog and twenty-six more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 62 qualified, 74 self-claimed, and 22 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted thirty-nine edges from self-claimed to
+qualified — ten from the contact-free triage backlog and twenty-nine more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
-simulation-accelerator family (quasi-Newton/Liu-2017, Projective Dynamics, Chebyshev acceleration,
-Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, and AQP's own AGD ablation), testing their
+simulation-accelerator and distortion-solver families (quasi-Newton/Liu-2017, Projective Dynamics,
+Chebyshev acceleration, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, AQP's own AGD
+ablation, and — reimplemented from the paper *and* the authors' reference code — the full **Blended
+Cured Quasi-Newton** (§8.3) and **Composite Majorization** (§8.5) distortion solvers), testing their
 *convergence/quality* claims on hardware-independent iteration counts and constraint-violation trends
 (`results/dynamics_solvers.md`, `results/agd_vs_aqp.md`, `results/massspring_solvers.md`, `results/admm_ms.md`). But — tellingly — that work
 added *nothing* to the validated column: it stays at the same two edges,
@@ -915,20 +935,22 @@ clamp-projected, line-searched Newton stays well-conditioned (so the result is a
 harness, not evidence against the paper); and AQP-faster-than-Newton is confounded by the C++/Python
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 **tie**. "We cannot adjudicate this, and here is precisely why" is itself a reported result. The
-majority of the graph, meanwhile, remains out of reach — the 77 *self-claimed* edges we took on the
+majority of the graph, meanwhile, remains out of reach — the 74 *self-claimed* edges we took on the
 field's word plus the 22 *unmeasured* World-3 edges — and we label each with the *specific reason*
 rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
 the buckets below are approximate and need not sum exactly to the ledger):
 
-- **needs unavailable code** (~18 edges) — the claim requires the paper's own implementation, which we
+- **needs unavailable code** (~15 edges) — the claim requires the paper's own implementation, which we
   will not substitute with a look-alike (that would beg the question). A "try-harder" pass reclaimed
   most of this bucket: where a method's algorithm is fully specified we *did* build it faithfully — the
   **convergence/quality** claims of the simulation-accelerator family (quasi-Newton, Projective
   Dynamics, fast-mass-spring, Chebyshev, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM;
-  `results/dynamics_solvers.md`, `results/massspring_solvers.md`, `results/admm_ms.md`), **and now
-  Composite Majorization itself** — the one edge we had long left deliberately unmeasured — built
-  faithfully from its convex-concave construction and gated on the paper's own Proposition 3.1 (§8.5,
-  `results/composite_majorization.md`). What remains genuinely code-bound is smaller: the
+  `results/dynamics_solvers.md`, `results/massspring_solvers.md`, `results/admm_ms.md`), **Composite
+  Majorization** (from its convex-concave construction, gated on the paper's Proposition 3.1; §8.5), **and
+  the full Blended Cured Quasi-Newton** (reimplemented from the paper *and* the authors' reference code —
+  proxy, blend, cured direction filter, line search and characteristic-norm stop — settling its
+  `→ aqp`, `→ projected-newton` and `→ composite-majorization` edges; §8.3, `results/bcqn.md`). What
+  remains genuinely code-bound is smaller: the
   *lifted-content* energy of an injective-mapping method whose exact per-simplex formula needs its
   paper, and a handful of competitor ports (an interior-point QP/SOCP). The corresponding
   GPU-throughput/wall-clock *speed* headlines stay hardware-confounded, below.
