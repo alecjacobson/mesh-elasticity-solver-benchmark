@@ -87,8 +87,9 @@ class TetProblem:
         np.add.at(g, self.edof, ge)
         return g
 
-    def _elem_hess(self, F, project=True):
-        """Analytic element stiffness (N,12,12), optionally clamp-projected to SPD."""
+    def _elem_hess(self, F, filt="clamp"):
+        """Analytic element stiffness (N,12,12). filt: 'none' (raw), 'clamp' (max(λ,ε)),
+        'absolute' (max(|λ|,ε)) — the World-2 eigenvalue filters, per element."""
         N = F.shape[0]
         J = np.linalg.det(F)
         logJ = np.log(J)
@@ -101,23 +102,29 @@ class TetProblem:
         C = self.mu * eye9[None] + self.lam * T2 + coef[:, None, None] * T3
         He = self.vol[:, None, None] * np.einsum('nia,nij,njb->nab', self.B, C, self.B)
         He = 0.5 * (He + np.transpose(He, (0, 2, 1)))
-        if project:
-            w, V = np.linalg.eigh(He)
+        if filt == "none":
+            return He
+        w, V = np.linalg.eigh(He)
+        if filt == "clamp":
             w = np.maximum(w, 1e-9)
-            He = np.einsum('nab,nb,ncb->nac', V, w, V)
-        return He
+        elif filt == "absolute":
+            w = np.maximum(np.abs(w), 1e-9)
+        else:
+            raise ValueError(filt)
+        return np.einsum('nab,nb,ncb->nac', V, w, V)
 
-    def hess(self, x, project=True):
+    def hess(self, x, project=True, filt="clamp"):
         F = self._F(x)
-        He = self._elem_hess(F, project=project)               # (N,12,12)
+        He = self._elem_hess(F, filt=(filt if project else "none"))    # (N,12,12)
         data = He.reshape(-1)
         H = sp.coo_matrix((data, (self._rows, self._cols)),
                           shape=(3 * self.nv, 3 * self.nv)).tocsr()
         return H
 
 
-def solve_newton(P, max_iter=200, tol=1e-6, c=1e-4, verbose=False):
-    """Sparse projected-Newton with backtracking line search. Returns iteration & timing log."""
+def solve_newton(P, max_iter=200, tol=1e-6, c=1e-4, filt="clamp", verbose=False):
+    """Sparse projected-Newton with backtracking line search. Returns iteration & timing log.
+    filt selects the per-element SPD filter ('clamp' | 'absolute')."""
     x = P.x0.copy()
     fi = P._free_idx
     res = []
@@ -130,7 +137,7 @@ def solve_newton(P, max_iter=200, tol=1e-6, c=1e-4, verbose=False):
         res.append(gnorm)
         if gnorm < tol:
             status = "converged"; break
-        H = P.hess(x, project=True).tocsc()
+        H = P.hess(x, project=True, filt=filt).tocsc()
         Hff = H[fi][:, fi]
         try:
             lu = spla.splu(Hff)                                # sparse LU (SPD after projection)

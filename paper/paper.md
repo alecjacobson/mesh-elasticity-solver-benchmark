@@ -571,8 +571,13 @@ Four independent locking treatments now concur that the P1 "refutation" is a dis
 rather than a filter property: a lower-locking crossed mesh (`results/locking.md`), a standard P2
 element (`results/p2_nu.md`), the Stable-Neo-Hookean P2 combination above, and a *validated*
 selective-reduced-integration element on which absolute crushes clamp **23 versus 250 iterations** at
-`ν = 0.4999` (`results/sri_nu.md`). The effect also generalizes to 3D tetrahedra, where P1 locking is
-if anything worse (`results/3d_nu.md`).
+`ν = 0.4999` (`results/sri_nu.md`). The effect generalizes to **genuine 3D tetrahedra at scale**: on a
+10,368-element P1 tet mesh (the scalable analytic-Hessian harness `bench/tet_scale.py`, not a 2D
+prototype), projected-Newton iterations climb from 5 at `ν = 0.30` to **93 at `ν = 0.499`** as the
+constant-strain element locks, and — reproducing the 2D P1 reversal in 3D — **absolute under-performs
+clamp there (172 versus 93 iterations)**, the same locking artifact rather than a filter property
+(`results/tet3d_filters.md`). The 3D locking-relieved control (a P2 / mixed u–p tet, on which the 2D
+re-validation predicts absolute should again *beat* clamp) is the pending next step.
 
 The re-validation is not a single-initialization accident: across **five genuinely different
 deformation problems** — varying the stretch magnitude (1.6×–2.5×) and adding a shear, not merely
