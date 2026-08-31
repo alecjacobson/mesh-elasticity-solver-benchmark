@@ -197,10 +197,38 @@ A unifying view earns its keep only if it states where it breaks. Two caveats:
   we scope the unifying claim to global-step methods and treat the relaxation family as a sibling
   branch rather than forcing it into the mold.
 
-With these boundaries stated, the metric-descent view organizes the rest of the report: the taxonomy
-(§3) enumerates the axes on which `M` and the globalization are chosen; the survey (§4) catalogs the
-choices; the lineage map (§5) names their classical origins; and the benchmark (§7–§8) changes one
-choice at a time.
+## 2.3 Reductions the view makes precise
+
+The metric-descent lens does more than tabulate; it exposes *reductions* — statements that a method
+thought sui generis is another method with one component swapped. Beyond the cross-field equalities of
+§2.1 (Sobolev preconditioning = natural gradient; AQP = Nesterov over a Laplacian metric; the World-2
+filters = the choice of how to turn an indefinite Hessian into `M`), two reductions are load-bearing
+for the benchmark's simulation track (§8.7) and worth stating outright:
+
+- **Projective Dynamics is a constant-metric quasi-Newton.** Its global solve is Newton's step with the
+  true Hessian replaced by a *fixed*, prefactored SPD proxy (the rest-state Laplacian of the
+  constraint set) — the Hessian evaluated once and reused, i.e. a *lagged-Hessian* Newton
+  [cite:quasi-newton-liu2017]. This single reduction predicts the measured behavior: PD needs **more**
+  iterations than a refactoring Newton but each is far cheaper (§8.7), exactly as a fixed-metric method
+  must. Chebyshev-, Anderson-, and L-BFGS-accelerated PD are then just different *globalizations* of
+  that same fixed-metric iteration.
+
+- **XPBD is compliant implicit Euler.** Adding a per-constraint *compliance* `1/(k·h²)` to Position
+  Based Dynamics makes the constraint stiffness time-step-consistent — which is precisely
+  backward-Euler on the elastic potential at finite stiffness [cite:xpbd]; plain PBD is the
+  infinitely-stiff, iteration-count-dependent limit (compliance → 0). This reduction is why the
+  benchmark can put XPBD, PBD, PD, ADMM, and Newton on the *same* incremental potential and residual
+  (§8.7), and why XPBD's constraint sweep — which realizes the compliant elastic solve but drops the
+  momentum-coupling term — *stagnates* on that potential's gradient while a primal solve of the same
+  potential converges.
+
+Each reduction is a testable prediction, not just a re-labeling: §8.7 confirms both on the shared
+testbed. Naming them is where the survey stops cataloguing and starts adjudicating.
+
+With these boundaries and reductions stated, the metric-descent view organizes the rest of the report:
+the taxonomy (§3) enumerates the axes on which `M` and the globalization are chosen; the survey (§4)
+catalogs the choices; the lineage map (§5) names their classical origins; and the benchmark (§7–§8)
+changes one choice at a time.
 
 ---
 
