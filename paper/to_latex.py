@@ -78,6 +78,14 @@ def inline(s):
     return s
 
 
+def _is_special(ln):
+    """True if the line starts a block that convert_block handles specially (so a plain paragraph
+    should stop accumulating before it)."""
+    s = ln.lstrip()
+    return bool(re.match(r"^#{1,3}\s", ln)) or s.startswith("$$") or ln.strip() == "---" \
+        or ln.startswith("![") or ln.startswith("- ") or s.startswith("```") or s.startswith("|")
+
+
 def convert_block(md):
     out, i, lines = [], 0, md.split("\n")
     while i < len(lines):
@@ -137,7 +145,10 @@ def convert_block(md):
                 out.append(deverb(lines[i])); i += 1
             out.append(r"\end{verbatim}")
         else:
-            out.append(inline(ln))
+            para = [ln]                                   # coalesce a wrapped paragraph so inline
+            while i + 1 < len(lines) and lines[i + 1].strip() != "" and not _is_special(lines[i + 1]):
+                i += 1; para.append(lines[i])             # markup (**bold**, *italic*) spanning lines converts
+            out.append(inline("\n".join(para)))
         i += 1
     return "\n".join(out)
 

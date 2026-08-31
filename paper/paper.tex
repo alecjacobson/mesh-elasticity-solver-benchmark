@@ -83,15 +83,15 @@ the same: iteratively descend a nonconvex energy whose Hessian is indefinite far
 this core. Almost universally, a new method is a \emph{component swap} inside one shared iteration --- it
 changes the energy, the way the indefinite Hessian is made positive-definite (the \emph{filter}), the
 search direction, the line search, the linear solver, or the convergence criterion. The difficulty is
-that papers typically change **two or three of these components at once and attribute the resulting
-speed-up or robustness to a single one*\emph{. A method might blend a new preconditioner }and* a new
+that papers typically change \textbf{two or three of these components at once and attribute the resulting
+speed-up or robustness to a single one}. A method might blend a new preconditioner \emph{and} a new
 line-search \emph{and} a new stopping criterion, then report an order-of-magnitude win against a baseline
 that shares none of them. The reader cannot tell how much of the advantage is the headline idea, how
 much is the other bundled changes, and how much is a weak or mismatched baseline. Superiority claims
 accumulate that are individually plausible and collectively irreconcilable.
 
-\textbf{Two failure poles.} A survey of this literature can fail in two opposite ways. It can be *insular
-and narrow* --- comparing only within one clique of graphics papers, inheriting their baselines and
+\textbf{Two failure poles.} A survey of this literature can fail in two opposite ways. It can be \emph{insular
+and narrow} --- comparing only within one clique of graphics papers, inheriting their baselines and
 their confounds, and reproducing rather than testing their claims. Or it can be \emph{broad and unfair} ---
 racing methods across problem classes they were never designed for, or against implementations of
 wildly different maturity (a compiled C++ library versus a research prototype), so that hardware and
@@ -106,8 +106,8 @@ which published superiority claims survive confound control. Our contributions a
   \item \textbf{A unifying view (\S2).} Graphics, classical-optimization, and machine-learning solvers are all
 \end{itemize}
   \emph{metric descent} \texttt{x' = x $-$ $\alpha$ M\textsuperscript{-1} $\nabla$E(x)}, differing only in the metric \texttt{M} and its globalization.
-  This makes the swapped components explicit and lets us say precisely, for example, that "Sobolev
-  preconditioning`` in graphics and ''natural gradient" in machine learning are the same idea under
+  This makes the swapped components explicit and lets us say precisely, for example, that ``Sobolev
+  preconditioning'' in graphics and ``natural gradient'' in machine learning are the same idea under
   different metrics --- with the honest caveats where the analogy breaks.
 
 \begin{itemize}
@@ -184,8 +184,8 @@ Fisher information & natural gradient (Amari) \cite{amari-1998} & ML \\
 a fixed factorized proxy & projective dynamics \cite{projective-dynamics} / local--global \cite{local-global} (ADMM \cite{boyd-2011-admm} under a quadratic proxy) & World-2 \\
 \bottomrule\end{tabular}\end{table*}
 
-The payoff is a precise cross-field statement: **``Sobolev preconditioning'' in graphics and "natural
-gradient" in machine learning are the same idea under different metrics** --- both replace the Euclidean
+The payoff is a precise cross-field statement: \textbf{``Sobolev preconditioning'' in graphics and ``natural
+gradient'' in machine learning are the same idea under different metrics} --- both replace the Euclidean
 inner product on the update with one adapted to the problem's geometry. The accelerated quadratic
 proxy is Nesterov acceleration applied over a Laplacian metric; SLIM is a reweighted Gauss--Newton; the
 eigenvalue \emph{filters} of World-2 (\S4.3) are precisely the choice of how to turn an indefinite \texttt{$\nabla$\textsuperscript{2}E}
@@ -236,8 +236,8 @@ Every configuration in the benchmark is a choice on each of:
    (\texttt{max($\lambda$,$\epsilon$)}), \emph{absolute} (\texttt{max(|$\lambda$|,$\epsilon$)}), trust-region-style blends, or none-with-a-globalization.
 3. \textbf{Search direction} --- Newton, quasi-Newton (L-BFGS), Sobolev-preconditioned (AQP), reweighted
    Gauss--Newton (SLIM), local--global, Anderson-accelerated, or first-order (GD, Adam).
-4. \textbf{Line search / feasibility} --- backtracking Armijo, exact, or **injectivity-barrier-aware /
-   CCD-filtered** (the step is capped at the largest inversion-free length).
+4. \textbf{Line search / feasibility} --- backtracking Armijo, exact, or \textbf{injectivity-barrier-aware /
+   CCD-filtered} (the step is capped at the largest inversion-free length).
 5. \textbf{Linear solver} --- dense or sparse direct factorization, conjugate gradient, or a
    preconditioned Krylov method, plus the inner tolerance.
 6. \textbf{Convergence criterion} --- gradient $\infty$-norm, a mesh-invariant \emph{characteristic} gradient norm,
@@ -321,13 +321,13 @@ Stable Neo-Hookean $\cdot$ W2 & \emph{energy} (finite at J$\le$0) & --- & --- & 
 IPC $\cdot$ W3 & Newton + log-barrier & refac/iter & quadratic (smoothed) & \textbf{intersection-free (CCD)} & unmeasured --- no contact harness in v1 (\S9.2) \\
 \bottomrule\end{tabularx}\end{table*}
 
-*Table 3.1. The method matrix. ``matrix'' = global-system reuse (refactor each iteration vs. prefactor
+\emph{Table 3.1. The method matrix. ``matrix'' = global-system reuse (refactor each iteration vs. prefactor
 once and reuse vs. matrix-free); ``inversion'' = behavior at a degenerate/inverted element (barrier =
 \texttt{+$\infty$}, needs a feasible start; finite = passes through folds; constraint-set = position-based, no
 elastic barrier). W0--W3 are the three worlds of \S3.2 plus classical baselines. The verdict column is
 this report's measured status (\S8--\S9); ``reference'' marks a World-0 baseline or proxy that carries no
 first-party superiority edge. Contested cells --- where a self-reported headline meets a benchmark
-qualification --- are the report's contribution.*
+qualification --- are the report's contribution.}
 
 
 \section{Survey by Axis}
@@ -416,9 +416,9 @@ treats the criterion as a first-class, swappable axis and re-times every result 
 
 \section{Lineage Map: Graphics ``Innovations'' $\Leftarrow$ Classical Ancestors}
 
-One of the report's most useful contributions is also the simplest to state: **many recent
+One of the report's most useful contributions is also the simplest to state: \textbf{many recent
 mesh-elasticity ``innovations'' are adaptations of named classical technique, and should be cited as
-adaptations rather than inventions.** Making the lineage explicit is not a demotion of the graphics
+adaptations rather than inventions.} Making the lineage explicit is not a demotion of the graphics
 work --- the adaptations are often genuinely clever (per-element locality, analytic eigensystems, a
 50-line untangler) --- but it reframes the \emph{contribution} honestly and points a reader to the
 better-understood classical analysis.
@@ -428,8 +428,8 @@ better-understood classical analysis.
   \caption{Lineage map}
 \end{figure*}
 
-*Figure 5.1. Each graphics adaptation (right, colored by world) descends from a named classical
-ancestor (left). Generated by \texttt{python -m bench.run\_figures lineage} from \texttt{docs/design.md} \S12.2.*
+\emph{Figure 5.1. Each graphics adaptation (right, colored by world) descends from a named classical
+ancestor (left). Generated by \texttt{python -m bench.run\_figures lineage} from \texttt{docs/design.md} \S12.2.}
 
 The principal descents:
 
@@ -501,8 +501,8 @@ for \emph{why}, and when a claim is fragile, the lineage often already anticipat
 To reason about the literature's claims systematically rather than anecdotally, we extract them into a
 machine-readable directed graph. Each \textbf{node} is a method; each \textbf{edge} \texttt{A $\rightarrow$ B} is a claim that \texttt{A}
 beats \texttt{B} on a stated \textbf{dimension} (speed, convergence, robustness, quality, scalability), annotated
-with the paper's own evidence, the source, and an \textbf{evidentiary status}. The v1 graph has **81 nodes
-and 160 claimed-win edges**, consolidated from a per-paper extraction over the corpus (\texttt{claims/}).
+with the paper's own evidence, the source, and an \textbf{evidentiary status}. The v1 graph has \textbf{81 nodes
+and 160 claimed-win edges}, consolidated from a per-paper extraction over the corpus (\texttt{claims/}).
 
 \subsection{The status ladder}
 
@@ -528,10 +528,10 @@ evidence:
   \caption{Claims ledger}
 \end{figure*}
 
-*Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 74 are the papers' own
+\emph{Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 74 are the papers' own
 word (\texttt{self-claimed}), 22 are unmeasured (contact), 62 are qualified, and only 2 are independently
 validated. The benchmark \textbf{qualifies} far more than it overturns --- and refutes no published edge
-outright.*
+outright.}
 
 \subsection{The honesty patterns}
 
@@ -631,8 +631,8 @@ not a total order --- never as a single speed number.
 The v1 protocol fixes, per world: an energy and a convergence criterion (characteristic gradient norm
 for the distortion track, gradient/Newton-decrement for the filter track); a problem set stratified
 into \emph{easy / typical / adversarial / ill-conditioned}; controls that hold the confounding axes fixed
-(the element and the energy, whose entanglement is the subject of \S8.1); an **independent reference
-solution*\emph{ \texttt{E}} computed by Newton to a tight gradient tolerance --- \emph{not} the best final energy among
+(the element and the energy, whose entanglement is the subject of \S8.1); an \textbf{independent reference
+solution} \texttt{E\emph{} computed by Newton to a tight gradient tolerance --- }not* the best final energy among
 the compared methods, which would bias toward the strongest solver; an \textbf{equal tuning budget} with no
 per-problem parameter tuning; and a hidden/rotating tier for the living benchmark (\S10). The corpus
 that populates these strata spans roughly two decades and all three worlds (Figure 7.1), so the
@@ -643,21 +643,21 @@ benchmark is not concentrated in one paper or one corner of the field.
   \caption{Corpus breadth}
 \end{figure*}
 
-*Figure 7.1. Corpus breadth: papers per year by world, and node totals. The survey spans \textasciitilde{}2003--2026
-and all three worlds (World-1-heavy).*
+\emph{Figure 7.1. Corpus breadth: papers per year by world, and node totals. The survey spans \textasciitilde{}2003--2026
+and all three worlds (World-1-heavy).}
 
 
 \section{Results: The Decomposition Experiments}
 
 This section is the report's reason to exist. Each result below is a single-axis decomposition on the
 contact-free track, produced by the conformance-gated harness and regenerable from \texttt{bench/}; every
-number cites a \texttt{results/*.md} file. Most v1 decompositions run on a 2D prototype (dense solves, small
-meshes, few seeds), and those headlines are \emph{indicative}, each stated with its regime of validity. The
-near-incompressibility headline (\S8.1) additionally runs on a new **sparse, analytic-Hessian 3D
-tetrahedral path\textbf{ whose projected-Newton scales to }131,712 elements / 68,121 DOF with a
-mesh-independent iteration count** (4--5 Newton steps flat across a 3k$\rightarrow$132k sweep; \texttt{results/scale\_3d.md})
+number cites a \texttt{results/\emph{.md} file. Most v1 decompositions run on a 2D prototype (dense solves, small
+meshes, few seeds), and those headlines are }indicative\emph{, each stated with its regime of validity. The
+near-incompressibility headline (\S8.1) additionally runs on a new \textbf{sparse, analytic-Hessian 3D
+tetrahedral path} whose projected-Newton scales to \textbf{131,712 elements / 68,121 DOF with a
+mesh-independent iteration count} (4--5 Newton steps flat across a 3k$\rightarrow$132k sweep; \texttt{results/scale\_3d.md})
 --- the substrate that takes the 2D lessons toward the scale the claims are actually about. What survives
-is less a set of rankings than a set of \emph{lessons about attribution}.
+is less a set of rankings than a set of }lessons about attribution*.
 
 \subsection{The headline: a near-incompressibility filtering claim, reversed then re-validated}
 
@@ -673,21 +673,21 @@ converge at all. Taken at face value this refutes the claim. It does not --- the
   \caption{Volumetric locking}
 \end{figure*}
 
-*Figure 8.1. The confound, made visual. A near-incompressible Neo-Hookean stretch colored by `J = det
-F`. The P1 constant-strain element cannot represent the near-isochoric deformation and buckles into
+\emph{Figure 8.1. The confound, made visual. A near-incompressible Neo-Hookean stretch colored by \texttt{J = det
+F}. The P1 constant-strain element cannot represent the near-isochoric deformation and buckles into
 spurious modes (volumetric locking), taking 130 iterations; a locking-relieved P2 element and a
-selective-reduced-integration element deform smoothly and converge in 26 and 66 iterations *at this
-figure's $\nu$=0.499 stretch instance* (the $\nu$-sweep table in \texttt{results/world2\_filters.md} reports the
-per-$\nu$ counts separately). (\texttt{results/world2\_filters.md}.)*
+selective-reduced-integration element deform smoothly and converge in 26 and 66 iterations }at this
+figure's $\nu$=0.499 stretch instance\emph{ (the $\nu$-sweep table in \texttt{results/world2\_filters.md} reports the
+per-$\nu$ counts separately). (\texttt{results/world2\_filters.md}.)}
 
 Untangling the claim requires removing \textbf{two entangled confounds at once}: the \emph{element} (which
 governs locking) and the \emph{energy} (the paper's method is built on a specific one). Removing only the
 element is not enough --- an intermediate round of our own review caught that a ``P2 fixes it'' result was
 measured on the \emph{wrong} (classical-barrier) energy. With \textbf{both} confounds controlled --- a
 locking-relieved P2 element \textbf{and} the Stable Neo-Hookean energy \cite{stable-neo-hookean} the method actually targets ---
-absolute filtering \emph{beats} clamp near incompressibility, and its advantage **grows toward the
-incompressible limit**: 38 versus 48 iterations at \texttt{$\nu$ = 0.4999}, widening to 71 versus 113 at `$\nu$ =
-0.49999\texttt{ (}results/p2\_stable\_nu.md`). A locking artifact would \emph{collapse} at the limit; instead it
+absolute filtering \emph{beats} clamp near incompressibility, and its advantage \textbf{grows toward the
+incompressible limit}: 38 versus 48 iterations at \texttt{$\nu$ = 0.4999}, widening to 71 versus 113 at \texttt{$\nu$ =
+0.49999} (\texttt{results/p2\_stable\_nu.md}). A locking artifact would \emph{collapse} at the limit; instead it
 strengthens, which is the signature of a real effect.
 
 Four independent locking treatments now concur that the P1 ``refutation'' is a discretization confound
@@ -697,13 +697,13 @@ selective-reduced-integration element on which absolute crushes clamp \textbf{23
 \texttt{$\nu$ = 0.4999} (\texttt{results/sri\_nu.md}). The effect generalizes to \textbf{genuine 3D tetrahedra at scale}: on a
 10,368-element P1 tet mesh (the scalable analytic-Hessian harness \texttt{bench/tet\_scale.py}, not a 2D
 prototype), projected-Newton iterations climb from 5 at \texttt{$\nu$ = 0.30} to \textbf{93 at \texttt{$\nu$ = 0.499}} as the
-constant-strain element locks, and --- reproducing the 2D P1 reversal in 3D --- **absolute under-performs
-clamp there (172 versus 93 iterations)**, the same locking artifact rather than a filter property
+constant-strain element locks, and --- reproducing the 2D P1 reversal in 3D --- \textbf{absolute under-performs
+clamp there (172 versus 93 iterations)}, the same locking artifact rather than a filter property
 (\texttt{results/tet3d\_filters.md}). The 3D locking-relieved control (a P2 / mixed u--p tet, on which the 2D
 re-validation predicts absolute should again \emph{beat} clamp) is the pending next step.
 
-The re-validation is not a single-initialization accident: across **five genuinely different
-deformation problems** --- varying the stretch magnitude (1.6$\times$--2.5$\times$) and adding a shear, not merely
+The re-validation is not a single-initialization accident: across \textbf{five genuinely different
+deformation problems} --- varying the stretch magnitude (1.6$\times$--2.5$\times$) and adding a shear, not merely
 jittering one init --- absolute beats clamp on \textbf{all five} at both $\nu$ = 0.499 and $\nu$ = 0.4999 (median 22
 vs 28 and 38 vs 56 iterations, with wide per-config bands reflecting the real diversity), and the gap
 widens toward the incompressible limit, exactly as a real effect should
@@ -711,10 +711,10 @@ widens toward the incompressible limit, exactly as a real effect should
 
 \textbf{The lesson.} A decade-old superiority claim that \emph{reverses} and then \emph{re-validates} only once two
 entangled confounds --- element and energy --- are separately controlled. Neither confound acts alone;
-this is the report's clearest demonstration that single-axis control is not optional. *(Scope: 2D,
+this is the report's clearest demonstration that single-axis control is not optional. \emph{(Scope: 2D,
 single stretch magnitude and $\tau$; the seed confound is removed above, but the P2 element is
-locking-\emph{relieved}, not fully locking-free --- a Taylor--Hood / mixed u--p element and 3D remain the
-pending gold-standard controls, so this is indicative, not a general proof.)*
+locking-}relieved\emph{, not fully locking-free --- a Taylor--Hood / mixed u--p element and 3D remain the
+pending gold-standard controls, so this is indicative, not a general proof.)}
 
 \subsection{Innovations that do not survive fair, faithful re-measurement}
 
@@ -734,19 +734,19 @@ held fixed:
   \item \textbf{AQP's mesh-independence is a loose-tolerance artifact.} AQP's \cite{aqp} celebrated mesh-independent
 \end{itemize}
   iteration count holds only to \emph{loose} tolerance. A $\tau$-sweep with a CI-gated growth exponent (iters
-  $\propto$ DOF\textasciicircum{}p) shows p = $-$0.09 (CI includes 0, mesh-independent) at $\tau$ = 1e-3 but **p = +0.68 (clearly
-  growing)** at $\tau$ = 1e-6 (\texttt{results/mesh\_independence.md}, Figure 8.2). The Laplacian proxy gives
+  $\propto$ DOF\textasciicircum{}p) shows p = $-$0.09 (CI includes 0, mesh-independent) at $\tau$ = 1e-3 but \textbf{p = +0.68 (clearly
+  growing)} at $\tau$ = 1e-6 (\texttt{results/mesh\_independence.md}, Figure 8.2). The Laplacian proxy gives
   mesh-independent \emph{initial} progress but a first-order \emph{tail} that is not. Honesty cuts both ways:
-  the same CI-gating forced us to \emph{retract} our own follow-on claim that "AQP scales worse than
-  L-BFGS," which the overlapping confidence intervals do not support.
+  the same CI-gating forced us to \emph{retract} our own follow-on claim that ``AQP scales worse than
+  L-BFGS,'' which the overlapping confidence intervals do not support.
 
 \begin{figure*}[t]\centering
   \includegraphics[width=\textwidth]{mesh_independence.png}
   \caption{Mesh independence}
 \end{figure*}
 
-*Figure 8.2. AQP's mesh-independence is tolerance-dependent --- a flat growth exponent at loose $\tau$, a
-clearly growing one at tight $\tau$, with min--max bands and CI-gated exponents.*
+\emph{Figure 8.2. AQP's mesh-independence is tolerance-dependent --- a flat growth exponent at loose $\tau$, a
+clearly growing one at tight $\tau$, with min--max bands and CI-gated exponents.}
 
 \begin{itemize}
   \item \textbf{AQP's single-factorization ``wins at scale'' --- refuted at tight tolerance.} Measured factorization
@@ -782,7 +782,7 @@ on a single controlled instance.
   \caption{Running example}
 \end{figure*}
 
-*Figure 8.2b. The controlled running example --- one symmetric-Dirichlet scene, six faithfully
+\emph{Figure 8.2b. The controlled running example --- one symmetric-Dirichlet scene, six faithfully
 implemented solvers, convergence to a shared minimum shown both ways. \textbf{Left (vs iteration):}
 projected-Newton and Composite Majorization reach the minimum in the fewest steps, BCQN close behind,
 AQP slowest --- second-order and superlinear methods win the iteration axis. \textbf{Right (vs cost):} the
@@ -790,7 +790,7 @@ ranking compresses and re-orders, because Newton and CM refactor a coupled Hessi
 while AQP and BCQN factor once and reuse it --- ``fewest iterations'' is not ``cheapest.'' Wall-clock is
 comparable only within this pure-Python group (libigl SLIM's compiled C++ is excluded from the time
 axis); iteration counts remain the portable, hardware-independent verdict, and the cost panel is
-illustrative of the per-iteration-cost structure the benchmark keeps separate from the algorithm.*
+illustrative of the per-iteration-cost structure the benchmark keeps separate from the algorithm.}
 
 \subsection{Bundled methods entangle rather than add}
 
@@ -811,29 +811,31 @@ per-cell effect instead.
   \caption{E3 factorial}
 \end{figure*}
 
-*Figure 8.3. The BCQN direction factor is regime-gated --- the Sobolev proxy's iteration reduction grows
-with ill-conditioning and vanishes elsewhere --- and interacts with the line-search factor.*
+\emph{Figure 8.3. The BCQN direction factor is regime-gated --- the Sobolev proxy's iteration reduction grows
+with ill-conditioning and vanishes elsewhere --- and interacts with the line-search factor.}
 
 \textbf{The lesson.} BCQN's bundle is one strong (regime-gated) factor plus two minor ones that interact,
 not three co-equal contributions. On this barrier energy, the barrier-aware line search is moreover
 partly \emph{redundant} with the energy's own \texttt{+$\infty$}-at-inversion barrier.
 
 \textbf{The assembled method, faithfully.} To test the \emph{whole} method rather than its factored parts, we
-reimplemented BCQN end-to-end from the paper and the authors' reference code --- the \texttt{L = 2$\cdot$}cotan-Laplacian
-proxy factored once, the blend \texttt{$\beta$ = \mathrm{clamp}(\mathrm{normest}(L)\,y\textasciicircum{}\top\! Ls / \sum\_t a\_t, 0, 1)}
-(Eq. 13), the ``cured'' barrier-aware direction filter (a per-element no-inversion QP solved by damped
-projected Jacobi), the inversion-free/Armijo line search, and the characteristic-gradient stop --- and
-conformance-gated it on \texttt{$\beta$$\in$[0,1]}, monotone descent, and convergence to the projected-Newton minimum
-(\texttt{bench/bcqn.py}). On symmetric Dirichlet over six mesh/seed scenarios (\texttt{results/bcqn.md}), full BCQN
-reaches the shared energy tolerance in **8.0 iterations, versus AQP's 26.3, its own no-blend
-Sobolev-L-BFGS ablation's 12.7, and a well-implemented L-BFGS's 12.0** --- so \texttt{bcqn $\rightarrow$ aqp} and the blend's
-contribution both \textbf{reproduce on the hardware-independent axis}, and the paper's headline over AQP is
-earned there (its \texttt{>7$\times$} wall-clock figure is a separate, hardware-confounded claim). Against the
-second-order methods the ordering \textbf{inverts}, exactly as expected: BCQN needs \textbf{more} iterations than
-projected-Newton (6.8) and Composite Majorization (7.0), because it descends a \emph{fixed} scalar-Laplacian
-proxy while they refactor a coupled Hessian each step. BCQN's \texttt{$\rightarrow$ projected-newton} / \texttt{$\rightarrow$ CM} claim is
-therefore the same shape as Projective Dynamics $\rightarrow$ Newton (\S8.7): a \emph{cheaper-per-iteration}, factor-once
-argument that lives in wall-clock and memory-at-scale, not a fewer-iterations one --- so it stays
+reimplemented BCQN end-to-end from the paper and the authors' reference code --- the cotan-Laplacian
+proxy (scaled by two) factored once and applied per coordinate, the secant/Laplacian \emph{blend} of
+Eq. 13 (which mixes the L-BFGS secant with the Laplacian-applied step under a curvature-ratio weight
+clamped to the unit interval), the ``cured'' barrier-aware direction filter (a per-element no-inversion
+QP solved by damped projected Jacobi), the inversion-free plus Armijo line search, and the
+characteristic-gradient stop --- and conformance-gated it on the blend weight staying in the unit
+interval, monotone descent, and convergence to the projected-Newton minimum (\texttt{bench/bcqn.py}). On
+symmetric Dirichlet over six mesh/seed scenarios (\texttt{results/bcqn.md}), full BCQN reaches the shared
+energy tolerance in \textbf{8.0 iterations} --- versus AQP's 26.3, its own no-blend Sobolev-L-BFGS ablation's
+12.7, and a well-implemented L-BFGS's 12.0 --- so \texttt{bcqn to aqp} and the blend's contribution both
+\textbf{reproduce on the hardware-independent axis}, and the paper's headline over AQP is earned there (its
+7-fold wall-clock figure is a separate, hardware-confounded claim). Against the second-order methods
+the ordering \textbf{inverts}, exactly as expected: BCQN needs \textbf{more} iterations than projected-Newton
+(6.8) and Composite Majorization (7.0), because it descends a \emph{fixed} scalar-Laplacian proxy while they
+refactor a coupled Hessian each step. BCQN's claim over projected-Newton and CM is therefore the same
+shape as Projective Dynamics versus Newton (\S8.7): a \emph{cheaper-per-iteration}, factor-once argument that
+lives in wall-clock and memory-at-scale, not a fewer-iterations one --- so it stays
 \texttt{qualified} on the mechanism, not the iteration axis.
 
 \subsection{Injectivity is a capability axis, not a speed contest}
@@ -852,8 +854,8 @@ Figure 8.4).
   \caption{Injectivity}
 \end{figure*}
 
-*Figure 8.4. A folded initialization (108 inverted elements, red) untangled to all-valid by two
-barrier-free energies; the barrier symmetric-Dirichlet energy is \texttt{+$\infty$} at folds and cannot start.*
+\emph{Figure 8.4. A folded initialization (108 inverted elements, red) untangled to all-valid by two
+barrier-free energies; the barrier symmetric-Dirichlet energy is \texttt{+$\infty$} at folds and cannot start.}
 
 On a \emph{hard} non-convex boundary --- a wavy warp whose injective target is guaranteed by exact discrete
 area preservation --- both barrier-free energies still succeed, but the raw area penalty needs far more
@@ -896,9 +898,9 @@ left deliberately unmeasured (\S9.1).
   \caption{Twist phase}
 \end{figure*}
 
-*Figure 8.5. The twist eigenvalue over the singular-value plane (left; blue = negative = indefinite,
+\emph{Figure 8.5. The twist eigenvalue over the singular-value plane (left; blue = negative = indefinite,
 all under compression) and the clamp$\leftrightarrow$absolute gap \texttt{|$\lambda$\_t|} (right) --- the only place, and the only
-amount, by which the filter choice matters.*
+amount, by which the filter choice matters.}
 
 \subsection{Confounds the benchmark quantifies}
 
@@ -1013,8 +1015,8 @@ qualified --- ten from the contact-free triage backlog and twenty-nine more from
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator and distortion-solver families (quasi-Newton/Liu-2017, Projective Dynamics,
 Chebyshev acceleration, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, AQP's own AGD
-ablation, and --- reimplemented from the paper \emph{and} the authors' reference code --- the full **Blended
-Cured Quasi-Newton\textbf{ (\S8.3) and }Composite Majorization** (\S8.5) distortion solvers), testing their
+ablation, and --- reimplemented from the paper \emph{and} the authors' reference code --- the full \textbf{Blended
+Cured Quasi-Newton} (\S8.3) and \textbf{Composite Majorization} (\S8.5) distortion solvers), testing their
 \emph{convergence/quality} claims on hardware-independent iteration counts and constraint-violation trends
 (\texttt{results/dynamics\_solvers.md}, \texttt{results/agd\_vs\_aqp.md}, \texttt{results/massspring\_solvers.md}, \texttt{results/admm\_ms.md}). But --- tellingly --- that work
 added \emph{nothing} to the validated column: it stays at the same two edges,
@@ -1027,8 +1029,8 @@ profile); the new results, strong as some are, do not, and we resisted the tempt
 
 That restraint is itself a finding, and it came from turning the review loop on our \emph{own} first
 verdicts: an internal adversarial pass caught four edges we had initially marked \emph{validated} and
-forced them down to \emph{qualified}. Three are genuinely striking but rest on a **single hand-picked
-instance\textbf{ or a }deliberately un-globalized baseline**: Anderson wrapped around the official SLIM
+forced them down to \emph{qualified}. Three are genuinely striking but rest on a \textbf{single hand-picked
+instance} or a \textbf{deliberately un-globalized baseline}: Anderson wrapped around the official SLIM
 fixed-point map cuts a slowly-contracting instance from 380 iterations to 10 (a 36--38$\times$ reduction,
 verified faithful to continuous SLIM and confirmed on an absolute stopping tolerance,
 \texttt{results/anderson\_slim.md}) --- but on one instance with no multi-seed sweep; trust-region and
@@ -1047,14 +1049,14 @@ all the way to \texttt{self-claimed}: our attempted comparison was cross-energy 
 different objectives to different minima), so it cannot adjudicate them at all, and saying so is more
 honest than a manufactured verdict.
 
-The distribution is the finding. The benchmark **qualifies far more than it overturns: no published
-claims-graph edge is \texttt{refuted}** (the ledger records zero), and even the headline \texttt{$\nu$}-claim ends up
-\emph{re-validated} once its confounds are controlled. What does not survive are a few *baseline-confounded
-or self-derived* speed statements --- AQP's ``$\times$200 versus L-BFGS'' (a MATLAB-baseline artifact) and the
+The distribution is the finding. The benchmark \textbf{qualifies far more than it overturns: no published
+claims-graph edge is \texttt{refuted}} (the ledger records zero), and even the headline \texttt{$\nu$}-claim ends up
+\emph{re-validated} once its confounds are controlled. What does not survive are a few \emph{baseline-confounded
+or self-derived} speed statements --- AQP's ``$\times$200 versus L-BFGS'' (a MATLAB-baseline artifact) and the
 downstream ``AQP's single factorization wins at scale'' (refuted at tight tolerance, \S8.2) --- neither of
 which is a first-party superiority edge in the graph. This is the opposite of a debunking exercise. What the ledger records is that
-the field's superiority claims are, as of this snapshot, overwhelmingly *untested against confound
-control* --- not wrong, but unearned --- and that when they are tested, the honest verdict is usually a
+the field's superiority claims are, as of this snapshot, overwhelmingly \emph{untested against confound
+control} --- not wrong, but unearned --- and that when they are tested, the honest verdict is usually a
 \emph{qualification of regime} rather than a reversal.
 
 \subsection{What we cannot yet adjudicate, and why}
@@ -1086,9 +1088,9 @@ the buckets below are approximate and need not sum exactly to the ledger):
   most of this bucket: where a method's algorithm is fully specified we \emph{did} build it faithfully --- the
   \textbf{convergence/quality} claims of the simulation-accelerator family (quasi-Newton, Projective
   Dynamics, fast-mass-spring, Chebyshev, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM;
-  \texttt{results/dynamics\_solvers.md}, \texttt{results/massspring\_solvers.md}, \texttt{results/admm\_ms.md}), **Composite
-  Majorization\textbf{ (from its convex-concave construction, gated on the paper's Proposition 3.1; \S8.5), }and
-  the full Blended Cured Quasi-Newton*\emph{ (reimplemented from the paper }and* the authors' reference code ---
+  \texttt{results/dynamics\_solvers.md}, \texttt{results/massspring\_solvers.md}, \texttt{results/admm\_ms.md}), \textbf{Composite
+  Majorization} (from its convex-concave construction, gated on the paper's Proposition 3.1; \S8.5), \textbf{and
+  the full Blended Cured Quasi-Newton} (reimplemented from the paper \emph{and} the authors' reference code ---
   proxy, blend, cured direction filter, line search and characteristic-norm stop --- settling its
   \texttt{$\rightarrow$ aqp}, \texttt{$\rightarrow$ projected-newton} and \texttt{$\rightarrow$ composite-majorization} edges; \S8.3, \texttt{results/bcqn.md}). What
   remains genuinely code-bound is smaller: the
@@ -1151,9 +1153,9 @@ measurement --- hunted for the confound we had missed. It repeatedly found one, 
   guarantee, and we downgraded both (\S8.4).
 
 Each of these was an over-reach in \emph{our own} prior conclusion, caught by applying the confound-untangling
-the benchmark is built for reflexively. The lesson generalizes beyond any single claim: **superiority
+the benchmark is built for reflexively. The lesson generalizes beyond any single claim: \textbf{superiority
 in this field is entangled with element choice, energy, tolerance, baseline quality, and hardware, and
-a single confound rarely acts alone** --- the \texttt{$\nu$}-claim needed two removed at once. A benchmark that does
+a single confound rarely acts alone} --- the \texttt{$\nu$}-claim needed two removed at once. A benchmark that does
 not audit itself as adversarially as it audits the literature will simply manufacture new confounded
 claims of its own.
 
@@ -1219,8 +1221,8 @@ seed of a living benchmark, governed by three principles carried over from the r
 \begin{itemize}
   \item \textbf{The status ladder as the unit of contribution.} A contribution is not ``my method is fastest'' but
 \end{itemize}
-  "this edge of the claims graph moves from self-claimed to validated/qualified, by this single-axis
-  experiment, reproducibly." The adversarial-review discipline of \S9 is part of the acceptance
+  ``this edge of the claims graph moves from self-claimed to validated/qualified, by this single-axis
+  experiment, reproducibly.'' The adversarial-review discipline of \S9 is part of the acceptance
   criterion: a submitted result must survive an attempt to find its confound.
 
 An optional \textbf{learned-accelerators} companion track (learned warm-starts, preconditioners, neural
@@ -1229,8 +1231,8 @@ classical core so it does not contaminate the apples-to-apples comparison.
 
 \subsection{Conclusion}
 
-A decade of mesh-elasticity solvers is, to a first approximation, a decade of *component swaps inside
-one metric-descent iteration* --- and the field's superiority claims are entangled with the components
+A decade of mesh-elasticity solvers is, to a first approximation, a decade of \emph{component swaps inside
+one metric-descent iteration} --- and the field's superiority claims are entangled with the components
 each paper changed but did not credit. We have reorganized the literature around that shared structure,
 named each innovation's classical ancestor, encoded the claims as a testable graph, and built a
 conformance-gated benchmark that changes one component at a time. Applied to the contact-free track,

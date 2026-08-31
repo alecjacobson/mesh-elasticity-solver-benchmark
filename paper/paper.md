@@ -723,21 +723,23 @@ not three co-equal contributions. On this barrier energy, the barrier-aware line
 partly *redundant* with the energy's own `+∞`-at-inversion barrier.
 
 **The assembled method, faithfully.** To test the *whole* method rather than its factored parts, we
-reimplemented BCQN end-to-end from the paper and the authors' reference code — the `L = 2·`cotan-Laplacian
-proxy factored once, the blend `β = \mathrm{clamp}(\mathrm{normest}(L)\,y^\top\! Ls / \sum_t a_t, 0, 1)`
-(Eq. 13), the "cured" barrier-aware direction filter (a per-element no-inversion QP solved by damped
-projected Jacobi), the inversion-free/Armijo line search, and the characteristic-gradient stop — and
-conformance-gated it on `β∈[0,1]`, monotone descent, and convergence to the projected-Newton minimum
-(`bench/bcqn.py`). On symmetric Dirichlet over six mesh/seed scenarios (`results/bcqn.md`), full BCQN
-reaches the shared energy tolerance in **8.0 iterations, versus AQP's 26.3, its own no-blend
-Sobolev-L-BFGS ablation's 12.7, and a well-implemented L-BFGS's 12.0** — so `bcqn → aqp` and the blend's
-contribution both **reproduce on the hardware-independent axis**, and the paper's headline over AQP is
-earned there (its `>7×` wall-clock figure is a separate, hardware-confounded claim). Against the
-second-order methods the ordering **inverts**, exactly as expected: BCQN needs **more** iterations than
-projected-Newton (6.8) and Composite Majorization (7.0), because it descends a *fixed* scalar-Laplacian
-proxy while they refactor a coupled Hessian each step. BCQN's `→ projected-newton` / `→ CM` claim is
-therefore the same shape as Projective Dynamics → Newton (§8.7): a *cheaper-per-iteration*, factor-once
-argument that lives in wall-clock and memory-at-scale, not a fewer-iterations one — so it stays
+reimplemented BCQN end-to-end from the paper and the authors' reference code — the cotan-Laplacian
+proxy (scaled by two) factored once and applied per coordinate, the secant/Laplacian *blend* of
+Eq. 13 (which mixes the L-BFGS secant with the Laplacian-applied step under a curvature-ratio weight
+clamped to the unit interval), the "cured" barrier-aware direction filter (a per-element no-inversion
+QP solved by damped projected Jacobi), the inversion-free plus Armijo line search, and the
+characteristic-gradient stop — and conformance-gated it on the blend weight staying in the unit
+interval, monotone descent, and convergence to the projected-Newton minimum (`bench/bcqn.py`). On
+symmetric Dirichlet over six mesh/seed scenarios (`results/bcqn.md`), full BCQN reaches the shared
+energy tolerance in **8.0 iterations** — versus AQP's 26.3, its own no-blend Sobolev-L-BFGS ablation's
+12.7, and a well-implemented L-BFGS's 12.0 — so `bcqn to aqp` and the blend's contribution both
+**reproduce on the hardware-independent axis**, and the paper's headline over AQP is earned there (its
+7-fold wall-clock figure is a separate, hardware-confounded claim). Against the second-order methods
+the ordering **inverts**, exactly as expected: BCQN needs **more** iterations than projected-Newton
+(6.8) and Composite Majorization (7.0), because it descends a *fixed* scalar-Laplacian proxy while they
+refactor a coupled Hessian each step. BCQN's claim over projected-Newton and CM is therefore the same
+shape as Projective Dynamics versus Newton (§8.7): a *cheaper-per-iteration*, factor-once argument that
+lives in wall-clock and memory-at-scale, not a fewer-iterations one — so it stays
 `qualified` on the mechanism, not the iteration axis.
 
 ## 8.4 Injectivity is a capability axis, not a speed contest
