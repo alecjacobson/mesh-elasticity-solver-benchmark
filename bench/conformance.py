@@ -135,6 +135,9 @@ def run():
     from .composite_majorization import _conformance as _cm_conf
     cm_sv, cm_psd, cm_maj, cm_ana, cm_mono, cm_same, _ = _cm_conf()   # CM: Σσ=SVD; PSD; Prop 3.1; MM monotone; same min
     ok12 = cm_sv < 1e-9 and cm_psd > -1e-7 and cm_maj > -1e-7 and cm_ana < 1e-4 and cm_mono and cm_same < 1e-6
+    from .tet_scale import _conformance as _t3_conf
+    t3_g, t3_h, t3_re, t3_rg, t3_de, t3_dg = _t3_conf()   # 3D scalable tet: analytic grad/Hess vs FD; rigid inv; ==dense tet.py
+    ok13 = t3_g < 1e-5 and t3_h < 1e-4 and t3_re < 1e-9 and t3_rg < 1e-8 and t3_de < 1e-10 and t3_dg < 1e-10
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
     print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
@@ -155,8 +158,11 @@ def run():
     print(f"[conformance] composite-majorization Σσ/PSD/Prop3.1/analytic/monotone/same-min: "
           f"{cm_sv:.0e}/{cm_psd:.0e}/{cm_maj:.0e}/{cm_ana:.0e}/{cm_mono}/{cm_same:.0e} "
           f"-> {'PASS' if ok12 else 'FAIL'}")
+    print(f"[conformance] 3D-scale tet analytic grad/Hess vs FD, rigid, =dense: "
+          f"{t3_g:.0e}/{t3_h:.0e}/{t3_re:.0e}/{t3_rg:.0e}/{t3_de:.0e}/{t3_dg:.0e} "
+          f"-> {'PASS' if ok13 else 'FAIL'}")
     ok = (ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9 and ok10 and ok11
-          and ok12)
+          and ok12 and ok13)
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 
