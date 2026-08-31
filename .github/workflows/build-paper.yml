@@ -44,7 +44,9 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             texlive-latex-base texlive-latex-recommended texlive-latex-extra \
             texlive-fonts-recommended texlive-fonts-extra texlive-bibtex-extra \
-            texlive-science texlive-plain-generic poppler-utils
+            texlive-science texlive-plain-generic cm-super poppler-utils
+          # cm-super supplies Type1 versions of the T1/EC Computer Modern fonts the EG class uses,
+          # so pdflatex never falls back to MetaFont bitmap generation (mktexpk "strange path" error).
           # egpubl.cls + eg-alpha*.bst + egweblnk.sty are vendored in paper/, so no EG-specific
           # package install is needed beyond a standard TeX Live.
 
