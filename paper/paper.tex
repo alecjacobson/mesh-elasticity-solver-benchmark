@@ -7,6 +7,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx,amsmath,amssymb,booktabs}
+\usepackage{tabularx}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \usepackage{hyperref}
 \graphicspath{{../figures/}}
 \title[Untangling a Decade of Mesh-Elasticity Solvers]%
@@ -283,6 +285,49 @@ only if its element derivatives pass a finite-difference check, its filter repro
 projection, and --- for ported official code --- it reproduces the source implementation's energy on a
 shared instance. This prevents a mis-implemented component from masquerading as an algorithmic
 difference.
+
+\subsection{The method matrix}
+
+The taxonomy's payoff is that it makes otherwise-incommensurable methods line up as points in one
+design space. Table 3.1 places the load-bearing solvers on the axes that actually govern their cost
+and behavior --- the \emph{local model} they descend on, whether the \emph{system matrix is reused}, the
+\emph{convergence guarantee}, and \emph{inversion handling} --- and, in the last column, this report's
+benchmark verdict. Every entry is a checkable fact, not an adjective; the verdict column is where the
+benchmark earns its keep, replacing each method's self-reported headline with a measured, regime-scoped
+status (\S8--\S9).
+
+\begin{table*}[t]\centering\footnotesize\begin{tabularx}{\textwidth}{lYYYYY}
+\toprule method (world) & local model & matrix & convergence & inversion & benchmark verdict \\ \midrule
+gradient descent $\cdot$ W0 & identity & none & linear & energy-set & reference \\
+Nesterov / AGD $\cdot$ W0 & identity + momentum & none & accel. 1st-order & energy-set & reference \\
+L-BFGS $\cdot$ W0 & quasi-Newton (m-secant) & matrix-free & superlinear & energy-set & fair 1st-class baseline \\
+projected Newton $\cdot$ W1--2 & filtered Hessian & refac/iter & quadratic (post-filter) & barrier & filter \emph{necessary}; choice = one twist scalar (\S8.5) \\
+AQP $\cdot$ W1 & fixed Laplacian proxy + Nesterov & prefac once & linear tail & needs feasible start & qualified --- mesh-indep. is loose-$\tau$ only (\S8.2) \\
+SLIM $\cdot$ W1 & reweighted Gauss--Newton & refac/iter & few-iter (superlin-like) & needs feasible start & \textbf{validated} --- 6 vs 19 iters vs AQP (\S8.2) \\
+BCQN $\cdot$ W1 & Sobolev-L-BFGS + blend/cure & prefac once + history & superlinear-like & inversion-aware LS & qualified --- bundle entangles; 1 factor moves it (\S8.3) \\
+Composite Majorization $\cdot$ W1 & convex majorizer Hessian & refac/iter (analytic) & monotone MM & needs feasible start & qualified --- 9 vs \textasciitilde{}780 AQP; ties p-Newton (\S8.5) \\
+Anderson-accel. $\cdot$ W1 & multisecant on fixed point & LS over history & accel. $\rightarrow$ superlin & inherits base map & \textbf{validated} --- 1.85$\times$ local--global, multi-seed$\times$mesh (\S8.6) \\
+local--global / PD $\cdot$ W1--2 & fixed quadratic proxy & prefac once & linear & constraint-set & reference / proxy \\
+TLC, foldover-free $\cdot$ W1 & Newton on lifted energy & refac/iter & quad on smooth energy & \textbf{finite through folds} & qualified --- untangles 100\%; a \emph{capability} axis (\S8.4) \\
+Projective Dynamics $\cdot$ W2 & fixed quadratic majorizer & prefac once & linear & constraint-set & qualified --- \textasciitilde{}5$\times$ \emph{more} iters than Newton; edge is factor-reuse (\S8.7) \\
+quasi-Newton (Liu '17) $\cdot$ W2 & L-BFGS + PD-proxy init & prefac once + history & superlinear-like & constraint-set & qualified --- 6 vs 78 vs scaled-id init (\S8.7) \\
+Chebyshev-PD $\cdot$ W2 & Chebyshev on PD fixed point & prefac once & accel. linear (needs $\rho$) & constraint-set & qualified --- shaves proxy tail; ties Anderson (\S8.7) \\
+ADMM-PD $\cdot$ W2 & operator splitting & prefac once & linear (ADMM) & constraint-set & qualified --- reduces to PD; no iter win (\S8.7) \\
+AA-ADMM $\cdot$ W2 & Anderson on ADMM map & prefac once + LS & accel. linear & constraint-set & qualified --- 11 $\rightarrow$ 6 iters (\S8.7) \\
+XPBD $\cdot$ W2 & compliant-constraint G--S & matrix-free & none (stagnates) & compliance & qualified --- 0.7--65\% off Newton by regime (\S8.7) \\
+PBD $\cdot$ W2 & constraint Gauss--Seidel & matrix-free & none (iter-stiffening) & --- & reference --- over-stiffens \textasciitilde{}23$\times$ (\S8.7) \\
+Vertex Block Descent $\cdot$ W2 & per-vertex block Newton & matrix-free & G--S convergent & local & qualified --- G--S beats relaxed Jacobi (\S8.7) \\
+Stable Neo-Hookean $\cdot$ W2 & \emph{energy} (finite at J$\le$0) & --- & --- & \textbf{finite through inversion} & qualified --- inversion recovery, partly definitional (\S9.1) \\
+IPC $\cdot$ W3 & Newton + log-barrier & refac/iter & quadratic (smoothed) & \textbf{intersection-free (CCD)} & unmeasured --- no contact harness in v1 (\S9.2) \\
+\bottomrule\end{tabularx}\end{table*}
+
+*Table 3.1. The method matrix. ``matrix'' = global-system reuse (refactor each iteration vs. prefactor
+once and reuse vs. matrix-free); ``inversion'' = behavior at a degenerate/inverted element (barrier =
+\texttt{+$\infty$}, needs a feasible start; finite = passes through folds; constraint-set = position-based, no
+elastic barrier). W0--W3 are the three worlds of \S3.2 plus classical baselines. The verdict column is
+this report's measured status (\S8--\S9); ``reference'' marks a World-0 baseline or proxy that carries no
+first-party superiority edge. Contested cells --- where a self-reported headline meets a benchmark
+qualification --- are the report's contribution.*
 
 
 \section{Survey by Axis}
