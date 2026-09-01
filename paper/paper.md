@@ -163,6 +163,24 @@ regularization. The methods differ almost entirely in their *choice of, or modif
 in how they enforce descent. Reading the field through this lens makes the swapped components explicit
 and turns "method A versus method B" into "which axis differs, and by how much."
 
+The literature's clashing notations are reconciled into one, used throughout (Table 2.0).
+
+| symbol | meaning |
+|---|---|
+| `x` | (free) vertex positions — the variable |
+| `E(x)`, `ψ` | total elastic energy; per-element density |
+| `F`, `J = det F` | element deformation gradient; its Jacobian |
+| `Σ, σ` | max / min singular values of `F` |
+| `M` | descent *metric* / preconditioner |
+| `∇E`, `∇²E` | energy gradient and Hessian |
+| `α` | line-search step length |
+| `ν`; `λ, μ` | Poisson ratio; Lamé parameters |
+| `τ` | convergence tolerance |
+| `d`, `dhat` | contact distance; barrier threshold |
+| `h` | implicit-Euler time step |
+
+*Table 2.0. Unified notation. Where a source paper uses a different symbol, we translate to this one.*
+
 ## 2.1 The metric table
 
 | metric `M` | method | world |
@@ -492,9 +510,16 @@ and 160 claimed-win edges**, consolidated from a per-paper extraction over the c
 Every edge starts `self-claimed` — the paper's own assertion — and is only promoted with cited
 evidence:
 
-- **self-claimed** — the paper says so; we have not tested it.
-- **unmeasured** — extracted but out of the v1 measurement scope (e.g. contact-world edges: v1
-  measures no contact).
+- **self-claimed** — the paper's own assertion, which our harness *could in principle test* (it lives
+  in the contact-free World-1/2 track the benchmark covers) but which we have not yet run a controlled
+  single-axis experiment for. It stands on the paper's word — *untested but testable*.
+- **unmeasured** — extracted into the graph but *categorically outside v1's measurement apparatus*:
+  the World-3 contact edges, for which — until the minimal IPC of §8.8 — no harness existed to run them
+  at all. Not "we didn't get to it" (that is self-claimed) but "there was nothing to run it in" —
+  *untested because it was, in v1, unmeasurable*. (The distinction is operational: self-claimed edges
+  are candidates for a decomposition experiment today; unmeasured edges need a whole world of machinery
+  first. When that machinery arrives — as IPC just did — an edge graduates from unmeasured, not from
+  self-claimed.)
 - **qualified** — the paper itself states a regime limit, *or* the claim rests on a released benchmark
   pending independent re-run, *or* it is an independent (not self-serving) study, *or* our benchmark
   reproduces it only under stated conditions.

@@ -12,6 +12,24 @@ regularization. The methods differ almost entirely in their *choice of, or modif
 in how they enforce descent. Reading the field through this lens makes the swapped components explicit
 and turns "method A versus method B" into "which axis differs, and by how much."
 
+The literature's clashing notations are reconciled into one, used throughout (Table 2.0).
+
+| symbol | meaning |
+|---|---|
+| `x` | (free) vertex positions — the variable |
+| `E(x)`, `ψ` | total elastic energy; per-element density |
+| `F`, `J = det F` | element deformation gradient; its Jacobian |
+| `Σ, σ` | max / min singular values of `F` |
+| `M` | descent *metric* / preconditioner |
+| `∇E`, `∇²E` | energy gradient and Hessian |
+| `α` | line-search step length |
+| `ν`; `λ, μ` | Poisson ratio; Lamé parameters |
+| `τ` | convergence tolerance |
+| `d`, `dhat` | contact distance; barrier threshold |
+| `h` | implicit-Euler time step |
+
+*Table 2.0. Unified notation. Where a source paper uses a different symbol, we translate to this one.*
+
 ## 2.1 The metric table
 
 | metric `M` | method | world |

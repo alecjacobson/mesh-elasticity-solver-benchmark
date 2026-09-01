@@ -104,8 +104,24 @@ def convert_block(md):
         elif ln.startswith("!["):
             m = re.match(r"!\[([^\]]*)\]\(([^)]+)\)", ln)
             cap, path = m.group(1), os.path.basename(m.group(2))
-            # figure* spans both columns (all our figures are wide multi-panel plots)
-            out += [r"\begin{figure*}[t]\centering",
+            # Attach the following "*Figure N. ...*" italic paragraph as the REAL caption, so the
+            # image and its caption stay together in the float (otherwise the caption is left orphaned
+            # in the body text when the float drifts to another page). Consume that paragraph.
+            k = i + 1
+            while k < len(lines) and lines[k].strip() == "":
+                k += 1
+            if k < len(lines) and re.match(r"^\s*[*_]\s*Figure\b", lines[k]):
+                para = []
+                while k < len(lines) and lines[k].strip() != "":
+                    para.append(lines[k].strip()); k += 1
+                raw = " ".join(para).strip()
+                if len(raw) >= 2 and raw[0] in "*_" and raw[-1] in "*_":
+                    raw = raw[1:-1].strip()                          # drop the italic markers
+                cap = raw
+                i = k - 1                                            # consume through the caption
+            # figure* spans both columns (all our figures are wide multi-panel plots); [tp] lets a
+            # congested full-width float go to a float page instead of being dropped/deferred.
+            out += [r"\begin{figure*}[tp]\centering",
                     r"  \includegraphics[width=\textwidth]{" + path + "}",
                     r"  \caption{" + inline(cap) + "}", r"\end{figure*}"]
         elif ln.lstrip().startswith("|") and i + 1 < len(lines) and re.match(r"^\s*\|[-:| ]+\|", lines[i + 1]):
