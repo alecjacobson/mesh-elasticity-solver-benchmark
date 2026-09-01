@@ -27,9 +27,10 @@ Snapshot at last update: **17 conformance gates; ledger 2 validated / 64 qualifi
 ---
 
 ## Thread 1 — deepen & stress the empirical core
-- [ ] **T1.1 Adversarial 3D scenarios.** Twist/torsion and large-compression on `tet_scale`, sweeping
-  stiffness/conditioning — stress tests that *break* solvers, not benign stretches (benchmark rubric:
-  small is fine only if adversarial). Adjudicate filter necessity + clamp/absolute/none success in 3D.
+- [x] **T1.1 Adversarial 3D torsion.** Added a twist BC + stress test (`run_tet3d_twist`). Honest
+  finding: under smooth torsion from a valid start, unfiltered Newton is *fastest* — so filter
+  necessity is REGIME-dependent (far-from-min/near-inversion), not dimension-dependent; nuanced §8.6.
+  (Large twist+compression → inversion/barrier regime, a separate line-search-cap experiment.)
 - [ ] **T1.2 Filter necessity & first-vs-second-order at 3D scale.** Does unfiltered Newton stall in 3D?
   clamp/absolute/none success + iteration profiles on hard 3D scenes; L-BFGS vs Newton on Φ in 3D.
 - [ ] **T1.3 Stable Neo-Hookean in 3D + inversion recovery.** Recover from inverted tets; extend the
