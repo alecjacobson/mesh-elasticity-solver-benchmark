@@ -36,7 +36,7 @@ def _edofs_all(tets):
 class TetProblem:
     """Structured box of tets under an axial stretch, with two pinned faces (x=0 held, x=W pulled)."""
 
-    def __init__(self, n=12, mu=1.0, lam=1.0, stretch=1.5, W=1.0):
+    def __init__(self, n=12, mu=1.0, lam=1.0, stretch=1.5, W=1.0, twist=0.0):
         self.mu, self.lam = float(mu), float(lam)
         verts, tets = box_tet_mesh(n, n, n, W=W, H=1.0, D=1.0)
         self.rest = verts.copy()
@@ -54,6 +54,10 @@ class TetProblem:
         self.free = np.repeat(free_v, 3)         # (3nv,) dof mask
         x_init = verts.copy()
         x_init[hi, 0] = W * stretch              # displace the pulled face
+        if twist != 0.0:                         # torsion: rotate the x=W face about the bar axis (x)
+            th = float(twist); R = np.array([[np.cos(th), -np.sin(th)], [np.sin(th), np.cos(th)]])
+            yz = verts[hi, 1:3] - 0.5            # about the bar centre (y=z=0.5)
+            x_init[hi, 1:3] = (yz @ R.T) + 0.5
         self.x0 = x_init.reshape(-1)
         # precompute sparse scatter indices (constant sparsity pattern)
         r = np.broadcast_to(self.edof[:, :, None], (len(tets), 12, 12))

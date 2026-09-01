@@ -981,10 +981,17 @@ amount, by which the filter choice matters.}
 Finally, the harness measures several confounds directly:
 
 \begin{itemize}
-  \item \textbf{Filtering is necessary.} Unfiltered full Newton non-descent-stalls: it solves only 30/40
+  \item *\emph{Filtering is necessary --- but that is a claim about the }regime\emph{, not the dimension.}* Unfiltered
 \end{itemize}
-  symmetric-Dirichlet and 5/12 Neo-Hookean instances, while the eigenvalue filters reach 100\%
-  (\texttt{results/profiles.md}) --- the concrete reason the filter axis exists.
+  full Newton non-descent-stalls on the World-2 problem set: it solves only 30/40 symmetric-Dirichlet
+  and 5/12 Neo-Hookean instances, while the eigenvalue filters reach 100\% (\texttt{results/profiles.md}). Yet
+  on a \emph{smooth} 3D torsion of an initially-valid bar (the far face twisted up to \textasciitilde{}69°), unfiltered
+  Newton converges on \textbf{every} twist level and in the \textbf{fewest} iterations --- the true Hessian beats
+  any filtered surrogate near a smooth minimum, and the line search alone keeps its step productive
+  (\texttt{results/tet3d\_twist.md}). So filtering earns its keep specifically \emph{far from the minimum and near
+  inversion}, where the raw step is non-descent --- not for large-but-smooth deformation of a valid mesh.
+  The filter axis exists for the hard regime, and the benchmark is careful to say which regime a
+  verdict is about.
 \begin{itemize}
   \item \textbf{First- versus second-order inverts under wall-clock.} Newton wins on iterations (\textasciitilde{}10) but
 \end{itemize}
