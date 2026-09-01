@@ -121,9 +121,14 @@ def convert_block(md):
                 i = k - 1                                            # consume through the caption
             # figure* spans both columns (all our figures are wide multi-panel plots); [tp] lets a
             # congested full-width float go to a float page instead of being dropped/deferred.
+            # The caption is emitted as attached text (NOT \caption) so LaTeX does not auto-number it —
+            # the paper's prose refers to figures by their MANUAL numbers ("Figure 8.2b", "Figure 6.1"),
+            # which the caption text already carries; a sequential \caption number would clash.
             out += [r"\begin{figure*}[tp]\centering",
                     r"  \includegraphics[width=\textwidth]{" + path + "}",
-                    r"  \caption{" + inline(cap) + "}", r"\end{figure*}"]
+                    r"  \par\smallskip",
+                    r"  \begin{minipage}{0.92\textwidth}\footnotesize\emph{" + inline(cap) + r"}\end{minipage}",
+                    r"\end{figure*}"]
         elif ln.lstrip().startswith("|") and i + 1 < len(lines) and re.match(r"^\s*\|[-:| ]+\|", lines[i + 1]):
             rows, j = [], i
             while j < len(lines) and lines[j].lstrip().startswith("|"):
