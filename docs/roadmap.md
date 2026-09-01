@@ -48,8 +48,10 @@ Snapshot at last update: **17 conformance gates; ledger 2 validated / 64 qualifi
 - [ ] **T2.5 AKVF (Killing-operator metric)** in World-1 — the one metric-table method not yet built.
 
 ## Thread 3 — paper quality (make it un-rejectable)
-- [ ] **T3.1 Signature figures.** Verify/upgrade the Dolan–Moré performance profile, Moré–Wild data
-  profile, and add a **work-precision** diagram; respect the Gould–Scott caveat (pairwise for non-best).
+- [x] **T3.1 Signature figures.** Dolan–Moré performance + Moré–Wild data profiles already present
+  (18 problems, pairwise per Gould–Scott). ADDED a **work-precision** diagram (Figure 8.2c,
+  `fig_work_precision`): cost (iterations) to reach k accuracy digits, over the accelerator set —
+  Newton/CM flat-cheap, AQP's first-order tail explodes to 250+ iters. Done.
 - [ ] **T3.2 Proportionate-framing pass.** Recalibrate now-stale "2D prototype / dense / indicative"
   hedging to the true state (3D to 131K tets, four faithful methods, contact opened, flagship-in-3D) —
   keep every caveat that is still true; remove the ones the evidence has outgrown. Honesty, not spin.

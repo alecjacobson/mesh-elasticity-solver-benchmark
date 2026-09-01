@@ -131,6 +131,20 @@ comparable only within this pure-Python group (libigl SLIM's compiled C++ is exc
 axis); iteration counts remain the portable, hardware-independent verdict, and the cost panel is
 illustrative of the per-iteration-cost structure the benchmark keeps separate from the algorithm.*
 
+Where the running example fixes one scene, a **work-precision** view fixes the *question* — "how much
+work to reach a given accuracy?" — and sweeps accuracy over the whole accelerator set (Figure 8.2c).
+
+![Work-precision](../figures/work_precision.png)
+
+*Figure 8.2c. Work-precision for the World-1 distortion accelerators: median iterations (the
+hardware-independent cost axis) to drive the normalized energy gap below `10^-k`, versus the number of
+accuracy digits `k`. Projected-Newton and Composite Majorization stay low and nearly flat — a handful
+of iterations even at eight digits — while **AQP's first-order tail makes tight accuracy expensive**
+(its cost rises past 250 iterations by eight digits), with BCQN, L-BFGS and the Sobolev proxy in
+between. This is the tolerance-swept form of §8.2's "AQP is mesh-independent only at loose tolerance":
+the cost of accuracy, not just the cost of a fixed budget. Iterations remain the portable axis;
+per-iteration cost still differs by method (Figure 8.2b).*
+
 ## 8.3 Bundled methods entangle rather than add
 
 BCQN [cite:bcqn] claims "fastest and most robust" from three simultaneous changes — a blended Sobolev/L-BFGS

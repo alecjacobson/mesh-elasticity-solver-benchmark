@@ -866,6 +866,67 @@ def fig_tet3d_nu_sweep():
     print(f"  tet3d_nu_sweep: iters " + ", ".join(f"ν{nu}={it}" for nu, _, _, it in shots))
 
 
+def fig_work_precision():
+    """Work-precision diagram (Hairer–Wanner style) for the World-1 distortion accelerators: cost
+    (iterations, the hardware-independent axis) to reach a given accuracy — the normalized energy gap
+    (E−E*)/(E0−E*) — swept over accuracy and MEDIANED over seeds. Lower curve = cheaper to reach the
+    same accuracy. Newton/CM sit low and flat (a few iterations even at tight accuracy); AQP's
+    first-order tail makes its curve rise steeply — 'solved' is a tunable accuracy, not binary."""
+    from .solver import solve
+    from .energy import element_terms as sd, element_eg
+    from .descent import solve_lbfgs
+    from . import world1
+    from .bcqn import solve_bcqn
+    from .run_e1 import build_scenario
+    seeds = [0, 7]; N = 8
+    digits = np.arange(1, 9)                           # accuracy = 10^-1 .. 10^-8
+    methods = ["projected-Newton", "Composite Majorization", "BCQN (faithful)",
+               "SL-BFGS (proxy)", "AQP", "L-BFGS"]
+    col = {"projected-Newton": "#111111", "Composite Majorization": "#9467bd",
+           "BCQN (faithful)": "#e45756", "SL-BFGS (proxy)": "#f2a900",
+           "AQP": "#4c78a8", "L-BFGS": "#59a14f"}
+    # cost(seed, method, digit) = first iteration reaching gap <= 10^-digit  (nan if never)
+    cost = {m: [[] for _ in digits] for m in methods}
+    for s in seeds:
+        sc = build_scenario(nx=N, ny=N, seed=s)
+        a = (sc["x0"], sc["tris"], sc["Bs"], sc["areas"], sc["free"])
+        logs = {
+            "projected-Newton": solve(*a, "clamp", eterms=sd, tol=1e-11, max_iter=300)["log"],
+            "Composite Majorization": solve(*a, "composite-majorization", eterms=sd, tol=1e-10, max_iter=500)["log"],
+            "BCQN (faithful)": solve_bcqn(sc["x0"], sc["tris"], sc["rest"], sc["free"], eps=1e-9, max_iter=1500)["log"],
+            "SL-BFGS (proxy)": world1.solve_sobolev_lbfgs(sc["x0"], sc["tris"], sc["rest"], sc["free"], max_iter=800, tol=1e-10)["log"],
+            "AQP": world1.solve_aqp(sc["x0"], sc["tris"], sc["rest"], sc["free"], max_iter=800, tol=1e-10)["log"],
+            "L-BFGS": solve_lbfgs(*a, element_eg, max_iter=800, tol=1e-10)["log"],
+        }
+        Estar = min(l[-1]["energy"] for l in logs.values()); span = (sc["E0"] - Estar) + 1e-30
+        for m, log in logs.items():
+            gap = [max((e["energy"] - Estar) / span, 1e-16) for e in log]
+            for di, d in enumerate(digits):
+                tau = 10.0 ** (-d)
+                hit = next((i for i, g in enumerate(gap) if g <= tau), None)
+                if hit is not None:
+                    cost[m][di].append(hit)
+    fig, ax = plt.subplots(figsize=(8.4, 5.0))
+    for m in methods:
+        xs, ys = [], []
+        for di, d in enumerate(digits):
+            if cost[m][di]:
+                xs.append(d); ys.append(float(np.median(cost[m][di])))
+        ax.semilogy(xs, ys, "o-", color=col[m], lw=1.9, ms=4, label=m)
+    ax.set_xlabel("accuracy — digits of the normalized energy gap  (−log₁₀ (E−E*)/(E0−E*))")
+    ax.set_ylabel("iterations to reach it  (median over seeds; lower = cheaper)")
+    ax.set_title(f"Work-precision — World-1 distortion accelerators ({N}×{N}, {len(seeds)} seeds)")
+    ax.legend(fontsize=8, loc="upper left")
+    fig.suptitle("Work-precision: cost to reach an accuracy. Newton/CM stay cheap at every accuracy; "
+                 "AQP's first-order tail makes high accuracy expensive.", y=0.99,
+                 fontweight="bold", fontsize=9.4)
+    fig.text(0.5, -0.02, "Iterations are the hardware-independent axis; per-iteration cost differs "
+             "(Newton/CM refactor each step, AQP/BCQN factor once — see §8.2b). Curves that stop early "
+             "reach only the accuracy plotted within the iteration budget.", ha="center", fontsize=7.5,
+             color="#666")
+    viz.save(fig, "work_precision")
+
+
 def fig_running_example():
     """The controlled running example: ONE World-1 scene, all faithful distortion solvers, convergence
     to a shared minimum shown BOTH vs iteration (left) and vs implementation-fair wall-clock (right,
@@ -927,7 +988,7 @@ def fig_running_example():
 
 
 FIGS = {"locking": fig_locking, "filter_convergence": fig_filter_convergence,
-        "running_example": fig_running_example,
+        "running_example": fig_running_example, "work_precision": fig_work_precision,
         "corpus_breadth": fig_corpus_breadth, "claims_ledger": fig_claims_ledger,
         "claims_network": fig_claims_network, "tet3d": fig_tet3d,
         "mesh_independence": fig_mesh_independence,
