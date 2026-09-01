@@ -325,7 +325,8 @@ per-iteration refactorization), a per-step-cost story that resolves to wall-cloc
 
 World-3 — contact — had been surveyed but entirely deferred, its 22 edges all `unmeasured`. We now
 open it with a **minimal but faithful 2D IPC** (`bench/ipc.py`): the exact C² log-barrier
-`b(d) = −(d−d̂)² ln(d/d̂)` (conformance-gated on its shape and on `b′,b″` versus finite differences), a
+`b(d) = -(d-dhat)^2 * ln(d/dhat)` (conformance-gated on its shape and on its first and second
+derivatives versus finite differences), a
 **CCD-filtered line search** that caps each step short of any wall crossing, and an implicit-Euler
 incremental potential minimized by projected Newton — the three ingredients that make IPC IPC. The
 scope is honest: vertex-versus-half-plane contact (linear CCD) and a mass-spring body settling into a

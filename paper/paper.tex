@@ -355,7 +355,7 @@ XPBD $\cdot$ W2 & compliant-constraint G--S & matrix-free & none (stagnates) & c
 PBD $\cdot$ W2 & constraint Gauss--Seidel & matrix-free & none (iter-stiffening) & --- & reference --- over-stiffens \textasciitilde{}23$\times$ (\S8.7) \\
 Vertex Block Descent $\cdot$ W2 & per-vertex block Newton & matrix-free & G--S convergent & local & qualified --- G--S beats relaxed Jacobi (\S8.7) \\
 Stable Neo-Hookean $\cdot$ W2 & \emph{energy} (finite at J$\le$0) & --- & --- & \textbf{finite through inversion} & qualified --- inversion recovery, partly definitional (\S9.1) \\
-IPC $\cdot$ W3 & Newton + log-barrier & refac/iter & quadratic (smoothed) & \textbf{intersection-free (CCD)} & unmeasured --- no contact harness in v1 (\S9.2) \\
+IPC $\cdot$ W3 & Newton + log-barrier & refac/iter & quadratic (smoothed) & \textbf{intersection-free (CCD)} & qualified --- guarantee holds vs a penalty that tunnels (\S8.8); speed edges unmeasured \\
 \bottomrule\end{tabularx}\end{table*}
 
 \emph{Table 3.1. The method matrix. ``matrix'' = global-system reuse (refactor each iteration vs. prefactor
@@ -1057,7 +1057,8 @@ per-iteration refactorization), a per-step-cost story that resolves to wall-cloc
 
 World-3 --- contact --- had been surveyed but entirely deferred, its 22 edges all \texttt{unmeasured}. We now
 open it with a \textbf{minimal but faithful 2D IPC} (\texttt{bench/ipc.py}): the exact C\textsuperscript{2} log-barrier
-\texttt{b(d) = $-$(d$-$d)\textsuperscript{2} ln(d/d)} (conformance-gated on its shape and on \texttt{b′,b″} versus finite differences), a
+\texttt{b(d) = -(d-dhat)\textasciicircum{}2 * ln(d/dhat)} (conformance-gated on its shape and on its first and second
+derivatives versus finite differences), a
 \textbf{CCD-filtered line search} that caps each step short of any wall crossing, and an implicit-Euler
 incremental potential minimized by projected Newton --- the three ingredients that make IPC IPC. The
 scope is honest: vertex-versus-half-plane contact (linear CCD) and a mass-spring body settling into a

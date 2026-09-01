@@ -330,7 +330,7 @@ status (§8–§9).
 | PBD · W2 | constraint Gauss–Seidel | matrix-free | none (iter-stiffening) | — | reference — over-stiffens ~23× (§8.7) |
 | Vertex Block Descent · W2 | per-vertex block Newton | matrix-free | G–S convergent | local | qualified — G–S beats relaxed Jacobi (§8.7) |
 | Stable Neo-Hookean · W2 | *energy* (finite at J≤0) | — | — | **finite through inversion** | qualified — inversion recovery, partly definitional (§9.1) |
-| IPC · W3 | Newton + log-barrier | refac/iter | quadratic (smoothed) | **intersection-free (CCD)** | unmeasured — no contact harness in v1 (§9.2) |
+| IPC · W3 | Newton + log-barrier | refac/iter | quadratic (smoothed) | **intersection-free (CCD)** | qualified — guarantee holds vs a penalty that tunnels (§8.8); speed edges unmeasured |
 
 *Table 3.1. The method matrix. "matrix" = global-system reuse (refactor each iteration vs. prefactor
 once and reuse vs. matrix-free); "inversion" = behavior at a degenerate/inverted element (barrier =
@@ -933,7 +933,8 @@ per-iteration refactorization), a per-step-cost story that resolves to wall-cloc
 
 World-3 — contact — had been surveyed but entirely deferred, its 22 edges all `unmeasured`. We now
 open it with a **minimal but faithful 2D IPC** (`bench/ipc.py`): the exact C² log-barrier
-`b(d) = −(d−d̂)² ln(d/d̂)` (conformance-gated on its shape and on `b′,b″` versus finite differences), a
+`b(d) = -(d-dhat)^2 * ln(d/dhat)` (conformance-gated on its shape and on its first and second
+derivatives versus finite differences), a
 **CCD-filtered line search** that caps each step short of any wall crossing, and an implicit-Euler
 incremental potential minimized by projected Newton — the three ingredients that make IPC IPC. The
 scope is honest: vertex-versus-half-plane contact (linear CCD) and a mass-spring body settling into a
