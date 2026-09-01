@@ -147,6 +147,9 @@ def run():
     from .ipc import _conformance as _ipc_conf
     ipc_shape, ipc_g, ipc_h, ipc_min, pen_min = _ipc_conf()   # IPC: barrier shape; b',b'' vs FD; intersection-free vs penalty tunnels
     ok16 = bool(ipc_shape) and ipc_g < 1e-5 and ipc_h < 1e-5 and ipc_min > 0.0 and pen_min < 0.0
+    from .tet_p2 import _conformance as _p2_conf
+    p2_re, p2_rg, p2_g, p2_h = _p2_conf()   # P2 quadratic tet: rigid invariance; analytic grad & element Hess vs FD
+    ok17 = p2_re < 1e-9 and p2_rg < 1e-8 and p2_g < 1e-5 and p2_h < 1e-4
     print(f"[conformance] dpsi/dF vs FD:        max rel err {r1:.2e}  -> {'PASS' if ok1 else 'FAIL'}")
     print(f"[conformance] global grad vs FD:    max rel err {r2:.2e}  -> {'PASS' if ok2 else 'FAIL'}")
     print(f"[conformance] psi vs canonical SD:  max rel err {r3:.2e}  -> {'PASS' if ok3 else 'FAIL'}")
@@ -176,8 +179,10 @@ def run():
           f"{tlc_fin}/{tlc_g:.0e}/{tlc_tua:.0e}/{tlc_inj} -> {'PASS' if ok15 else 'FAIL'}")
     print(f"[conformance] IPC barrier-shape/b'-FD/b''-FD/intersection-free(vs penalty tunnels): "
           f"{ipc_shape}/{ipc_g:.0e}/{ipc_h:.0e}/{ipc_min:.1e}>0 vs {pen_min:.1e}<0 -> {'PASS' if ok16 else 'FAIL'}")
+    print(f"[conformance] P2 quadratic tet rigid/grad-FD/elemHess-FD: "
+          f"{p2_re:.0e}/{p2_rg:.0e}/{p2_g:.0e}/{p2_h:.0e} -> {'PASS' if ok17 else 'FAIL'}")
     ok = (ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9 and ok10 and ok11
-          and ok12 and ok13 and ok14 and ok15 and ok16)
+          and ok12 and ok13 and ok14 and ok15 and ok16 and ok17)
     print(f"[conformance] {'ALL PASS' if ok else 'FAILED'}")
     return ok
 

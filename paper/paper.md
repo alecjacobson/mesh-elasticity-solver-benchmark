@@ -655,8 +655,14 @@ selective-reduced-integration element on which absolute crushes clamp **23 versu
 prototype), projected-Newton iterations climb from 5 at `ν = 0.30` to **93 at `ν = 0.499`** as the
 constant-strain element locks, and — reproducing the 2D P1 reversal in 3D — **absolute under-performs
 clamp there (172 versus 93 iterations)**, the same locking artifact rather than a filter property
-(`results/tet3d_filters.md`). The 3D locking-relieved control (a P2 / mixed u–p tet, on which the 2D
-re-validation predicts absolute should again *beat* clamp) is the pending next step.
+(`results/tet3d_filters.md`). The 3D **locking-relieved control closes the loop**: we implement a
+10-node **quadratic (P2) tetrahedron** (`bench/tet_p2.py`, analytic-tangent conformance-gated) and
+re-run the sweep. On the P2 element the locking is gone — near incompressibility the iteration counts
+stay low (19 and 17 at `ν = 0.499`, versus P1's 267 and 300+) — **and the reversal flips: absolute now
+*beats* clamp (17 versus 19)**, exactly as the 2D re-validation predicts. So the 3D P1 result, like the
+2D one, is a volumetric-locking artifact of the constant-strain element, not a filter property; on a
+genuine locking-relieved 3D element the near-incompressible advantage of absolute filtering re-appears
+(`results/tet3d_p2.md`). The flagship confound-control result now holds in 3D as fully as in 2D.
 
 The re-validation is not a single-initialization accident: across **five genuinely different
 deformation problems** — varying the stretch magnitude (1.6×–2.5×) and adding a shear, not merely
@@ -667,10 +673,11 @@ widens toward the incompressible limit, exactly as a real effect should
 
 **The lesson.** A decade-old superiority claim that *reverses* and then *re-validates* only once two
 entangled confounds — element and energy — are separately controlled. Neither confound acts alone;
-this is the report's clearest demonstration that single-axis control is not optional. *(Scope: 2D,
-single stretch magnitude and τ; the seed confound is removed above, but the P2 element is
-locking-*relieved*, not fully locking-free — a Taylor–Hood / mixed u–p element and 3D remain the
-pending gold-standard controls, so this is indicative, not a general proof.)*
+this is the report's clearest demonstration that single-axis control is not optional. *(Scope: the
+result now holds in both 2D and 3D, over five deformation problems, a validated SRI element, and a P2
+element in each dimension; single stretch magnitude and τ, and the P2 element is locking-*relieved*,
+not fully locking-free, so a Taylor–Hood / mixed u–p element remains the further gold standard. Strong
+and multiply-confirmed, but not a closed-form proof.)*
 
 ## 8.2 Innovations that do not survive fair, faithful re-measurement
 
