@@ -22,7 +22,7 @@ evidence:
 ![Claims ledger](../figures/claims_ledger.png)
 
 *Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 73 are the papers' own
-word (`self-claimed`), 22 are unmeasured (contact), 63 are qualified, and only 2 are independently
+word (`self-claimed`), 21 are unmeasured (contact), 64 are qualified, and only 2 are independently
 validated. The benchmark **qualifies** far more than it overturns — and refutes no published edge
 outright.*
 

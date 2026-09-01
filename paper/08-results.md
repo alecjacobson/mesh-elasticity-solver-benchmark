@@ -318,5 +318,27 @@ Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5), and Pr
 interactive-speed edge is factorization reuse (one prefactored constant system vs Newton's
 per-iteration refactorization), a per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay `qualified` on the
 *direction* they establish, not the headline margin. This pass moved
-**forty edges** from the field's own word to `qualified`, and added *nothing* to `validated`
+**forty-one edges** from the field's own word to `qualified`, and added *nothing* to `validated`
 (§9.1) — the honest yield of trying hard without inflating.
+
+## 8.8 Opening the contact world: IPC's guarantee, minimally but faithfully
+
+World-3 — contact — had been surveyed but entirely deferred, its 22 edges all `unmeasured`. We now
+open it with a **minimal but faithful 2D IPC** (`bench/ipc.py`): the exact C² log-barrier
+`b(d) = −(d−d̂)² ln(d/d̂)` (conformance-gated on its shape and on `b′,b″` versus finite differences), a
+**CCD-filtered line search** that caps each step short of any wall crossing, and an implicit-Euler
+incremental potential minimized by projected Newton — the three ingredients that make IPC IPC. The
+scope is honest: vertex-versus-half-plane contact (linear CCD) and a mass-spring body settling into a
+fixed wedge; mesh–mesh CCD, friction, and 3D/GPU scale are not implemented.
+
+That minimal harness is already enough to adjudicate IPC's *defining* claim, `ipc → prior-rigid-engines`
+(robustness): the **guaranteed intersection-free trajectory**. Thrown into the wedge at impact speeds
+from 4 to 30 (with a large `dt = 1/30`), IPC keeps every wall distance **strictly positive at every
+speed** (minimum distance 0.013–0.016) — the barrier is `+∞` at contact and the CCD cap makes a
+crossing impossible *by construction*, independent of velocity — while a classical quadratic penalty
+method (finite stiffness, no CCD) **tunnels on all five impacts**, worse as the impact hardens
+(penetration depth 0.09 → 0.28; `results/ipc.md`). This is the distinction between a *guarantee* and a
+*tuned parameter*: no stiffness or timestep makes IPC penetrate, whereas the penalty's safety is
+speed-dependent. `ipc → prior-rigid-engines` moves off `unmeasured` to `qualified` — the first
+contact-world edge the benchmark adjudicates. IPC's *speed/throughput* edges over GIPC, ABD, and
+medial-IPC remain `unmeasured`: those are GPU-scale, mesh–mesh claims a minimal 2D harness cannot reach.

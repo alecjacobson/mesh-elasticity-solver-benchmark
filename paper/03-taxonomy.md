@@ -43,7 +43,9 @@ the other — but the comparison is only fair within a world, because the energi
 success criteria differ. World 3 additionally introduces **four parameters that belong to no solver**
 — barrier stiffness `d̂`, CCD tolerance, friction regularizer `ε_v`, and time step `Δt` — which
 confound any cross-method comparison unless held fixed by protocol. This report's benchmark measures
-Worlds 1–2 (the contact-free solver track); World 3 is surveyed but deferred to v2.
+Worlds 1–2 (the contact-free solver track); World 3 is surveyed, and a minimal faithful IPC now opens
+it far enough to settle IPC's intersection-free guarantee (§8.8), with its mesh–mesh/GPU-scale edges
+deferred to v2.
 
 ## 3.3 Orthogonality and the fairness gate
 

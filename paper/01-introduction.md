@@ -66,7 +66,7 @@ which published superiority claims survive confound control. Our contributions a
   several well-cited claims (§8).
 
 **The honest core.** Of the 160 extracted superiority edges, only two are independently validated and
-63 qualified by our measurements; the remainder stay the papers' own word pending faithful
+64 qualified by our measurements; the remainder stay the papers' own word pending faithful
 re-measurement. We regard this ledger, and the **adversarial review loop** that produced it — in
 which the benchmark's confound-untangling was turned reflexively on our *own* draft conclusions,
 forcing repeated retractions of our own overreach — as the report's real deliverable: not a
@@ -74,6 +74,7 @@ leaderboard, but a reproducible *method for honest attribution*.
 
 **Scope.** The v1 benchmark measurements are a 2D prototype (dense solves, small meshes, few seeds);
 they are *indicative, not definitive*, and every headline below is reported with its regime of
-validity. The contact "world," larger-scale studies, and faithful ports of a handful of methods that
-require their source papers are explicitly deferred. What is offered now is the attribution method,
+validity. The contact "world" is now opened by a minimal faithful 2D IPC (§8.8); its mesh–mesh/GPU-scale
+edges, still-larger studies, and faithful ports of a few remaining methods that require their source
+papers are deferred. What is offered now is the attribution method,
 the taxonomy/lineage/claims scaffolding, and a released harness that seeds a living benchmark.

@@ -34,16 +34,18 @@ that a proxy method's celebrated mesh-independence is a **loose-tolerance artifa
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
 sign-indefinite eigenmode of the element Hessian.
 
-Of the 160 extracted superiority edges, only **2 are independently validated** and **63 qualified**
+Of the 160 extracted superiority edges, only **2 are independently validated** and **64 qualified**
 by our measurements; the rest remain the papers' own word pending faithful re-measurement. This is
 the honest core: rather than a leaderboard, the benchmark and its **adversarial review loop** — in
 which the harness's confound-untangling is applied reflexively to our *own* conclusions, forcing
 repeated retractions — offer a reproducible *method for honest attribution*. We release the harness,
 claims graph, and figures as the seed of a living benchmark.
 
-**Scope.** The v1 measurements are a 2D prototype: dense solves, small meshes, indicative not
-definitive. Every headline is reported with its regime of validity; the contact track and larger-scale
-studies are future work. The contribution is the attribution *method* and the survey scaffolding, not
+**Scope.** The v1 measurements are largely a 2D prototype (small meshes, indicative not definitive),
+now extended by a sparse analytic-Hessian 3D path that scales to ~130K tetrahedra and a minimal but
+faithful 2D IPC that opens the contact track (settling IPC's intersection-free guarantee); every
+headline is reported with its regime of validity, and mesh–mesh/GPU-scale contact and larger studies
+remain future work. The contribution is the attribution *method* and the survey scaffolding, not
 a settled ranking.
 
 ---
@@ -132,7 +134,7 @@ which published superiority claims survive confound control. Our contributions a
   several well-cited claims (§8).
 
 **The honest core.** Of the 160 extracted superiority edges, only two are independently validated and
-63 qualified by our measurements; the remainder stay the papers' own word pending faithful
+64 qualified by our measurements; the remainder stay the papers' own word pending faithful
 re-measurement. We regard this ledger, and the **adversarial review loop** that produced it — in
 which the benchmark's confound-untangling was turned reflexively on our *own* draft conclusions,
 forcing repeated retractions of our own overreach — as the report's real deliverable: not a
@@ -140,8 +142,9 @@ leaderboard, but a reproducible *method for honest attribution*.
 
 **Scope.** The v1 benchmark measurements are a 2D prototype (dense solves, small meshes, few seeds);
 they are *indicative, not definitive*, and every headline below is reported with its regime of
-validity. The contact "world," larger-scale studies, and faithful ports of a handful of methods that
-require their source papers are explicitly deferred. What is offered now is the attribution method,
+validity. The contact "world" is now opened by a minimal faithful 2D IPC (§8.8); its mesh–mesh/GPU-scale
+edges, still-larger studies, and faithful ports of a few remaining methods that require their source
+papers are deferred. What is offered now is the attribution method,
 the taxonomy/lineage/claims scaffolding, and a released harness that seeds a living benchmark.
 
 ---
@@ -277,7 +280,9 @@ the other — but the comparison is only fair within a world, because the energi
 success criteria differ. World 3 additionally introduces **four parameters that belong to no solver**
 — barrier stiffness `d̂`, CCD tolerance, friction regularizer `ε_v`, and time step `Δt` — which
 confound any cross-method comparison unless held fixed by protocol. This report's benchmark measures
-Worlds 1–2 (the contact-free solver track); World 3 is surveyed but deferred to v2.
+Worlds 1–2 (the contact-free solver track); World 3 is surveyed, and a minimal faithful IPC now opens
+it far enough to settle IPC's intersection-free guarantee (§8.8), with its mesh–mesh/GPU-scale edges
+deferred to v2.
 
 ## 3.3 Orthogonality and the fairness gate
 
@@ -498,7 +503,7 @@ evidence:
 ![Claims ledger](../figures/claims_ledger.png)
 
 *Figure 6.1. The epistemic scoreboard. Of 160 extracted superiority edges, 73 are the papers' own
-word (`self-claimed`), 22 are unmeasured (contact), 63 are qualified, and only 2 are independently
+word (`self-claimed`), 21 are unmeasured (contact), 64 are qualified, and only 2 are independently
 validated. The benchmark **qualifies** far more than it overturns — and refutes no published edge
 outright.*
 
@@ -921,8 +926,30 @@ Majorization ties rather than beats projected-Newton (9.0 vs 8.8, §8.5), and Pr
 interactive-speed edge is factorization reuse (one prefactored constant system vs Newton's
 per-iteration refactorization), a per-step-cost story that resolves to wall-clock, not a fewer-steps win. Those stay `qualified` on the
 *direction* they establish, not the headline margin. This pass moved
-**forty edges** from the field's own word to `qualified`, and added *nothing* to `validated`
+**forty-one edges** from the field's own word to `qualified`, and added *nothing* to `validated`
 (§9.1) — the honest yield of trying hard without inflating.
+
+## 8.8 Opening the contact world: IPC's guarantee, minimally but faithfully
+
+World-3 — contact — had been surveyed but entirely deferred, its 22 edges all `unmeasured`. We now
+open it with a **minimal but faithful 2D IPC** (`bench/ipc.py`): the exact C² log-barrier
+`b(d) = −(d−d̂)² ln(d/d̂)` (conformance-gated on its shape and on `b′,b″` versus finite differences), a
+**CCD-filtered line search** that caps each step short of any wall crossing, and an implicit-Euler
+incremental potential minimized by projected Newton — the three ingredients that make IPC IPC. The
+scope is honest: vertex-versus-half-plane contact (linear CCD) and a mass-spring body settling into a
+fixed wedge; mesh–mesh CCD, friction, and 3D/GPU scale are not implemented.
+
+That minimal harness is already enough to adjudicate IPC's *defining* claim, `ipc → prior-rigid-engines`
+(robustness): the **guaranteed intersection-free trajectory**. Thrown into the wedge at impact speeds
+from 4 to 30 (with a large `dt = 1/30`), IPC keeps every wall distance **strictly positive at every
+speed** (minimum distance 0.013–0.016) — the barrier is `+∞` at contact and the CCD cap makes a
+crossing impossible *by construction*, independent of velocity — while a classical quadratic penalty
+method (finite stiffness, no CCD) **tunnels on all five impacts**, worse as the impact hardens
+(penetration depth 0.09 → 0.28; `results/ipc.md`). This is the distinction between a *guarantee* and a
+*tuned parameter*: no stiffness or timestep makes IPC penetrate, whereas the penalty's safety is
+speed-dependent. `ipc → prior-rigid-engines` moves off `unmeasured` to `qualified` — the first
+contact-world edge the benchmark adjudicates. IPC's *speed/throughput* edges over GIPC, ABD, and
+medial-IPC remain `unmeasured`: those are GPU-scale, mesh–mesh claims a minimal 2D harness cannot reach.
 
 ---
 
@@ -931,9 +958,9 @@ per-iteration refactorization), a per-step-cost story that resolves to wall-cloc
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 63 qualified, 73 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted forty edges from self-claimed to
-qualified — ten from the contact-free triage backlog and thirty more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 64 qualified, 73 self-claimed, and 21 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted forty-one edges from self-claimed to
+qualified — ten from the contact-free triage backlog and thirty-one more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator and distortion-solver families (quasi-Newton/Liu-2017, Projective Dynamics,
 Chebyshev acceleration, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, AQP's own AGD
@@ -1000,7 +1027,7 @@ harness, not evidence against the paper); and AQP-faster-than-Newton is confound
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 **tie**. "We cannot adjudicate this, and here is precisely why" is itself a reported result. The
 majority of the graph, meanwhile, remains out of reach — the 73 *self-claimed* edges we took on the
-field's word plus the 22 *unmeasured* World-3 edges — and we label each with the *specific reason*
+field's word plus the 21 *unmeasured* World-3 edges — and we label each with the *specific reason*
 rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
 the buckets below are approximate and need not sum exactly to the ledger):
 
@@ -1020,9 +1047,12 @@ the buckets below are approximate and need not sum exactly to the ledger):
   (foldover-free, LBD, simplex-assembly) needed to rank *within* that cohort, and a handful of
   competitor ports (an interior-point QP/SOCP). The corresponding GPU-throughput/wall-clock *speed*
   headlines stay hardware-confounded, below.
-- **needs contact physics** (22, exactly the *unmeasured* bucket) — World-3 (IPC barriers, continuous
-  collision detection, friction); v1 implements none, so an intersection-free or friction claim has no
-  harness to run in.
+- **needs contact physics** (21, the *unmeasured* bucket) — World-3 (IPC barriers, continuous
+  collision detection, friction). v1 now opens this world with a **minimal faithful 2D IPC** (the C²
+  log-barrier + a CCD-filtered line search, conformance-gated; §8.8) that settles IPC's *defining*
+  intersection-free guarantee (`ipc → prior-rigid-engines`, moved off *unmeasured*). The remaining 21
+  are the *speed/throughput* and mesh-mesh/GPU-scale edges (GIPC, ABD, medial-IPC, C-IPC → IPC) that
+  need the full 3D contact implementations, not a minimal 2D harness.
 - **needs scale** (21) — the claim *is* about 100K–1.5M-element meshes, GPU throughput, or frame-rate
   budgets the dense Python prototype cannot reach.
 - **entangled, needs source** (9) — the method bundles several co-changed components that cannot be

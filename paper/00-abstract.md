@@ -34,14 +34,16 @@ that a proxy method's celebrated mesh-independence is a **loose-tolerance artifa
 entire clamp-versus-absolute filtering question reduces to **one analytic scalar** — the sole
 sign-indefinite eigenmode of the element Hessian.
 
-Of the 160 extracted superiority edges, only **2 are independently validated** and **63 qualified**
+Of the 160 extracted superiority edges, only **2 are independently validated** and **64 qualified**
 by our measurements; the rest remain the papers' own word pending faithful re-measurement. This is
 the honest core: rather than a leaderboard, the benchmark and its **adversarial review loop** — in
 which the harness's confound-untangling is applied reflexively to our *own* conclusions, forcing
 repeated retractions — offer a reproducible *method for honest attribution*. We release the harness,
 claims graph, and figures as the seed of a living benchmark.
 
-**Scope.** The v1 measurements are a 2D prototype: dense solves, small meshes, indicative not
-definitive. Every headline is reported with its regime of validity; the contact track and larger-scale
-studies are future work. The contribution is the attribution *method* and the survey scaffolding, not
+**Scope.** The v1 measurements are largely a 2D prototype (small meshes, indicative not definitive),
+now extended by a sparse analytic-Hessian 3D path that scales to ~130K tetrahedra and a minimal but
+faithful 2D IPC that opens the contact track (settling IPC's intersection-free guarantee); every
+headline is reported with its regime of validity, and mesh–mesh/GPU-scale contact and larger studies
+remain future work. The contribution is the attribution *method* and the survey scaffolding, not
 a settled ranking.

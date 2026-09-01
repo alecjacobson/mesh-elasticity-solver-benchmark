@@ -3,9 +3,9 @@
 ## 9.1 The hardened ledger
 
 After the decomposition experiments and two single-axis verification passes (§9.2), the
-superiority-claims graph stands at **2 validated, 63 qualified, 73 self-claimed, and 22 unmeasured**
-edges (`claims/hardening.md`). The verification work promoted forty edges from self-claimed to
-qualified — ten from the contact-free triage backlog and thirty more from a "try-harder" pass that
+superiority-claims graph stands at **2 validated, 64 qualified, 73 self-claimed, and 21 unmeasured**
+edges (`claims/hardening.md`). The verification work promoted forty-one edges from self-claimed to
+qualified — ten from the contact-free triage backlog and thirty-one more from a "try-harder" pass that
 built incremental-potential and mass-spring testbeds and faithfully re-implemented much of the
 simulation-accelerator and distortion-solver families (quasi-Newton/Liu-2017, Projective Dynamics,
 Chebyshev acceleration, Vertex Block Descent, XPBD/PBD, ADMM-PD and Anderson-ADMM, AQP's own AGD
@@ -72,7 +72,7 @@ harness, not evidence against the paper); and AQP-faster-than-Newton is confound
 wall-clock boundary at small scale. The remaining one, absolute versus clamp on robustness, is a genuine
 **tie**. "We cannot adjudicate this, and here is precisely why" is itself a reported result. The
 majority of the graph, meanwhile, remains out of reach — the 73 *self-claimed* edges we took on the
-field's word plus the 22 *unmeasured* World-3 edges — and we label each with the *specific reason*
+field's word plus the 21 *unmeasured* World-3 edges — and we label each with the *specific reason*
 rather than dropping it (a few edges satisfy two reasons and are placed under the tightest primary, so
 the buckets below are approximate and need not sum exactly to the ledger):
 
@@ -92,9 +92,12 @@ the buckets below are approximate and need not sum exactly to the ledger):
   (foldover-free, LBD, simplex-assembly) needed to rank *within* that cohort, and a handful of
   competitor ports (an interior-point QP/SOCP). The corresponding GPU-throughput/wall-clock *speed*
   headlines stay hardware-confounded, below.
-- **needs contact physics** (22, exactly the *unmeasured* bucket) — World-3 (IPC barriers, continuous
-  collision detection, friction); v1 implements none, so an intersection-free or friction claim has no
-  harness to run in.
+- **needs contact physics** (21, the *unmeasured* bucket) — World-3 (IPC barriers, continuous
+  collision detection, friction). v1 now opens this world with a **minimal faithful 2D IPC** (the C²
+  log-barrier + a CCD-filtered line search, conformance-gated; §8.8) that settles IPC's *defining*
+  intersection-free guarantee (`ipc → prior-rigid-engines`, moved off *unmeasured*). The remaining 21
+  are the *speed/throughput* and mesh-mesh/GPU-scale edges (GIPC, ABD, medial-IPC, C-IPC → IPC) that
+  need the full 3D contact implementations, not a minimal 2D harness.
 - **needs scale** (21) — the claim *is* about 100K–1.5M-element meshes, GPU throughput, or frame-rate
   budgets the dense Python prototype cannot reach.
 - **entangled, needs source** (9) — the method bundles several co-changed components that cannot be
