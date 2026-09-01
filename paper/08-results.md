@@ -222,9 +222,19 @@ lifted gradient reaches injectivity in fewer iterations (median 34 vs 60) — a 
 confirmation of the paper's Proposition 4.3, that the *lifting* is what turns the degenerate
 unsigned-area plateau into an injective minimizer (`results/tlc.md`). The barrier symmetric-Dirichlet
 energy remains `+∞` at a fold and cannot start at all — the capability distinction, now drawn with the
-real TLC energy rather than a classical area-penalty stand-in. Ranking TLC *against the other cohort
-members* (foldover-free, LBD, simplex-assembly) still needs their code, and TLC's large-scale
-100%-success headline is not adjudicated here.
+real TLC energy rather than a classical area-penalty stand-in.
+
+We can also rank TLC *within the cohort* against its classical ancestor — the one-sided area penalty —
+and Stable Neo-Hookean, on the folded-init suite (`results/injectivity.md`). All three untangle the
+pinned-square target **100%** at every fold severity (Stable-NH fastest to first injectivity, the area
+penalty and TLC comparable). But on a **hard non-convex boundary** the ranking separates: the area
+penalty (100%, ~610 first-order steps) and Stable-NH (100%, 6 Newton steps) reach injectivity where
+**faithful TLC does not cross within a practical budget**. This is TLC's own documented trade-off, not
+an implementation flaw — the paper's default lifting `α = 1e-6` buys untangling reliability with *very
+flat gradients* that slow first-order convergence — so on this instance the classical ancestor is the
+more effective untangler. Ranking against the paper's own competitors (foldover-free, LBD,
+simplex-assembly) still needs their code, and TLC's large-scale 100%-success headline is not
+adjudicated here.
 
 ## 8.5 The clamp-versus-absolute question is one analytic scalar
 

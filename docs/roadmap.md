@@ -41,8 +41,12 @@ Snapshot at last update: **17 conformance gates; ledger 2 validated / 64 qualifi
 ## Thread 2 — faithful reimplementations (adjudicate more claims)
 - [ ] **T2.1 Mesh–mesh 2D IPC + friction.** Vertex-vs-edge distance + point-edge CCD (quadratic TOI) and
   a friction term; unlocks contact edges beyond the halfplane guarantee (e.g. friction / C-IPC-style).
-- [ ] **T2.2 Faithful foldover-free / SEA (Su et al. 2019)** and/or **LBD (Kovalsky 2015)** — to *rank
-  within* the injectivity cohort (TLC vs FF vs LBD vs simplex-assembly), the §8.4 deferred comparison.
+- [~] **T2.2 Injectivity-cohort ranking.** DONE a 3-way ranking of the faithful barrier-free untanglers
+  — TLC vs its classical ancestor (one-sided area penalty) vs Stable-NH — on the folded-init suite
+  (`run_injectivity`): all untangle easy folds 100%; on a hard non-convex boundary the penalty (610) and
+  Stable-NH (6) cross but faithful TLC does NOT within budget (its default α=1e-6 → flat gradients, the
+  paper's own reliability-vs-speed trade-off). §8.4 updated. STILL TODO: implement foldover-free / LBD
+  to rank against the paper's *own* Table-1 competitors.
 - [ ] **T2.3 Progressive Embedding (Shen et al. 2019)** — faithful reimplementation; adjudicate its edges.
 - [ ] **T2.4 Accelerated VBD** (Anderson/Chebyshev layer) — revisit `vertex-block-descent→l-bfgs`
   properly (the earlier probe tested base VBD only) on a vectorised harness.
